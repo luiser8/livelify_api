@@ -1,0 +1,409 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+
+// Guards and Decorators
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { Public } from '../decorators/public.decorator';
+import {
+  AuthThrottle,
+  StrictThrottle,
+  PublicThrottle,
+} from '../decorators/throttle.decorator';
+import * as currentUserDecorator from '../decorators/current-user.decorator';
+
+// DTOs
+import {
+  CreateUserWithProfileDto,
+  UpdateUserProfileDto,
+  CreateUserWithProfileResponseDto,
+  UserProfileResponseDto,
+} from '../dtos/user';
+
+// Use Cases
+import { CreateUserWithProfileUseCase } from '../../application/use-cases/user/create-user-with-profile.use-case';
+import { GetUserByIdUseCase } from '../../application/use-cases/user/get-user-by-id.use-case';
+import { GetSubscriptionByUserIdUseCase } from '../../application/use-cases/subscription/get-subscription-by-user.use-case';
+import { UpdateUserProfileUseCase } from '../../application/use-cases/user/update-user-profile.use-case';
+import { CreateUserSubscriptionUseCase } from '../../application/use-cases/subscription/create-user-with-subscription.use-case';
+import { UpdateUserSubscriptionUseCase } from '../../application/use-cases/subscription/update-user-subscription.use-case';
+import { CreateUserSubscriptionDto } from '../dtos/subscription/create-user-subscription.dto';
+import { UserSubscriptionResponseDto } from '../dtos/subscription/user-subscription.dto';
+import { CreateUserContextDto } from '../dtos/context/create-user-context.dto';
+import { CreateUserWithContextUseCase } from '../../application/use-cases/context/create-user-with-context.use-case';
+import { GetContextByUserIdUseCase } from '../../application/use-cases/context/get-context-by-user.use-case';
+import { GetUserContextsResponseDto } from '../dtos/context/context-response.dto';
+import { GetUserCompleteProfileUseCase } from '../../application/use-cases/user/get-user-complete-profile.use-case';
+import { UserCompleteProfileResponseDto } from '../dtos/user/user-complete-profile.dto';
+import { UpdateUserSubscriptionDto } from '../dtos/subscription/update-user-subscription.dto';
+
+@ApiTags('Users')
+@Controller('users')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth('JWT-auth')
+export class UserController {
+  constructor(
+    private readonly createUserWithProfileUseCase: CreateUserWithProfileUseCase,
+    private readonly getUserByIdUseCase: GetUserByIdUseCase,
+    private readonly updateUserProfileUseCase: UpdateUserProfileUseCase,
+    private readonly createUserSubscriptionUseCase: CreateUserSubscriptionUseCase,
+    private readonly getSubscriptionByUserIdUseCase: GetSubscriptionByUserIdUseCase,
+    private readonly createUserWithContextUseCase: CreateUserWithContextUseCase,
+    private readonly getContextByUserIdUseCase: GetContextByUserIdUseCase,
+    private readonly updateSubscriptionUseCase: UpdateUserSubscriptionUseCase,
+    private readonly getUserCompleteProfileUseCase: GetUserCompleteProfileUseCase,
+  ) {}
+
+  @Post('register')
+  @Public()
+  @AuthThrottle() // 🔐 5 attempts per 15 minutes
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Register a new user with complete profile',
+    description: 'Rate limited: 5 registrations per 15 minutes per IP',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'User registered successfully with profile',
+    type: CreateUserWithProfileResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+  @ApiResponse({ status: 409, description: 'Conflict - user already exists' })
+  @ApiResponse({
+    status: 429,
+    description: 'Too Many Requests - rate limit exceeded',
+  })
+  async register(
+    @Body() createUserDto: CreateUserWithProfileDto,
+  ): Promise<CreateUserWithProfileResponseDto> {
+    try {
+      const result = await this.createUserWithProfileUseCase.execute({
+        email: createUserDto.email,
+        password: createUserDto.password,
+        firstName: createUserDto.firstName,
+        lastName: createUserDto.lastName,
+        address: createUserDto.address,
+        phone: createUserDto.phone,
+        avatarUrl: createUserDto.avatarUrl,
+      });
+
+      return result;
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === 'User with this email already exists'
+      ) {
+        throw new ConflictException('User with this email already exists');
+      }
+      throw error;
+    }
+  }
+
+  @Put('update')
+  @StrictThrottle() // 🚨 10 requests per minute
+  @ApiOperation({
+    summary: 'Update current user profile',
+    description: 'Rate limited: 10 updates per minute per IP',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile updated successfully',
+    type: UserProfileResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - invalid token' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+  @ApiResponse({
+    status: 429,
+    description: 'Too Many Requests - rate limit exceeded',
+  })
+  async update(
+    @currentUserDecorator.CurrentUser() user: currentUserDecorator.JwtPayload,
+    @Body() updateProfileDto: UpdateUserProfileDto,
+  ): Promise<UserProfileResponseDto> {
+    try {
+      const result = await this.updateUserProfileUseCase.execute({
+        userId: user.sub,
+        firstName: updateProfileDto.firstName,
+        lastName: updateProfileDto.lastName,
+        address: updateProfileDto.address,
+        phone: updateProfileDto.phone,
+        avatarUrl: updateProfileDto.avatarUrl,
+      });
+
+      return result;
+    } catch (error) {
+      if (error instanceof Error && error.message === 'User not found') {
+        throw new NotFoundException('User not found');
+      }
+      throw error;
+    }
+  }
+
+  @Post('add-subscription')
+  @AuthThrottle() // 🔐 5 attempts per 15 minutes
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Add a new subscription for the user',
+    description: 'Rate limited: 5 subscriptions per 15 minutes per IP',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Subscription added successfully',
+    type: Boolean,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict - user subscription already exists',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too Many Requests - rate limit exceeded',
+  })
+  async addSubscription(
+    @currentUserDecorator.CurrentUser() user: currentUserDecorator.JwtPayload,
+    @Body() createSubscriptionDto: CreateUserSubscriptionDto,
+  ): Promise<boolean> {
+    try {
+      const result = await this.createUserSubscriptionUseCase.execute({
+        userId: user.sub,
+        planId: createSubscriptionDto.planId,
+      });
+      if (result) {
+        return true;
+      }
+      return false;
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === 'User with this subscription already exists'
+      ) {
+        throw new ConflictException(
+          'User with this subscription already exists',
+        );
+      }
+      throw error;
+    }
+  }
+
+  @Put('update-subscription')
+  @AuthThrottle() // 🔐 5 attempts per 15 minutes
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Update a subscription for the user',
+    description: 'Rate limited: 5 subscriptions per 15 minutes per IP',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Subscription updated successfully',
+    type: UpdateUserSubscriptionUseCase,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict - user subscription not exists',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too Many Requests - rate limit exceeded',
+  })
+  async updateSubscription(
+    @currentUserDecorator.CurrentUser() user: currentUserDecorator.JwtPayload,
+    @Body() updateSubscriptionDto: UpdateUserSubscriptionDto,
+  ): Promise<boolean> {
+    try {
+      const result = await this.updateSubscriptionUseCase.execute({
+        id: updateSubscriptionDto.id,
+        userId: user.sub,
+        planId: updateSubscriptionDto.planId,
+      });
+      if (result) {
+        return true;
+      }
+      return false;
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === 'User with this subscription already exists'
+      ) {
+        throw new ConflictException(
+          'User with this subscription already exists',
+        );
+      }
+      throw error;
+    }
+  }
+
+  @Get('my-subscription')
+  @PublicThrottle() // 🌐 100 requests per minute
+  @ApiOperation({
+    summary: 'Get current user subscription',
+    description: 'Rate limited: 100 requests per minute per IP',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Current user subscription',
+    type: UserSubscriptionResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - invalid token' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({
+    status: 429,
+    description: 'Too Many Requests - rate limit exceeded',
+  })
+  async mySubscription(
+    @currentUserDecorator.CurrentUser() user: currentUserDecorator.JwtPayload,
+  ): Promise<UserSubscriptionResponseDto> {
+    try {
+      const result = await this.getSubscriptionByUserIdUseCase.execute({
+        userId: user.sub,
+      });
+      return result;
+    } catch (error) {
+      if (error instanceof Error && error.message === 'User not found') {
+        throw new NotFoundException('User not found');
+      }
+      throw error;
+    }
+  }
+
+  @Post('add-context')
+  @AuthThrottle() // 🔐 5 attempts per 15 minutes
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Add a new context for the user',
+    description: 'Rate limited: 5 contexts per 15 minutes per IP',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Context added successfully',
+    type: CreateUserContextDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict - user subscription already exists',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too Many Requests - rate limit exceeded',
+  })
+  async addContext(
+    @currentUserDecorator.CurrentUser() user: currentUserDecorator.JwtPayload,
+    @Body() createUserContextDto: CreateUserContextDto,
+  ): Promise<boolean> {
+    try {
+      const result = await this.createUserWithContextUseCase.execute({
+        userId: user.sub,
+        name: createUserContextDto.name,
+      });
+      if (result) {
+        return true;
+      }
+      return false;
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === 'User with this context already exists'
+      ) {
+        throw new ConflictException('User with this context already exists');
+      }
+      throw error;
+    }
+  }
+
+  @Get('my-contexts')
+  @PublicThrottle() // 🌐 100 requests per minute
+  @ApiOperation({
+    summary: 'Get current user contexts',
+    description: 'Rate limited: 100 requests per minute per IP',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Current user contexts',
+    type: GetUserContextsResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - invalid token' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({
+    status: 429,
+    description: 'Too Many Requests - rate limit exceeded',
+  })
+  async myContexts(
+    @currentUserDecorator.CurrentUser() user: currentUserDecorator.JwtPayload,
+  ): Promise<GetUserContextsResponseDto> {
+    try {
+      const contexts = await this.getContextByUserIdUseCase.execute({
+        userId: user.sub,
+      });
+
+      // Format response - remove id and userId, keep only name, createdAt, updatedAt
+      const formattedContexts =
+        contexts?.map((context) => ({
+          id: context.id,
+          name: context.name,
+          createdAt: context.createdAt,
+          updatedAt: context.updatedAt,
+        })) || [];
+
+      return {
+        contexts: formattedContexts,
+      };
+    } catch (error) {
+      if (error instanceof Error && error.message === 'User not found') {
+        throw new NotFoundException('User not found');
+      }
+      throw error;
+    }
+  }
+
+  @Get('me')
+  @PublicThrottle() // 🌐 100 requests per minute
+  @ApiOperation({
+    summary: 'Get complete user profile',
+    description:
+      'Retrieves complete user profile including subscription, contexts, lifewheel, projects, goals, and actions',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Complete user profile retrieved successfully',
+    type: UserCompleteProfileResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - invalid token' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({
+    status: 429,
+    description: 'Too Many Requests - rate limit exceeded',
+  })
+  async getCompleteProfile(
+    @currentUserDecorator.CurrentUser() user: currentUserDecorator.JwtPayload,
+  ): Promise<UserCompleteProfileResponseDto> {
+    try {
+      const result = await this.getUserCompleteProfileUseCase.execute({
+        userId: user.sub,
+      });
+      return result;
+    } catch (error) {
+      if (error instanceof Error && error.message === 'User not found') {
+        throw new NotFoundException('User not found');
+      }
+      throw error;
+    }
+  }
+}

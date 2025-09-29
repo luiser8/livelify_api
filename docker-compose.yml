@@ -1,0 +1,52 @@
+# docker-compose.yml
+
+version: "3.13"
+
+services:
+  livelify_api:
+    container_name: livelify_api
+    image: dockerhub-livelify_api:1.0.0
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - APP_ENV=development
+      - APP_DEBUG=true
+      - APP_PORT=3000
+      - APP_PREFIX=api
+      - APP_SWAGGER_UI=true
+      - APP_TITLE=Livelify Application
+      - APP_DESCRIPTION=Livelify API Application
+      - APP_VERSION=v1
+      - APP_TOKEN=secret_token_key
+      - APP_DB_TYPE=postgres
+      - APP_DB_HOST=localhost
+      - APP_DB_USER=livelify_user
+      - APP_DB_PASS=livelify_password
+      - APP_DB_PORT=5432
+      - APP_DB_DBNAME=livelify
+      - APP_DB_SYNCHRONIZE=true
+      - APP_DB_AUTOLOADENTITIES=true
+      - APP_ALLOWED_ORIGINS=http://localhost:3001;http://localhost:4001;http://localhost:5173
+      - THROTTLE_TTL=60000
+      - THROTTLE_LIMIT=100
+      - THROTTLE_AUTH_TTL=900000
+      - THROTTLE_AUTH_LIMIT=5
+      - THROTTLE_STRICT_TTL=60000
+      - THROTTLE_STRICT_LIMIT=10
+    command: pnpm start
+    depends_on:
+      - livelify
+  livelify:
+    container_name: livelify
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=livelify_user
+      - POSTGRES_PASSWORD=livelify_password
+      - POSTGRES_DB=livelify
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata: {}
