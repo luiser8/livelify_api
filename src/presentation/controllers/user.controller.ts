@@ -20,11 +20,7 @@ import {
 // Guards and Decorators
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Public } from '../decorators/public.decorator';
-import {
-  AuthThrottle,
-  StrictThrottle,
-  PublicThrottle,
-} from '../decorators/throttle.decorator';
+import { AuthThrottle, DefaultThrottle, StrictThrottle } from '../decorators/throttle.decorator';
 import * as currentUserDecorator from '../decorators/current-user.decorator';
 
 // DTOs
@@ -251,7 +247,7 @@ export class UserController {
   }
 
   @Get('my-subscription')
-  @PublicThrottle() // 🌐 100 requests per minute
+  @DefaultThrottle() // 🌐 Uses environment config
   @ApiOperation({
     summary: 'Get current user subscription',
     description: 'Rate limited: 100 requests per minute per IP',
@@ -329,7 +325,7 @@ export class UserController {
   }
 
   @Get('my-contexts')
-  @PublicThrottle() // 🌐 100 requests per minute
+  @DefaultThrottle() // 🌐 Uses environment config
   @ApiOperation({
     summary: 'Get current user contexts',
     description: 'Rate limited: 100 requests per minute per IP',
@@ -374,7 +370,7 @@ export class UserController {
   }
 
   @Get('me')
-  @PublicThrottle() // 🌐 100 requests per minute
+  @DefaultThrottle() // 🌐 Uses environment config
   @ApiOperation({
     summary: 'Get complete user profile',
     description:

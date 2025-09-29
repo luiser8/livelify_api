@@ -29,22 +29,23 @@ export const PublicThrottle = () =>
 /**
  * 🌐 Default Rate Limiting - Standard usage
  * For general API endpoints
+ * Uses environment variables: THROTTLE_LIMIT and THROTTLE_TTL
  */
-export const DefaultThrottle = () =>
-  Throttle({ default: { limit: 100, ttl: 60000 } }); // 100 requests per minute
+export const DefaultThrottle = () => Throttle({ default: {} }); // Config comes from ThrottlerModule
 
 /**
  * 🔐 Auth Rate Limiting - Restrictive for security
  * For login, register, password reset
+ * Uses environment variables: THROTTLE_AUTH_LIMIT and THROTTLE_AUTH_TTL
  */
-export const AuthThrottle = () => Throttle({ auth: { limit: 5, ttl: 900000 } }); // 5 attempts per 15 minutes
+export const AuthThrottle = () => Throttle({ auth: {} }); // Config comes from ThrottlerModule
 
 /**
  * 🚨 Strict Rate Limiting - Very restrictive
  * For admin operations, sensitive data access
+ * Uses environment variables: THROTTLE_STRICT_LIMIT and THROTTLE_STRICT_TTL
  */
-export const StrictThrottle = () =>
-  Throttle({ strict: { limit: 10, ttl: 60000 } }); // 10 requests per minute
+export const StrictThrottle = () => Throttle({ strict: {} }); // Config comes from ThrottlerModule
 
 /**
  * 📊 Data Rate Limiting - For data-intensive operations
