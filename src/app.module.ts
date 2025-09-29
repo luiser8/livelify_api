@@ -2,12 +2,14 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 
 // Hexagonal Architecture Modules
 import { PresentationModule } from './presentation/presentation.module';
 import { ApplicationModule } from './application/application.module';
 import { DatabaseModule } from './infrastructure/config/database.module';
+import { LoggerModule } from './infrastructure/config/logger.module';
+import { LoggingInterceptor } from './infrastructure/config/logging.interceptor';
 
 function getEnvFilePath(): string {
   const environment =
@@ -26,6 +28,7 @@ function getEnvFilePath(): string {
       envFilePath: getEnvFilePath(),
       expandVariables: true,
     }),
+    LoggerModule,
     JwtModule.registerAsync({
       global: true,
       inject: [ConfigService],
@@ -66,6 +69,11 @@ function getEnvFilePath(): string {
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    // Global Logging Interceptor
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
     },
   ],
 })

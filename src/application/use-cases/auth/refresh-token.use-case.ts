@@ -5,6 +5,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserId } from '../../../domain/value-objects/user/user-id.value-object';
+import { CustomLoggerService } from '../../../infrastructure/config/logger.service';
 import type { UserRepositoryInterface } from '../../../domain/repositories/user/user.repository.interface';
 import type { UserTokenRepositoryInterface } from '../../../domain/repositories/user/user-token.repository.interface';
 import type { UserProfileRepositoryInterface } from '../../../domain/repositories/user/user-profile.repository.interface';
@@ -35,19 +36,29 @@ export class RefreshTokenUseCase {
     private readonly userProfileRepository: UserProfileRepositoryInterface,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) {}
+    private readonly logger: CustomLoggerService,
+  ) {
+    this.logger.setContext('RefreshTokenUseCase');
+  }
 
   async execute(request: RefreshTokenRequest): Promise<RefreshTokenResponse> {
+    const startTime = Date.now();
+    this.logger.log('Token refresh attempt');
+
     try {
       // 1. Verify refresh token
+      this.logger.debug('Verifying refresh token');
       const jwtSecret = this.configService.get<string>('APP_JWT_SECRET');
       if (!jwtSecret) {
+        this.logger.error('JWT secret not configured');
         throw new Error('JWT secret not configured');
       }
 
       const decoded = await this.jwtService.verifyAsync(request.refresh_token, {
         secret: jwtSecret,
       });
+
+      this.logger.debug(`Token decoded for user: ${decoded.sub}`);
 
       // 2. Check if it's a refresh token
       if (decoded.type !== 'refresh') {
@@ -160,12 +171,25 @@ export class RefreshTokenUseCase {
 
       await this.userTokenRepository.save(updatedToken);
 
+      const duration = Date.now() - startTime;
+      this.logger.log(
+        `Token refresh successful for user ${decoded.sub} in ${duration}ms`,
+      );
+
       // 11. Return new tokens
       return {
         access_token: newAccessToken,
         refresh_token: newRefreshToken,
       };
-    } catch {
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      this.logger.error(
+        `Token refresh failed in ${duration}ms: ${error.message}`,
+      );
+      this.logger.logSecurityEvent('Refresh token validation failed', {
+        error: error.message,
+        duration,
+      });
       throw new Error('Invalid or expired refresh token');
     }
   }

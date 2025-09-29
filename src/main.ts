@@ -5,6 +5,7 @@ import { AppModule } from './app.module';
 import { swaggerInit } from './swagger.config';
 import { configureSecurityHeaders, getSecurityInfo } from './security.config';
 import { ValidationPipe } from '@nestjs/common';
+import { CustomLoggerService } from './infrastructure/config/logger.service';
 
 const PORT = +(process.env.APP_PORT ?? 3000);
 const PREFIX = process.env.APP_PREFIX ?? '';
@@ -14,6 +15,15 @@ const SECURITY_ALLOWED_ORIGINS = process.env.APP_ALLOWED_ORIGINS;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // 📝 Configure Custom Logger
+  const logger = app.get(CustomLoggerService);
+  logger.setContext('Bootstrap');
+  app.useLogger(logger);
+
+  logger.log('🚀 Starting Livelify API...');
+  logger.log(`🌍 Environment: ${process.env.APP_ENV || 'development'}`);
+  logger.log(`📊 Log Level: ${process.env.LOG_LEVEL || 'info'}`);
 
   // 🔒 Configure Security Headers
   configureSecurityHeaders(app);
@@ -49,23 +59,19 @@ async function bootstrap() {
 
   // 🚀 Start Server
   await app.listen(PORT, () => {
-    console.log(`\n🚀 \x1B[32mLivelify API\x1B[0m started successfully!`);
-    console.log(
-      `📍 API: \x1B[36mhttp://localhost:${PORT}/${GLOBAL_PREFIX}\x1B[0m`,
-    );
-    console.log(
-      `📚 Docs: \x1B[36mhttp://localhost:${PORT}/${GLOBAL_PREFIX}/docs\x1B[0m`,
-    );
-    console.log(
-      `🌍 Environment: \x1B[33m${process.env.APP_ENV || 'development'}\x1B[0m`,
-    );
-
+    logger.log(`🚀 Livelify API started successfully!`);
+    logger.log(`📍 API: http://localhost:${PORT}/${GLOBAL_PREFIX}`);
+    logger.log(`📚 Docs: http://localhost:${PORT}/${GLOBAL_PREFIX}/docs`);
+    
     // 🔒 Security Information
     const securityInfo = getSecurityInfo();
-    console.log('\n🔒 Security Features:');
+    logger.log('🔒 Security Features initialized');
+    logger.debug('Security configuration:', 'SECURITY');
     Object.entries(securityInfo).forEach(([key, value]) => {
-      console.log(`   ${key}: ${value}`);
+      logger.debug(`   ${key}: ${value}`, 'SECURITY');
     });
+
+    logger.log('✅ Application ready to receive requests!');
   });
 }
 void bootstrap();
