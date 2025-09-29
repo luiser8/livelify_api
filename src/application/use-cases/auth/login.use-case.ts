@@ -94,8 +94,12 @@ export class LoginUseCase {
       expiresIn: accessTokenExpiresIn,
     });
 
+    const refreshTokenExpiresIn = this.configService.get<string>(
+      'APP_JWT_REFRESH_EXPIRE',
+      '24h',
+    );
     const refreshToken = await this.jwtService.signAsync(refreshTokenPayload, {
-      expiresIn: '7d', // Refresh token expires in 7 days
+      expiresIn: refreshTokenExpiresIn, // Refresh token expires based on config
     });
 
     // 6. Calculate expiration date for access token

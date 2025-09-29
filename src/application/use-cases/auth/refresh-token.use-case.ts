@@ -119,10 +119,14 @@ export class RefreshTokenUseCase {
         },
       );
 
+      const refreshTokenExpiresIn = this.configService.get<string>(
+        'APP_JWT_REFRESH_EXPIRE',
+        '24h',
+      );
       const newRefreshToken = await this.jwtService.signAsync(
         newRefreshTokenPayload,
         {
-          expiresIn: '7d',
+          expiresIn: refreshTokenExpiresIn,
         },
       );
 
