@@ -25,7 +25,11 @@ RUN pnpm install --unsafe-perm
 # Copiamos el resto del código fuente de la aplicación al contenedor.
 COPY . .
 
-# PASO AÑADIDO: Compilamos la aplicación.
+# PASO AÑADIDO CLAVE: Generar explícitamente el cliente de Prisma.
+# Esto soluciona los errores de TypeScript al asegurar que PrismaClient esté disponible antes de la compilación.
+RUN pnpm exec prisma generate
+
+# PASO DE COMPILACIÓN: Compilamos la aplicación.
 # El script 'start:dev' no genera una build persistente; necesitamos este paso.
 RUN pnpm run build
 
@@ -37,4 +41,3 @@ EXPOSE 3000
 # Usamos 'node' para ejecutar directamente el archivo de salida compilado.
 # Esto asegura que la app respete la variable de entorno PORT que Cloud Run le proporciona.
 CMD ["node", "dist/main.js"]
-
