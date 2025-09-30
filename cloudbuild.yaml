@@ -41,6 +41,10 @@ steps:
 # Definimos las variables que se pueden sustituir en el trigger.
 substitutions:
   _SERVICE_NAME: 'livelify-api'
+  # Proporcionamos un valor por defecto para _PROJECT_ID.
+  # Este valor será SOBREESCRITO por la variable definida en tu Trigger.
+  # Esto previene el error si la variable no se pasa o en ejecuciones manuales.
+  _PROJECT_ID: 'livelify-dev'
 
 # Opciones de registro para la compilación.
 options:
