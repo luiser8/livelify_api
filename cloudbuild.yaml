@@ -4,14 +4,14 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-api/${_SERVICE_NAME}:$COMMIT_SHA'
       - '.'
 
   # 2. Subir la imagen a Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-api/${_SERVICE_NAME}:$COMMIT_SHA'
 
   # 3. Desplegar en Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -21,7 +21,7 @@ steps:
       - 'deploy'
       - '${_SERVICE_NAME}'
       - '--image'
-      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-api/${_SERVICE_NAME}:$COMMIT_SHA'
       - '--region'
       - 'us-central1'
       - '--platform'
@@ -31,7 +31,7 @@ steps:
       - '${PROJECT_ID}'
 
 substitutions:
-  _SERVICE_NAME: 'livelify_api'
+  _SERVICE_NAME: 'livelify-api'
 
 # --- AÑADE ESTA SECCIÓN PARA CORREGIR EL ERROR ---
 options:
