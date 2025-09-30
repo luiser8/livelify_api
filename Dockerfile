@@ -9,7 +9,7 @@ FROM node:22-alpine
 WORKDIR /usr/src/app
 
 # Establecemos el entorno a "development" para asegurar que se instalen las devDependencies.
-ENV NODE_ENV=development
+ENV APP_ENV=development
 
 # Habilitamos pnpm a través de corepack, el método moderno y recomendado.
 RUN corepack enable
