@@ -40,4 +40,4 @@ EXPOSE 3000
 # No usamos 'start:dev' porque no es compatible con el entorno de Cloud Run.
 # Usamos 'node' para ejecutar directamente el archivo de salida compilado.
 # Esto asegura que la app respete la variable de entorno PORT que Cloud Run le proporciona.
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]
