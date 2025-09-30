@@ -1,15 +1,16 @@
 steps:
-  # 1. Construir la imagen de Docker, pasando el secreto DATABASE_URL como un argumento de construcción.
+  # 1. Construir la imagen de Docker, pasando el secreto DATABASE_URL de forma segura.
   - name: 'gcr.io/cloud-builders/docker'
+    # Usamos un entrypoint de 'bash' para controlar la expansión de variables.
+    entrypoint: 'bash'
     args:
-      - 'build'
-      - '--build-arg'
-      # Pasamos la variable de entorno del paso (inyectada por secretEnv) como un argumento al Dockerfile.
-      - 'DATABASE_URL=${DATABASE_URL}'
-      - '-t'
-      # Usamos tu variable _SERVICE_NAME para el nombre de la imagen.
-      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA'
-      - '.'
+      - '-c'
+      # El script de shell asegura que $$DATABASE_URL se resuelva a partir de la variable de entorno del paso.
+      - |
+        docker build \
+          --build-arg DATABASE_URL="$$DATABASE_URL" \
+          -t "us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA" \
+          .
     # secretEnv hace que el secreto de Secret Manager esté disponible como una variable de entorno para ESTE paso.
     secretEnv: ['DATABASE_URL']
 
