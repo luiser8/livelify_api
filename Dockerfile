@@ -1,30 +1,40 @@
-# ---- Dockerfile para Desarrollo ----
-# Usamos una imagen base que incluye herramientas de compilación necesarias para algunos paquetes.
+# ---- Dockerfile para Despliegue en Cloud Run (Ambiente de Desarrollo) ----
+# Este Dockerfile instala dependencias de desarrollo y compila la aplicación,
+# pero la ejecuta de una manera compatible con Cloud Run.
+
+# Usamos una imagen base estándar de Node.js con Alpine.
 FROM node:22-alpine
 
-# Establecemos el directorio de trabajo
+# Establecemos el directorio de trabajo dentro del contenedor.
 WORKDIR /usr/src/app
 
-# Establecemos el entorno a "development"
+# Establecemos el entorno a "development" para asegurar que se instalen las devDependencies.
 ENV NODE_ENV=development
 
-# Habilitamos pnpm a través de corepack (el método recomendado)
+# Habilitamos pnpm a través de corepack, el método moderno y recomendado.
 RUN corepack enable
 
-# Copiamos solo los archivos de definición de dependencias
-# Esto aprovecha el cache de Docker. La instalación solo se repetirá si estos archivos cambian.
+# Copiamos solo los archivos de definición de dependencias.
+# Esto aprovecha el caché de Docker. La instalación solo se repetirá si estos archivos cambian.
 COPY package.json pnpm-lock.yaml* ./
 
-# Instalamos TODAS las dependencias, incluyendo las de desarrollo
-# --unsafe-perm es necesario para que paquetes como Prisma puedan ejecutar sus scripts de instalación
+# Instalamos TODAS las dependencias, incluyendo las de desarrollo.
+# --unsafe-perm es necesario para que paquetes como Prisma puedan ejecutar sus scripts de instalación.
 RUN pnpm install --unsafe-perm
 
-# Copiamos el resto del código fuente de la aplicación al contenedor
+# Copiamos el resto del código fuente de la aplicación al contenedor.
 COPY . .
 
-# Exponemos el puerto de la aplicación
+# PASO AÑADIDO: Compilamos la aplicación.
+# El script 'start:dev' no genera una build persistente; necesitamos este paso.
+RUN pnpm run build
+
+# Exponemos el puerto que la aplicación escuchará (Cloud Run lo mapeará a 8080).
 EXPOSE 3000
 
-# El comando para iniciar la aplicación en modo "watch"
-# Este comando reiniciará el servidor automáticamente cada vez que detecte un cambio en el código
-CMD ["pnpm", "run", "start:dev"]
+# COMANDO MODIFICADO: Ejecuta la aplicación ya compilada.
+# No usamos 'start:dev' porque no es compatible con el entorno de Cloud Run.
+# Usamos 'node' para ejecutar directamente el archivo de salida compilado.
+# Esto asegura que la app respete la variable de entorno PORT que Cloud Run le proporciona.
+CMD ["node", "dist/main.js"]
+
