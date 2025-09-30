@@ -58,11 +58,11 @@ async function bootstrap() {
   app.enableVersioning();
 
   // 🚀 Start Server
-  await app.listen(PORT, () => {
+  await app.listen(PORT || 3000, () => {
     logger.log(`🚀 Livelify API started successfully!`);
     logger.log(`📍 API: http://localhost:${PORT}/${GLOBAL_PREFIX}`);
     logger.log(`📚 Docs: http://localhost:${PORT}/${GLOBAL_PREFIX}/docs`);
-    
+
     // 🔒 Security Information
     const securityInfo = getSecurityInfo();
     logger.log('🔒 Security Features initialized');
