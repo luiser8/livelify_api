@@ -1,6 +1,6 @@
 FROM node:22.19.0-alpine3.22
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
 COPY package*.json ./
 
@@ -11,4 +11,6 @@ COPY . .
 
 RUN pnpm run build
 
-CMD [ "pnpm", "start" ]
+EXPOSE 3000
+
+CMD ["node", "dist/src/main"]
