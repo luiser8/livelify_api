@@ -2,6 +2,12 @@
 # Este Dockerfile instala dependencias de desarrollo y compila la aplicación,
 # pero la ejecuta de una manera compatible con Cloud Run.
 
+# ARG declara un argumento que se puede pasar durante la construcción de la imagen.
+ARG DATABASE_URL
+
+# ENV hace que el argumento esté disponible como una variable de entorno para los comandos RUN.
+ENV DATABASE_URL=$DATABASE_URL
+
 # Usamos una imagen base estándar de Node.js con Alpine.
 FROM node:22-alpine
 
@@ -44,5 +50,5 @@ EXPOSE 3000
 # COMANDO MODIFICADO: Ejecuta la aplicación ya compilada.
 # No usamos 'start:dev' porque no es compatible con el entorno de Cloud Run.
 # Usamos 'node' para ejecutar directamente el archivo de salida compilado.
-# También he corregido la ruta de 'dist/src/main.js' a 'dist/main.js'.
+# También he corregido la ruta de 'dist/main.js' a 'dist/main.js'.
 CMD ["node", "dist/src/main.js"]

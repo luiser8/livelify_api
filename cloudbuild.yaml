@@ -1,17 +1,23 @@
 steps:
-  # 1. Construir la imagen de Docker
+  # 1. Construir la imagen de Docker, pasando el secreto DATABASE_URL como un argumento de construcción.
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
+      - '--build-arg'
+      # Pasamos la variable de entorno del paso (inyectada por secretEnv) como un argumento al Dockerfile.
+      - 'DATABASE_URL=${DATABASE_URL}'
       - '-t'
-      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-api/${_SERVICE_NAME}:$COMMIT_SHA'
+      # Usamos tu variable _SERVICE_NAME para el nombre de la imagen.
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA'
       - '.'
+    # secretEnv hace que el secreto de Secret Manager esté disponible como una variable de entorno para ESTE paso.
+    secretEnv: ['DATABASE_URL']
 
   # 2. Subir la imagen a Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-api/${_SERVICE_NAME}:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA'
 
   # 3. Desplegar en Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -19,20 +25,28 @@ steps:
     args:
       - 'run'
       - 'deploy'
+      # Usamos tu variable _SERVICE_NAME para el nombre del servicio.
       - '${_SERVICE_NAME}'
       - '--image'
-      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-api/${_SERVICE_NAME}:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA'
       - '--region'
       - 'us-central1'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
       - '--project'
-      - '${PROJECT_ID}'
+      - '${_PROJECT_ID}' # Variable definida en el trigger (ej. 'livelify-dev')
 
+# Definimos las variables que se pueden sustituir en el trigger.
 substitutions:
   _SERVICE_NAME: 'livelify-api'
 
-# --- AÑADE ESTA SECCIÓN PARA CORREGIR EL ERROR ---
+# Opciones de registro para la compilación.
 options:
   logging: CLOUD_LOGGING_ONLY
+
+# Aquí definimos qué secretos de Secret Manager estarán disponibles para los pasos de esta compilación.
+availableSecrets:
+  secretManager:
+  - versionName: projects/${_PROJECT_ID}/secrets/DATABASE_URL/versions/latest
+    env: 'DATABASE_URL'
