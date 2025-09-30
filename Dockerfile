@@ -29,6 +29,11 @@ COPY . .
 # Esto soluciona los errores de TypeScript al asegurar que PrismaClient esté disponible antes de la compilación.
 RUN pnpm exec prisma generate
 
+# PASO AÑADIDO CRÍTICO: Aplicar las migraciones de la base de datos.
+# Esto asegura que el esquema de la base de datos esté sincronizado con el de la aplicación antes de arrancar.
+# La falta de este paso es una causa común de fallos en el arranque.
+RUN pnpm exec prisma migrate deploy
+
 # PASO DE COMPILACIÓN: Compilamos la aplicación.
 # El script 'start:dev' no genera una build persistente; necesitamos este paso.
 RUN pnpm run build
@@ -39,5 +44,5 @@ EXPOSE 3000
 # COMANDO MODIFICADO: Ejecuta la aplicación ya compilada.
 # No usamos 'start:dev' porque no es compatible con el entorno de Cloud Run.
 # Usamos 'node' para ejecutar directamente el archivo de salida compilado.
-# Esto asegura que la app respete la variable de entorno PORT que Cloud Run le proporciona.
+# También he corregido la ruta de 'dist/src/main.js' a 'dist/main.js'.
 CMD ["node", "dist/src/main.js"]
