@@ -79,6 +79,7 @@ async function main() {
   const areasWithQuestions = [
     {
       name: 'PERSONAL_DEVELOPMENT',
+      description: 'Desarrollo Personal',
       questions: [
         { text: '¿Dedicas tiempo regularmente a aprender algo nuevo?' },
         { text: '¿Sientes que estás creciendo como persona?' },
@@ -94,6 +95,7 @@ async function main() {
     },
     {
       name: 'PROFESSIONAL_ACTIVITY',
+      description: 'Actividad Profesional',
       questions: [
         { text: '¿Disfrutas de tu trabajo o actividad principal?' },
         { text: '¿Sientes que tu trabajo tiene un propósito o significado?' },
@@ -111,6 +113,7 @@ async function main() {
     },
     {
       name: 'HEALTH_NUTRITION',
+      description: 'Salud y Nutrición',
       questions: [
         {
           text: '¿Realizas actividad física de forma regular (al menos 3 veces por semana)?',
@@ -134,6 +137,7 @@ async function main() {
     },
     {
       name: 'MONEY_FINANCES',
+      description: 'Dinero y Finanzas',
       questions: [
         { text: '¿Tienes un presupuesto mensual y te apegas a él?' },
         { text: '¿Estás satisfecho con tus ingresos actuales?' },
@@ -155,6 +159,7 @@ async function main() {
     },
     {
       name: 'SOCIAL_RELATIONSHIPS',
+      description: 'Relaciones Sociales',
       questions: [
         { text: '¿Pasas tiempo de calidad con tus amigos y familiares?' },
         {
@@ -182,6 +187,7 @@ async function main() {
     },
     {
       name: 'COUPLE_INTIMACY',
+      description: 'Pareja e Intimidad',
       questions: [
         { text: '¿Sientes una conexión emocional profunda con tu pareja?' },
         { text: '¿La comunicación en tu relación es efectiva y respetuosa?' },
@@ -212,6 +218,7 @@ async function main() {
       update: {},
       create: {
         name: areaData.name,
+        description: areaData.description,
         questions: {
           create: areaData.questions,
         },

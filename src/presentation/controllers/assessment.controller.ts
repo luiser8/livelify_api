@@ -14,7 +14,7 @@ import {
 
 // Guards and Decorators
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { PublicThrottle } from '../decorators/throttle.decorator';
+import { DefaultThrottle } from '../decorators/throttle.decorator';
 
 // DTOs
 
@@ -33,7 +33,7 @@ export class AssessmentController {
   ) {}
 
   @Get('area/:id')
-  @PublicThrottle() // 🌐 100 requests per minute
+  @DefaultThrottle() // 🌐 Rate limited
   @ApiOperation({
     summary: 'Get questions by areas',
     description: 'Rate limited: 100 requests per minute per IP',
@@ -58,7 +58,7 @@ export class AssessmentController {
       // Format response
       const formattedQuestions = questions.map((question) => ({
         id: question.id.getValue(),
-        question: question.question,
+        text: question.text,
         type: question.type || 'boolean',
         order: question.order || 0,
         isRequired: question.isRequired !== false, // Default to true
@@ -71,7 +71,9 @@ export class AssessmentController {
           id: areaId,
           name:
             questions.length > 0
-              ? questions[0].area?.name || 'Unknown Area'
+              ? questions[0].area?.description ||
+                questions[0].area?.name ||
+                'Unknown Area'
               : 'Unknown Area',
         },
       };

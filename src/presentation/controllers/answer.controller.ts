@@ -17,7 +17,7 @@ import {
 
 // Guards and Decorators
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { PublicThrottle } from '../decorators/throttle.decorator';
+import { DefaultThrottle } from '../decorators/throttle.decorator';
 import { CurrentUser } from '../decorators/current-user.decorator';
 
 // DTOs
@@ -39,7 +39,7 @@ export class AnswerController {
   ) {}
 
   @Post('submit-area')
-  @PublicThrottle() // 100 requests per minute
+  @DefaultThrottle() // 🌐 Rate limited
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Submit answers for questions in a specific life area',

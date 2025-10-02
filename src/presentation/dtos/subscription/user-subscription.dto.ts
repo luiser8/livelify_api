@@ -44,8 +44,8 @@ export class UserSubscriptionResponseDto {
 
   @ApiProperty({ example: '2025-01-02T00:00:00.000Z' })
   updatedAt: Date;
-    planName: any;
-    price: any;
-    isActive: any;
-    endDate: any;
+  planName: string;
+  price: number;
+  isActive: boolean;
+  endDate: Date;
 }

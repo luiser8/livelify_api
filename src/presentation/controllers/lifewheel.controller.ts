@@ -15,7 +15,7 @@ import {
 
 // Guards and Decorators
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { PublicThrottle } from '../decorators/throttle.decorator';
+//import { PublicThrottle } from '../decorators/throttle.decorator';
 import { CurrentUser } from '../decorators/current-user.decorator';
 
 // DTOs
@@ -23,6 +23,7 @@ import { GetUserLifeWheelResponseDto } from '../dtos/lifewheel/get-user-lifewhee
 
 // Use Cases
 import { GetUserLifeWheelUseCase } from '../../application/use-cases/lifewheel/get-user-lifewheel.use-case';
+import { DefaultThrottle } from '../decorators/throttle.decorator';
 
 @ApiTags('LifeWheel')
 @Controller('lifewheel')
@@ -34,7 +35,7 @@ export class LifeWheelController {
   ) {}
 
   @Get('me')
-  @PublicThrottle() // 100 requests per minute
+  @DefaultThrottle() // 🌐 Rate limited
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get current user LifeWheel with all areas and scores',

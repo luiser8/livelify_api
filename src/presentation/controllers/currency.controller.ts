@@ -8,7 +8,7 @@ import {
 import { GetAvailableCurrenciesUseCase } from '../../application/use-cases/currency/get-available-currencies.use-case';
 import { GetAvailableCurrenciesResponseDto } from '../dtos/currency/get-currencies.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { PublicThrottle } from '../decorators/throttle.decorator';
+import { DefaultThrottle } from '../decorators/throttle.decorator';
 
 @ApiTags('currencies')
 @UseGuards(JwtAuthGuard)
@@ -20,7 +20,7 @@ export class CurrencyController {
   ) {}
 
   @Get('all')
-  @PublicThrottle()
+  @DefaultThrottle() // 🌐 Rate limited
   @ApiOperation({
     summary: 'Get available currencies',
     description: 'Retrieves all available currencies for budget creation',

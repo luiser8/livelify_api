@@ -11,7 +11,7 @@ export class QuestionResponseDto {
     description: 'Question text',
     example: 'Do you exercise regularly?',
   })
-  question: string;
+  text: string;
 
   @ApiProperty({
     description: 'Question type',

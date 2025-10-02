@@ -16,6 +16,7 @@ export interface UpdateUserWithSubscriptionRequest {
 export interface UpdateUserWithSubscriptionResponse {
   id: string;
   subscription: {
+    plan: undefined;
     id: string;
     planId: string;
     status: string;
@@ -68,6 +69,7 @@ export class UpdateUserSubscriptionUseCase {
         status: savedUserSubscription.active ? 'active' : 'inactive',
         startedAt: savedUserSubscription.startDate,
         expiresAt: savedUserSubscription.renewalDate,
+        plan: undefined,
       },
       createdAt: savedUserSubscription.createdAt,
     };

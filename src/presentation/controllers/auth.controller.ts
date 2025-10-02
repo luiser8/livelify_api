@@ -18,7 +18,7 @@ import {
 // Guards and Decorators
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Public } from '../decorators/public.decorator';
-import { AuthThrottle, StrictThrottle } from '../decorators/throttle.decorator';
+import { DefaultThrottle } from '../decorators/throttle.decorator';
 import * as currentUserDecorator from '../decorators/current-user.decorator';
 
 // DTOs
@@ -48,7 +48,7 @@ export class AuthController {
 
   @Post('login')
   @Public()
-  @AuthThrottle() // 🔐 5 attempts per 15 minutes
+  @DefaultThrottle() // 🌐 Rate limited
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Login user and get JWT tokens',
@@ -84,7 +84,7 @@ export class AuthController {
   }
 
   @Post('refresh')
-  @StrictThrottle() // 🚨 10 requests per minute
+  @DefaultThrottle() // 🌐 Rate limited
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Refresh access token using refresh token',
@@ -127,7 +127,7 @@ export class AuthController {
   }
 
   @Post('logout')
-  @StrictThrottle() // 🚨 10 requests per minute
+  @DefaultThrottle() // 🌐 Rate limited
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Logout user and invalidate tokens',

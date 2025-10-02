@@ -89,6 +89,7 @@ export class LifeWheelAreaRepository
       area = Area.reconstitute({
         id: AreaId.fromString(value.area.id),
         name: value.area.name,
+        description: value.area.description,
         createdAt: value.area.createdAt,
         updatedAt: value.area.updatedAt,
       });

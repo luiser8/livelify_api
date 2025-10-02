@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Controller,
   Get,
@@ -20,7 +21,7 @@ import {
 // Guards and Decorators
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Public } from '../decorators/public.decorator';
-import { AuthThrottle, DefaultThrottle, StrictThrottle } from '../decorators/throttle.decorator';
+import { DefaultThrottle } from '../decorators/throttle.decorator';
 import * as currentUserDecorator from '../decorators/current-user.decorator';
 
 // DTOs
@@ -36,12 +37,13 @@ import { CreateUserWithProfileUseCase } from '../../application/use-cases/user/c
 import { GetUserByIdUseCase } from '../../application/use-cases/user/get-user-by-id.use-case';
 import { GetSubscriptionByUserIdUseCase } from '../../application/use-cases/subscription/get-subscription-by-user.use-case';
 import { UpdateUserProfileUseCase } from '../../application/use-cases/user/update-user-profile.use-case';
-import { CreateUserSubscriptionUseCase } from '../../application/use-cases/subscription/create-user-with-subscription.use-case';
-import { UpdateUserSubscriptionUseCase } from '../../application/use-cases/subscription/update-user-subscription.use-case';
+import { CreateUserSubscriptionUseCase, CreateUserWithSubscriptionResponse } from '../../application/use-cases/subscription/create-user-with-subscription.use-case';
+import { UpdateUserSubscriptionUseCase, UpdateUserWithSubscriptionResponse } from '../../application/use-cases/subscription/update-user-subscription.use-case';
 import { CreateUserSubscriptionDto } from '../dtos/subscription/create-user-subscription.dto';
 import { UserSubscriptionResponseDto } from '../dtos/subscription/user-subscription.dto';
 import { CreateUserContextDto } from '../dtos/context/create-user-context.dto';
-import { CreateUserWithContextUseCase } from '../../application/use-cases/context/create-user-with-context.use-case';
+import { ContextResponseDto } from '../dtos/context/create-context.dto';
+import { CreateUserWithContextResponse, CreateUserWithContextUseCase } from '../../application/use-cases/context/create-user-with-context.use-case';
 import { GetContextByUserIdUseCase } from '../../application/use-cases/context/get-context-by-user.use-case';
 import { GetUserContextsResponseDto } from '../dtos/context/context-response.dto';
 import { GetUserCompleteProfileUseCase } from '../../application/use-cases/user/get-user-complete-profile.use-case';
@@ -67,7 +69,7 @@ export class UserController {
 
   @Post('register')
   @Public()
-  @AuthThrottle() // 🔐 5 attempts per 15 minutes
+  @DefaultThrottle() // 🌐 Rate limited
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Register a new user with complete profile',
@@ -111,7 +113,7 @@ export class UserController {
   }
 
   @Put('update')
-  @StrictThrottle() // 🚨 10 requests per minute
+  @DefaultThrottle() // 🌐 Rate limited
   @ApiOperation({
     summary: 'Update current user profile',
     description: 'Rate limited: 10 updates per minute per IP',
@@ -152,7 +154,7 @@ export class UserController {
   }
 
   @Post('add-subscription')
-  @AuthThrottle() // 🔐 5 attempts per 15 minutes
+  @DefaultThrottle() // 🌐 Rate limited
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Add a new subscription for the user',
@@ -161,7 +163,6 @@ export class UserController {
   @ApiResponse({
     status: 201,
     description: 'Subscription added successfully',
-    type: Boolean,
   })
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   @ApiResponse({
@@ -175,16 +176,19 @@ export class UserController {
   async addSubscription(
     @currentUserDecorator.CurrentUser() user: currentUserDecorator.JwtPayload,
     @Body() createSubscriptionDto: CreateUserSubscriptionDto,
-  ): Promise<boolean> {
+  ): Promise<CreateUserWithSubscriptionResponse> {
     try {
       const result = await this.createUserSubscriptionUseCase.execute({
         userId: user.sub,
         planId: createSubscriptionDto.planId,
       });
+
       if (result) {
-        return true;
+        // Map the use case response to the expected DTO
+        return result;
       }
-      return false;
+
+      throw new Error('Failed to create subscription');
     } catch (error) {
       if (
         error instanceof Error &&
@@ -199,8 +203,8 @@ export class UserController {
   }
 
   @Put('update-subscription')
-  @AuthThrottle() // 🔐 5 attempts per 15 minutes
-  @HttpCode(HttpStatus.CREATED)
+  @DefaultThrottle() // 🌐 Rate limited
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Update a subscription for the user',
     description: 'Rate limited: 5 subscriptions per 15 minutes per IP',
@@ -208,7 +212,6 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Subscription updated successfully',
-    type: UpdateUserSubscriptionUseCase,
   })
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   @ApiResponse({
@@ -222,17 +225,20 @@ export class UserController {
   async updateSubscription(
     @currentUserDecorator.CurrentUser() user: currentUserDecorator.JwtPayload,
     @Body() updateSubscriptionDto: UpdateUserSubscriptionDto,
-  ): Promise<boolean> {
+  ): Promise<UpdateUserWithSubscriptionResponse> {
     try {
       const result = await this.updateSubscriptionUseCase.execute({
         id: updateSubscriptionDto.id,
         userId: user.sub,
         planId: updateSubscriptionDto.planId,
       });
+
       if (result) {
-        return true;
+        // Map the use case response to the expected DTO
+        return result;
       }
-      return false;
+
+      throw new Error('Failed to update subscription');
     } catch (error) {
       if (
         error instanceof Error &&
@@ -247,7 +253,7 @@ export class UserController {
   }
 
   @Get('my-subscription')
-  @DefaultThrottle() // 🌐 Uses environment config
+  @DefaultThrottle() // 🌐 Rate limited
   @ApiOperation({
     summary: 'Get current user subscription',
     description: 'Rate limited: 100 requests per minute per IP',
@@ -280,7 +286,7 @@ export class UserController {
   }
 
   @Post('add-context')
-  @AuthThrottle() // 🔐 5 attempts per 15 minutes
+  @DefaultThrottle() // 🌐 Rate limited
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Add a new context for the user',
@@ -289,7 +295,6 @@ export class UserController {
   @ApiResponse({
     status: 201,
     description: 'Context added successfully',
-    type: CreateUserContextDto,
   })
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   @ApiResponse({
@@ -303,16 +308,19 @@ export class UserController {
   async addContext(
     @currentUserDecorator.CurrentUser() user: currentUserDecorator.JwtPayload,
     @Body() createUserContextDto: CreateUserContextDto,
-  ): Promise<boolean> {
+  ): Promise<CreateUserWithContextResponse> {
     try {
       const result = await this.createUserWithContextUseCase.execute({
         userId: user.sub,
         name: createUserContextDto.name,
       });
+
       if (result) {
-        return true;
+        // Map the use case response to the expected DTO
+        return result;
       }
-      return false;
+
+      throw new Error('Failed to create context');
     } catch (error) {
       if (
         error instanceof Error &&
@@ -325,7 +333,7 @@ export class UserController {
   }
 
   @Get('my-contexts')
-  @DefaultThrottle() // 🌐 Uses environment config
+  @DefaultThrottle() // 🌐 Rate limited
   @ApiOperation({
     summary: 'Get current user contexts',
     description: 'Rate limited: 100 requests per minute per IP',
@@ -370,7 +378,7 @@ export class UserController {
   }
 
   @Get('me')
-  @DefaultThrottle() // 🌐 Uses environment config
+  @DefaultThrottle() // 🌐 Rate limited
   @ApiOperation({
     summary: 'Get complete user profile',
     description:

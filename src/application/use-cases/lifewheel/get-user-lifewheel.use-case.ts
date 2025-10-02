@@ -63,7 +63,7 @@ export class GetUserLifeWheelUseCase {
       lifeAreas: lifeWheelAreas.map((lwa) => ({
         id: lwa.id.getValue(),
         areaId: lwa.areaId.getValue(),
-        areaName: lwa.area?.name || 'Unknown',
+        areaName: lwa.area?.description || lwa.area?.name || 'Unknown',
         score: lwa.score,
         createdAt: lwa.createdAt,
         updatedAt: lwa.updatedAt,

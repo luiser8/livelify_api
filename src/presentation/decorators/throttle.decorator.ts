@@ -24,7 +24,7 @@ export const THROTTLE_LEVELS = {
  * For documentation, health checks, public info
  */
 export const PublicThrottle = () =>
-  Throttle({ default: { limit: 1000, ttl: 60000 } }); // 1000 requests per minute
+  Throttle({ default: { limit: 10, ttl: 60000 } }); // 10 requests per minute for testing
 
 /**
  * 🌐 Default Rate Limiting - Standard usage
@@ -53,6 +53,12 @@ export const StrictThrottle = () => Throttle({ strict: {} }); // Config comes fr
  */
 export const DataThrottle = () =>
   Throttle({ data: { limit: 20, ttl: 300000 } }); // 20 requests per 5 minutes
+
+/**
+ * 🧪 Test Rate Limiting - Very restrictive for testing
+ * For testing rate limiting functionality
+ */
+export const TestThrottle = () => Throttle({ strict: {} }); // Uses strict config from ThrottlerModule
 
 /**
  * 🎯 Custom Throttle - For specific requirements

@@ -149,8 +149,9 @@ model LifeWheelArea {
 
 // ✅ NUEVO MODELO: Area (reemplaza al enum LifeArea)
 model Area {
-  id    String @id @default(uuid())
-  name  String @unique // e.g., PERSONAL_DEVELOPMENT, PROFESSIONAL_ACTIVITY, etc.
+  id          String @id @default(uuid())
+  name        String @unique // e.g., PERSONAL_DEVELOPMENT, PROFESSIONAL_ACTIVITY, etc.
+  description String // e.g., "Desarrollo Personal", "Actividad Profesional", etc.
 
   lifeWheelAreas LifeWheelArea[]
   questions      Question[]

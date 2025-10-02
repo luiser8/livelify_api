@@ -8,7 +8,7 @@ import {
 
 // Guards and Decorators
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { PublicThrottle } from '../decorators/throttle.decorator';
+import { DefaultThrottle } from '../decorators/throttle.decorator';
 
 // DTOs
 
@@ -26,7 +26,7 @@ export class SubscriptionController {
   ) {}
 
   @Get('all')
-  @PublicThrottle() // 🌐 100 requests per minute
+  @DefaultThrottle() // 🌐 Rate limited
   @ApiOperation({
     summary: 'Get all subscriptions',
     description: 'Rate limited: 100 requests per minute per IP',
@@ -44,9 +44,9 @@ export class SubscriptionController {
   async all(): Promise<GetAllSubscriptionsResponseDto> {
     try {
       const subscriptions = await this.getAllSubscriptionsUseCase.execute();
-      
+
       // Format response
-      const formattedSubscriptions = subscriptions.map(subscription => ({
+      const formattedSubscriptions = subscriptions.map((subscription) => ({
         id: subscription.id.getValue(), // Include ID
         name: subscription.name.toString(), // Convert PlanType enum to string
         description: subscription.description || '',

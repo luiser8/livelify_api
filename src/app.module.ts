@@ -35,29 +35,33 @@ function getEnvFilePath(): string {
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('APP_JWT_SECRET'),
         signOptions: {
-          expiresIn: configService.get<string>('APP_JWT_EXPIRE', '1h'),
+          expiresIn: configService.get<string>('APP_JWT_EXPIRE'),
         },
       }),
     }),
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => [
-        {
-          name: 'default',
-          ttl: configService.get<number>('THROTTLE_TTL', 60000), // 1 minute
-          limit: configService.get<number>('THROTTLE_LIMIT', 100), // 100 requests per minute
-        },
-        {
-          name: 'auth',
-          ttl: configService.get<number>('THROTTLE_AUTH_TTL', 900000), // 15 minutes
-          limit: configService.get<number>('THROTTLE_AUTH_LIMIT', 5), // 5 login attempts per 15 minutes
-        },
-        {
-          name: 'strict',
-          ttl: configService.get<number>('THROTTLE_STRICT_TTL', 60000), // 1 minute
-          limit: configService.get<number>('THROTTLE_STRICT_LIMIT', 10), // 10 requests per minute
-        },
-      ],
+      useFactory: (configService: ConfigService) => {
+        // Fix: Convert string env vars to numbers properly
+        const ttlString = configService.get<string>('THROTTLE_TTL', '60000');
+        const limitString = configService.get<string>('THROTTLE_LIMIT', '100');
+
+        const ttl = parseInt(ttlString);
+        const limit = parseInt(limitString);
+
+        // Fallback to hardcoded values if parsing fails
+        const finalTtl = isNaN(ttl) ? 60000 : ttl;
+        const finalLimit = isNaN(limit) ? 100 : limit;
+
+        return {
+          throttlers: [
+            {
+              ttl: finalTtl, // 1 minute
+              limit: finalLimit, // requests per minute
+            },
+          ],
+        };
+      },
     }),
     DatabaseModule,
     ApplicationModule,

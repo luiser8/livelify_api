@@ -17,12 +17,14 @@ export class AreaRepository implements AreaRepositoryInterface {
   private toDomainEntity(value: {
     id: string;
     name: string;
+    description: string;
     createdAt?: Date;
     updatedAt?: Date;
   }): Area {
     return Area.reconstitute({
       id: AreaId.fromString(value.id),
       name: value.name,
+      description: value.description,
       createdAt: value.createdAt,
       updatedAt: value.updatedAt,
     });

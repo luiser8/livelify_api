@@ -108,6 +108,7 @@ export class LifeWheelRepository implements LifeWheelRepositoryInterface {
             name: la.area.name,
             createdAt: la.area.createdAt,
             updatedAt: la.area.updatedAt,
+            description: la.area.description,
           });
         }
 

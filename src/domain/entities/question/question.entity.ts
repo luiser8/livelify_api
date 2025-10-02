@@ -17,7 +17,8 @@ interface Answer {
 interface Area {
   id: string;
   name: string;
-  toPlainObject(): { id: string; name: string };
+  description: string;
+  toPlainObject(): { id: string; name: string; description: string };
 }
 
 // ======================

@@ -18,7 +18,7 @@ import {
 
 // Guards and Decorators
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { PublicThrottle } from '../decorators/throttle.decorator';
+import { DefaultThrottle } from '../decorators/throttle.decorator';
 import { CurrentUser } from '../decorators/current-user.decorator';
 
 // DTOs
@@ -43,7 +43,7 @@ export class ProjectController {
   ) {}
 
   @Post('from-lifewheel-area')
-  @PublicThrottle() // 100 requests per minute
+  @DefaultThrottle() // 🌐 Rate limited
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create a GTD project from a LifeWheelArea',
@@ -96,7 +96,7 @@ export class ProjectController {
   }
 
   @Get('me')
-  @PublicThrottle() // 100 requests per minute
+  @DefaultThrottle() // 🌐 Rate limited
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get all projects for the current user',

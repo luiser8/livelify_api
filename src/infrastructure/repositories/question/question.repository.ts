@@ -12,6 +12,9 @@ export class QuestionRepository implements QuestionRepositoryInterface {
   async findByAreaId(areaId: AreaId): Promise<Question[]> {
     const question = await this.prisma.question.findMany({
       where: { areaId: areaId.getValue() },
+      include: {
+        area: true,
+      },
     });
 
     return question.map((q) => this.toDomainEntity(q));
@@ -23,6 +26,11 @@ export class QuestionRepository implements QuestionRepositoryInterface {
     areaId: string;
     createdAt?: Date;
     updatedAt?: Date;
+    area?: {
+      id: string;
+      name: string;
+      description: string;
+    };
   }): Question {
     return Question.reconstitute({
       id: QuestionId.fromString(value.id),
@@ -30,6 +38,16 @@ export class QuestionRepository implements QuestionRepositoryInterface {
       createdAt: value.createdAt,
       updatedAt: value.updatedAt,
       areaId: AreaId.fromString(value.areaId),
+      area: value.area ? {
+        id: value.area.id,
+        name: value.area.name,
+        description: value.area.description,
+        toPlainObject: () => ({
+          id: value.area!.id,
+          name: value.area!.name,
+          description: value.area!.description,
+        }),
+      } : undefined,
     });
   }
 }

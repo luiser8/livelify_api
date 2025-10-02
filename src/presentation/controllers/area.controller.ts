@@ -9,7 +9,7 @@ import {
 
 // Guards and Decorators
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { PublicThrottle } from '../decorators/throttle.decorator';
+import { DefaultThrottle } from '../decorators/throttle.decorator';
 
 // DTOs
 
@@ -25,7 +25,7 @@ export class AreaController {
   constructor(private readonly getAllAreaUseCase: GetAllAreasUseCase) {}
 
   @Get('all')
-  @PublicThrottle() // 🌐 100 requests per minute
+  @DefaultThrottle() // 🌐 Rate limited
   @ApiOperation({
     summary: 'Get all areas',
     description: 'Rate limited: 100 requests per minute per IP',
