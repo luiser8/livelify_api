@@ -8,6 +8,7 @@ import {
   UseGuards,
   BadRequestException,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -27,10 +28,12 @@ import {
   CreateProjectFromLifeWheelAreaResponseDto,
 } from '../dtos/project/create-project.dto';
 import { GetUserProjectsResponseDto } from '../dtos/project/get-user-projects.dto';
+import { GetProjectsByAreaQueryDto } from '../dtos/project/get-projects-by-area.dto';
 
 // Use Cases
 import { CreateProjectFromLifeWheelAreaUseCase } from '../../application/use-cases/project/create-project-from-lifewheel-area.use-case';
 import { GetUserProjectsUseCase } from '../../application/use-cases/project/get-user-projects.use-case';
+import { GetProjectsByAreaUseCase } from '../../application/use-cases/project/get-projects-by-area.use-case';
 
 @ApiTags('Projects')
 @Controller('projects')
@@ -40,6 +43,7 @@ export class ProjectController {
   constructor(
     private readonly createProjectFromLifeWheelAreaUseCase: CreateProjectFromLifeWheelAreaUseCase,
     private readonly getUserProjectsUseCase: GetUserProjectsUseCase,
+    private readonly getProjectsByAreaUseCase: GetProjectsByAreaUseCase,
   ) {}
 
   @Post('from-lifewheel-area')
@@ -120,6 +124,43 @@ export class ProjectController {
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {
         throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
+  }
+
+  @Get('by-area')
+  @DefaultThrottle() // 🌐 Rate limited
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get projects by LifeWheelArea',
+    description:
+      'Retrieve all GTD projects for a specific LifeWheelArea, including their details and statistics.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Projects retrieved successfully',
+    type: GetUserProjectsResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - invalid area ID',
+  })
+  async getProjectsByArea(
+    @Query() query: GetProjectsByAreaQueryDto,
+  ): Promise<GetUserProjectsResponseDto> {
+    try {
+      const result = await this.getProjectsByAreaUseCase.execute({
+        lifeWheelAreaId: query.area,
+      });
+
+      return result;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('not found')) {
+        throw new NotFoundException(error.message);
+      }
+      if (error instanceof Error && error.message.includes('Invalid')) {
+        throw new BadRequestException(error.message);
       }
       throw error;
     }

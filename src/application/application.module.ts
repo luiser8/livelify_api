@@ -21,6 +21,7 @@ import { GetUserLifeWheelUseCase } from './use-cases/lifewheel/get-user-lifewhee
 import { SubmitAreaAnswersUseCase } from './use-cases/answer/submit-area-answers.use-case';
 import { CreateProjectFromLifeWheelAreaUseCase } from './use-cases/project/create-project-from-lifewheel-area.use-case';
 import { GetUserProjectsUseCase } from './use-cases/project/get-user-projects.use-case';
+import { GetProjectsByAreaUseCase } from './use-cases/project/get-projects-by-area.use-case';
 import { CreateBudgetForProjectUseCase } from './use-cases/budget/create-budget-for-project.use-case';
 import { UpdateBudgetUseCase } from './use-cases/budget/update-budget.use-case';
 import { GetUserBudgetsUseCase } from './use-cases/budget/get-user-budgets.use-case';
@@ -63,6 +64,7 @@ import { GetSubscriptionByUserIdUseCase } from './use-cases/subscription/get-sub
     // Project
     CreateProjectFromLifeWheelAreaUseCase,
     GetUserProjectsUseCase,
+    GetProjectsByAreaUseCase,
     // Budget
     CreateBudgetForProjectUseCase,
     UpdateBudgetUseCase,
@@ -109,6 +111,7 @@ import { GetSubscriptionByUserIdUseCase } from './use-cases/subscription/get-sub
     // Project
     CreateProjectFromLifeWheelAreaUseCase,
     GetUserProjectsUseCase,
+    GetProjectsByAreaUseCase,
     // Budget
     CreateBudgetForProjectUseCase,
     UpdateBudgetUseCase,
