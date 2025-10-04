@@ -42,6 +42,7 @@ import { GetUserGoalsUseCase } from 'src/application/use-cases/goal/get-user-goa
 import { CreateGtdActionUseCase } from 'src/application/use-cases/action/create-gtd-action.use-case';
 import { GetUserActionsUseCase } from 'src/application/use-cases/action/get-user-actions.use-case';
 import { CompleteActionUseCase } from 'src/application/use-cases/action/complete-action.use-case';
+import { VerifyTokenUseCase } from 'src/application/use-cases/auth/verify-token.use-case';
 
 @Module({
   imports: [ApplicationModule, TerminusModule, DatabaseModule],
@@ -84,6 +85,7 @@ import { CompleteActionUseCase } from 'src/application/use-cases/action/complete
     GetUserActionsUseCase,
     CompleteActionUseCase,
     GetUserCompleteProfileUseCase,
+    VerifyTokenUseCase,
   ],
   exports: [JwtAuthGuard],
 })

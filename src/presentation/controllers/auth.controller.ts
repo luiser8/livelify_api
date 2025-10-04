@@ -2,11 +2,13 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   HttpCode,
   HttpStatus,
   UseGuards,
   UnauthorizedException,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,6 +16,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import type { Request } from 'express';
 
 // Guards and Decorators
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -29,11 +32,13 @@ import {
   RefreshTokenResponseDto,
   LogoutResponseDto,
 } from '../dtos/auth';
+import { VerifyTokenResponseDto } from '../dtos/auth/verify-token.dto';
 
 // Use Cases
 import { LoginUseCase } from '../../application/use-cases/auth/login.use-case';
 import { RefreshTokenUseCase } from '../../application/use-cases/auth/refresh-token.use-case';
 import { LogoutUseCase } from '../../application/use-cases/auth/logout.use-case';
+import { VerifyTokenUseCase } from '../../application/use-cases/auth/verify-token.use-case';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -44,6 +49,7 @@ export class AuthController {
     private readonly loginUseCase: LoginUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly logoutUseCase: LogoutUseCase,
+    private readonly verifyTokenUseCase: VerifyTokenUseCase,
   ) {}
 
   @Post('login')
@@ -84,12 +90,13 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @Public() // 🔓 Public endpoint - no access token required
   @DefaultThrottle() // 🌐 Rate limited
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Refresh access token using refresh token',
     description:
-      'Requires access token in Authorization header and refresh token in request body. Rate limited: 10 requests per minute per IP',
+      'Only requires refresh token in request body. The user ID is extracted from the refresh token. Rate limited: 10 requests per minute per IP',
   })
   @ApiResponse({
     status: 200,
@@ -98,19 +105,17 @@ export class AuthController {
   })
   @ApiResponse({
     status: 401,
-    description: 'Unauthorized - invalid or expired tokens',
+    description: 'Unauthorized - invalid or expired refresh token',
   })
   @ApiResponse({
     status: 429,
     description: 'Too Many Requests - rate limit exceeded',
   })
   async refreshToken(
-    @currentUserDecorator.CurrentUser() user: currentUserDecorator.JwtPayload,
     @Body() refreshTokenDto: RefreshTokenDto,
   ): Promise<RefreshTokenResponseDto> {
     try {
       const result = await this.refreshTokenUseCase.execute({
-        userId: user.sub, // Pass user ID from access token
         refresh_token: refreshTokenDto.refresh_token,
       });
 
@@ -157,6 +162,57 @@ export class AuthController {
       return result;
     } catch (error) {
       throw error;
+    }
+  }
+
+  @Get('verify-token')
+  @DefaultThrottle() // 🌐 Rate limited
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Verify if the current access token is valid',
+    description:
+      'Checks if the access token in the Authorization header is still valid and not expired or revoked. Rate limited: 10 requests per minute per IP',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Token verification result',
+    type: VerifyTokenResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid or missing token',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too Many Requests - rate limit exceeded',
+  })
+  async verifyToken(
+    @currentUserDecorator.CurrentUser() user: currentUserDecorator.JwtPayload,
+    @Req() request: Request,
+  ): Promise<VerifyTokenResponseDto> {
+    try {
+      // Extract token from Authorization header
+      const authHeader = request.headers.authorization;
+      if (!authHeader) {
+        throw new UnauthorizedException('Authorization header is required');
+      }
+
+      const [type, token] = authHeader.split(' ');
+      if (type !== 'Bearer' || !token) {
+        throw new UnauthorizedException('Invalid authorization format');
+      }
+
+      const result = await this.verifyTokenUseCase.execute({
+        userId: user.sub,
+        token,
+      });
+
+      return result;
+    } catch (error: unknown) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Token verification failed');
     }
   }
 }

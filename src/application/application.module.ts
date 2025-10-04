@@ -12,6 +12,7 @@ import { CreateUserWithContextUseCase } from './use-cases/context/create-user-wi
 import { LoginUseCase } from './use-cases/auth/login.use-case';
 import { RefreshTokenUseCase } from './use-cases/auth/refresh-token.use-case';
 import { LogoutUseCase } from './use-cases/auth/logout.use-case';
+import { VerifyTokenUseCase } from './use-cases/auth/verify-token.use-case';
 import { CreateUserSubscriptionUseCase } from './use-cases/subscription/create-user-with-subscription.use-case';
 import { GetAllSubscriptionsUseCase } from './use-cases/subscription/get-all-subscriptions.use-case';
 import { GetAllAreasUseCase } from './use-cases/area/get-all-areas.use-case';
@@ -52,6 +53,7 @@ import { GetSubscriptionByUserIdUseCase } from './use-cases/subscription/get-sub
     LoginUseCase,
     RefreshTokenUseCase,
     LogoutUseCase,
+    VerifyTokenUseCase,
     // Area
     GetAllAreasUseCase,
     // Question
@@ -99,6 +101,7 @@ import { GetSubscriptionByUserIdUseCase } from './use-cases/subscription/get-sub
     LoginUseCase,
     RefreshTokenUseCase,
     LogoutUseCase,
+    VerifyTokenUseCase,
     // Area
     GetAllAreasUseCase,
     // Question

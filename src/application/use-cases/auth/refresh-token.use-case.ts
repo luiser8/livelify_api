@@ -16,7 +16,6 @@ import {
 } from '../../ports/tokens';
 
 export interface RefreshTokenRequest {
-  userId?: string; // Optional: user ID from access token for additional validation
   refresh_token: string;
 }
 
@@ -46,7 +45,7 @@ export class RefreshTokenUseCase {
     this.logger.log('Token refresh attempt');
 
     try {
-      // 1. Verify refresh token
+      // 1. Verify and decode refresh token
       this.logger.debug('Verifying refresh token');
       const jwtSecret = this.configService.get<string>('APP_JWT_SECRET');
       if (!jwtSecret) {
@@ -62,32 +61,34 @@ export class RefreshTokenUseCase {
 
       // 2. Check if it's a refresh token
       if (decoded.type !== 'refresh') {
+        this.logger.warn(`Invalid token type: ${decoded.type}`);
         throw new Error('Invalid token type');
       }
 
-      // 3. Additional validation: if userId provided, verify it matches the token
-      if (request.userId && decoded.sub !== request.userId) {
-        throw new Error('Access token and refresh token user mismatch');
-      }
+      // 3. Extract userId from the refresh token
+      const userId = UserId.fromString(decoded.sub);
+      this.logger.debug(`Extracted userId from token: ${userId.getValue()}`);
 
       // 4. Find the stored token in database
       const storedToken = await this.userTokenRepository.findByRefreshToken(
         request.refresh_token,
       );
       if (!storedToken) {
+        this.logger.warn('Refresh token not found in database');
         throw new Error('Token not found or expired');
       }
 
-      // 5. Verify user still exists
-      const userId = UserId.fromString(decoded.sub);
-      const user = await this.userRepository.findById(userId);
-      if (!user) {
-        throw new Error('User not found');
+      // 5. Verify the stored token belongs to the same user
+      if (!storedToken.getUserId().equals(userId)) {
+        this.logger.error('Token ownership mismatch');
+        throw new Error('Token ownership mismatch');
       }
 
-      // 6. Additional security: verify the stored token belongs to the same user
-      if (!storedToken.getUserId().equals(userId)) {
-        throw new Error('Token ownership mismatch');
+      // 6. Verify user still exists
+      const user = await this.userRepository.findById(userId);
+      if (!user) {
+        this.logger.error(`User not found: ${userId.getValue()}`);
+        throw new Error('User not found');
       }
 
       // 7. Get user profile for personal data
