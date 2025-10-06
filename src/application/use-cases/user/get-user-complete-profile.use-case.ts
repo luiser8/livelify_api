@@ -72,10 +72,6 @@ export interface UserCompleteProfileResponse {
           id: string;
           goalType: string;
           content: string;
-          cost?: number;
-          saved?: number;
-          progress: number;
-          isCompleted: boolean;
           actions: Array<{
             id: string;
             title: string;
@@ -236,7 +232,8 @@ export class GetUserCompleteProfileUseCase {
         // Get all goals for this user
         const allGoals = await this.projectGoalRepository.findByUserId(userId);
         totalGoals = allGoals.length;
-        completedGoals = allGoals.filter((goal) => goal.isCompleted()).length;
+        // Note: completedGoals count removed as it now depends on GoalBudget data
+        completedGoals = 0; // TODO: Calculate based on GoalBudget if needed
 
         // Get all actions for this user
         const allActions = await this.gtdActionRepository.findByUserId(userId);
@@ -277,7 +274,7 @@ export class GetUserCompleteProfileUseCase {
                       id: action.id.getValue(),
                       title: action.title,
                       contextName: action.contextName,
-                      energy: action.energy,
+                      energy: action.energy as string,
                       completed: action.completed,
                       dueDate: action.dueDate,
                       isOverdue: action.isOverdue(),
@@ -285,12 +282,8 @@ export class GetUserCompleteProfileUseCase {
 
                     return {
                       id: goal.id.getValue(),
-                      goalType: goal.goalType,
+                      goalType: goal.goalType as string,
                       content: goal.content,
-                      cost: goal.cost,
-                      saved: goal.saved,
-                      progress: goal.getProgress(),
-                      isCompleted: goal.isCompleted(),
                       actions: formattedActions,
                     };
                   }),
@@ -313,8 +306,8 @@ export class GetUserCompleteProfileUseCase {
                 return {
                   id: project.id.getValue(),
                   title: project.title,
-                  description: project.description,
-                  status: project.status,
+                  description: project.description || undefined,
+                  status: project.status as string,
                   budget: formattedBudget,
                   goals: formattedGoals,
                 };
@@ -334,7 +327,7 @@ export class GetUserCompleteProfileUseCase {
         lifeWheel = {
           id: lifeWheelData.id.getValue(),
           globalScore: lifeWheelData.globalScore,
-          lifeAreas: lifeAreas,
+          lifeAreas: lifeAreas as any,
         };
       }
     } catch {

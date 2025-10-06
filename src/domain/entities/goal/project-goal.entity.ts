@@ -12,8 +12,6 @@ export interface ProjectGoalProps {
   detailId: GtdProjectDetailId;
   goalType: GoalType;
   content: string;
-  cost?: number;
-  saved?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -23,8 +21,6 @@ export class ProjectGoal {
   private readonly _detailId: GtdProjectDetailId;
   private readonly _goalType: GoalType;
   private _content: string;
-  private _cost?: number;
-  private _saved?: number;
   private readonly _createdAt: Date;
   private _updatedAt: Date;
 
@@ -33,8 +29,6 @@ export class ProjectGoal {
     this._detailId = props.detailId;
     this._goalType = props.goalType;
     this._content = props.content;
-    this._cost = props.cost;
-    this._saved = props.saved;
     this._createdAt = props.createdAt || new Date();
     this._updatedAt = props.updatedAt || new Date();
 
@@ -45,16 +39,12 @@ export class ProjectGoal {
     detailId: GtdProjectDetailId,
     goalType: GoalType,
     content: string,
-    cost?: number,
-    saved?: number,
   ): ProjectGoal {
     return new ProjectGoal({
       id: ProjectGoalId.create(),
       detailId,
       goalType,
       content,
-      cost,
-      saved,
     });
   }
 
@@ -68,12 +58,6 @@ export class ProjectGoal {
     }
     if (this._content.length > 500) {
       throw new Error('Goal content cannot exceed 500 characters');
-    }
-    if (this._cost !== undefined && this._cost < 0) {
-      throw new Error('Goal cost cannot be negative');
-    }
-    if (this._saved !== undefined && this._saved < 0) {
-      throw new Error('Goal saved amount cannot be negative');
     }
     if (!Object.values(GoalType).includes(this._goalType)) {
       throw new Error('Invalid goal type');
@@ -93,46 +77,6 @@ export class ProjectGoal {
     this.touch();
   }
 
-  public updateCost(cost: number): void {
-    if (cost < 0) {
-      throw new Error('Goal cost cannot be negative');
-    }
-    this._cost = cost;
-    this.touch();
-  }
-
-  public updateSaved(saved: number): void {
-    if (saved < 0) {
-      throw new Error('Goal saved amount cannot be negative');
-    }
-    this._saved = saved;
-    this.touch();
-  }
-
-  public addToSaved(amount: number): void {
-    if (amount <= 0) {
-      throw new Error('Amount to add must be positive');
-    }
-    this._saved = (this._saved || 0) + amount;
-    this.touch();
-  }
-
-  public getProgress(): number {
-    if (!this._cost || this._cost === 0) {
-      return 0;
-    }
-    const saved = this._saved || 0;
-    return Math.min((saved / this._cost) * 100, 100);
-  }
-
-  public isCompleted(): boolean {
-    if (!this._cost) {
-      return false;
-    }
-    const saved = this._saved || 0;
-    return saved >= this._cost;
-  }
-
   // Getters
   public get id(): ProjectGoalId {
     return this._id;
@@ -148,14 +92,6 @@ export class ProjectGoal {
 
   public get content(): string {
     return this._content;
-  }
-
-  public get cost(): number | undefined {
-    return this._cost;
-  }
-
-  public get saved(): number | undefined {
-    return this._saved;
   }
 
   public get createdAt(): Date {

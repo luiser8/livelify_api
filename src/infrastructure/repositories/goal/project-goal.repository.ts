@@ -20,8 +20,6 @@ export class ProjectGoalRepository implements ProjectGoalRepositoryInterface {
       detailId: goal.detailId.getValue(),
       goalType: goal.goalType,
       content: goal.content,
-      cost: goal.cost,
-      saved: goal.saved,
       createdAt: goal.createdAt,
       updatedAt: goal.updatedAt,
     };
@@ -83,8 +81,6 @@ export class ProjectGoalRepository implements ProjectGoalRepositoryInterface {
     const data = {
       goalType: goal.goalType,
       content: goal.content,
-      cost: goal.cost,
-      saved: goal.saved,
       updatedAt: goal.updatedAt,
     };
 
@@ -108,8 +104,6 @@ export class ProjectGoalRepository implements ProjectGoalRepositoryInterface {
       detailId: GtdProjectDetailId.fromString(value.detailId),
       goalType: value.goalType as GoalType,
       content: value.content,
-      cost: value.cost,
-      saved: value.saved,
       createdAt: value.createdAt,
       updatedAt: value.updatedAt,
     });

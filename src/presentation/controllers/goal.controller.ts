@@ -25,7 +25,7 @@ export class GoalController {
     private readonly getUserGoalsUseCase: GetUserGoalsUseCase,
   ) {}
 
-  @Post()
+  @Post('add')
   @ApiOperation({
     summary: 'Create project goal',
     description:

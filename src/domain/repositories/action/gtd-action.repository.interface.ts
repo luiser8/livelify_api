@@ -8,6 +8,7 @@ export interface GtdActionRepositoryInterface {
   save(action: GtdAction): Promise<GtdAction>;
   findById(id: GtdActionId): Promise<GtdAction | null>;
   findByGoalId(goalId: ProjectGoalId): Promise<GtdAction[]>;
+  findByProjectId(projectId: string): Promise<GtdAction[]>;
   findByContextId(contextId: ContextId): Promise<GtdAction[]>;
   findByUserId(userId: UserId): Promise<GtdAction[]>;
   findPendingByUserId(userId: UserId): Promise<GtdAction[]>;

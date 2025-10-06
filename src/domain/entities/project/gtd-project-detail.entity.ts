@@ -188,6 +188,33 @@ export class GtdProjectDetail {
   }
 
   // ==========
+  // Business methods
+  // ==========
+  /**
+   * Actualiza el progreso del proyecto
+   */
+  public updateProgress(
+    totalActions: number,
+    completedActions: number,
+    progressPercentage: number,
+  ): void {
+    if (totalActions < 0 || completedActions < 0) {
+      throw new Error('Actions count cannot be negative');
+    }
+    if (completedActions > totalActions) {
+      throw new Error('Completed actions cannot exceed total actions');
+    }
+    if (progressPercentage < 0 || progressPercentage > 100) {
+      throw new Error('Progress percentage must be between 0 and 100');
+    }
+
+    this._totalActions = totalActions;
+    this._completedActions = completedActions;
+    this._progressPercentage = progressPercentage;
+    this.touch();
+  }
+
+  // ==========
   // Serialization
   // ==========
   public toPlainObject(): {

@@ -28,32 +28,6 @@ export class GoalWithProjectResponseDto {
   content: string;
 
   @ApiProperty({
-    description: 'Cost associated with the goal',
-    example: 10000,
-    required: false,
-  })
-  cost?: number;
-
-  @ApiProperty({
-    description: 'Amount saved towards the goal',
-    example: 2500,
-    required: false,
-  })
-  saved?: number;
-
-  @ApiProperty({
-    description: 'Progress percentage (0-100)',
-    example: 25,
-  })
-  progress: number;
-
-  @ApiProperty({
-    description: 'Whether the goal is completed',
-    example: false,
-  })
-  isCompleted: boolean;
-
-  @ApiProperty({
     description: 'Creation date',
     example: '2024-01-01T00:00:00.000Z',
   })
@@ -104,28 +78,4 @@ export class GetUserGoalsResponseDto {
     type: GoalsByTypeDto,
   })
   goalsByType: GoalsByTypeDto;
-
-  @ApiProperty({
-    description: 'Number of completed goals',
-    example: 3,
-  })
-  completedGoals: number;
-
-  @ApiProperty({
-    description: 'Total cost across all goals',
-    example: 50000,
-  })
-  totalCost: number;
-
-  @ApiProperty({
-    description: 'Total saved across all goals',
-    example: 12500,
-  })
-  totalSaved: number;
-
-  @ApiProperty({
-    description: 'Overall progress percentage across all goals',
-    example: 25.5,
-  })
-  overallProgress: number;
 }

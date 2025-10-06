@@ -1,5 +1,37 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+export class ProjectBudgetDto {
+  @ApiProperty({
+    description: 'Budget ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  id: string;
+
+  @ApiPropertyOptional({
+    description: 'Monthly income target (IMO)',
+    example: 650.0,
+  })
+  monthlyIncomeTarget?: number;
+
+  @ApiPropertyOptional({
+    description: 'Daily income target (IDO)',
+    example: 21.67,
+  })
+  dailyIncomeTarget?: number;
+
+  @ApiProperty({
+    description: 'Currency code',
+    example: 'USD',
+  })
+  currencyCode: string;
+
+  @ApiProperty({
+    description: 'Currency symbol',
+    example: '$',
+  })
+  currencySymbol: string;
+}
+
 export class ProjectDetailDto {
   @ApiProperty({
     description: 'Project detail ID',
@@ -100,6 +132,12 @@ export class ProjectWithDetailDto {
     type: ProjectDetailDto,
   })
   detail?: ProjectDetailDto;
+
+  @ApiPropertyOptional({
+    description: 'Project budget information',
+    type: ProjectBudgetDto,
+  })
+  budget?: ProjectBudgetDto;
 }
 
 export class GetUserProjectsResponseDto {

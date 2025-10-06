@@ -69,18 +69,11 @@ export class Budget {
       throw new Error('Daily income target cannot be negative');
     }
 
-    // Validar consistencia entre IMO e IDO
-    if (this._monthlyIncomeTarget && this._dailyIncomeTarget) {
-      const expectedDailyFromMonthly = this._monthlyIncomeTarget / 30;
-      const difference = Math.abs(
-        this._dailyIncomeTarget - expectedDailyFromMonthly,
-      );
-      const tolerance = expectedDailyFromMonthly * 0.1; // 10% tolerance
-
-      if (difference > tolerance) {
-        throw new Error('Daily and monthly income targets are not consistent');
-      }
-    }
+    // NOTA: No validamos consistencia entre IMO e IDO porque los valores
+    // se calculan basándose en la duración real del proyecto, no en un mes estándar de 30 días.
+    // monthlyBudget = totalCapital / meses_reales_del_proyecto
+    // dailyBudget = totalCapital / días_reales_del_proyecto
+    // Por lo tanto, la relación NO es necesariamente 30:1
   }
 
   // Business methods

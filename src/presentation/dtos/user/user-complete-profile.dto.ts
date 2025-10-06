@@ -177,32 +177,6 @@ export class GoalInfoDto {
   content: string;
 
   @ApiProperty({
-    description: 'Cost associated with the goal',
-    example: 10000,
-    required: false,
-  })
-  cost?: number;
-
-  @ApiProperty({
-    description: 'Amount saved towards the goal',
-    example: 2500,
-    required: false,
-  })
-  saved?: number;
-
-  @ApiProperty({
-    description: 'Progress percentage',
-    example: 25,
-  })
-  progress: number;
-
-  @ApiProperty({
-    description: 'Is completed',
-    example: false,
-  })
-  isCompleted: boolean;
-
-  @ApiProperty({
     description: 'Actions associated with this goal',
     type: [ActionInfoDto],
   })

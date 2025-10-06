@@ -143,6 +143,38 @@ export class ProjectResponseDto {
   createdAt: Date;
 }
 
+export class BudgetResponseDto {
+  @ApiProperty({
+    description: 'Budget ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  id: string;
+
+  @ApiProperty({
+    description: 'Monthly income target (IMO)',
+    example: 0,
+  })
+  monthlyIncomeTarget: number;
+
+  @ApiProperty({
+    description: 'Daily income target (IDO)',
+    example: 0,
+  })
+  dailyIncomeTarget: number;
+
+  @ApiProperty({
+    description: 'Currency code',
+    example: 'USD',
+  })
+  currencyCode: string;
+
+  @ApiProperty({
+    description: 'Currency symbol',
+    example: '$',
+  })
+  currencySymbol: string;
+}
+
 export class CreateProjectFromLifeWheelAreaResponseDto {
   @ApiProperty({
     description: 'Created project',
@@ -155,4 +187,10 @@ export class CreateProjectFromLifeWheelAreaResponseDto {
     type: ProjectDetailResponseDto,
   })
   detail: ProjectDetailResponseDto;
+
+  @ApiProperty({
+    description: 'Created project budget (initialized with 0 values)',
+    type: BudgetResponseDto,
+  })
+  budget: BudgetResponseDto;
 }

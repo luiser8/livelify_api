@@ -13,10 +13,6 @@ export interface GoalWithProjectResponse {
   projectDetailId: string;
   goalType: GoalType;
   content: string;
-  cost?: number;
-  saved?: number;
-  progress: number;
-  isCompleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,10 +25,6 @@ export interface GetUserGoalsResponse {
     DO: number;
     HAVE: number;
   };
-  completedGoals: number;
-  totalCost: number;
-  totalSaved: number;
-  overallProgress: number;
 }
 
 @Injectable()
@@ -47,23 +39,18 @@ export class GetUserGoalsUseCase {
     const userId = UserId.fromString(request.userId);
     const goals = await this.projectGoalRepository.findByUserId(userId);
 
-    // 2. Mapear los goals con información adicional
+    // 2. Mapear los goals
     const goalsWithProjects: GoalWithProjectResponse[] = goals.map((goal) => ({
       id: goal.id.getValue(),
       projectDetailId: goal.detailId.getValue(),
       goalType: goal.goalType,
       content: goal.content,
-      cost: goal.cost,
-      saved: goal.saved,
-      progress: goal.getProgress(),
-      isCompleted: goal.isCompleted(),
       createdAt: goal.createdAt,
       updatedAt: goal.updatedAt,
     }));
 
     // 3. Calcular estadísticas
     const totalGoals = goals.length;
-    const completedGoals = goals.filter((goal) => goal.isCompleted()).length;
 
     // Contar por tipo
     const goalsByType = {
@@ -72,24 +59,10 @@ export class GetUserGoalsUseCase {
       HAVE: goals.filter((goal) => goal.goalType === GoalType.HAVE).length,
     };
 
-    // Calcular totales financieros
-    const totalCost = goals.reduce((sum, goal) => sum + (goal.cost || 0), 0);
-    const totalSaved = goals.reduce((sum, goal) => sum + (goal.saved || 0), 0);
-
-    // Calcular progreso general
-    const overallProgress =
-      totalGoals > 0
-        ? goals.reduce((sum, goal) => sum + goal.getProgress(), 0) / totalGoals
-        : 0;
-
     return {
       goals: goalsWithProjects,
       totalGoals,
       goalsByType,
-      completedGoals,
-      totalCost,
-      totalSaved,
-      overallProgress: Math.round(overallProgress * 100) / 100,
     };
   }
 }

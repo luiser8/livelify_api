@@ -2,7 +2,9 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Body,
+  Param,
   HttpCode,
   HttpStatus,
   UseGuards,
@@ -29,11 +31,16 @@ import {
 } from '../dtos/project/create-project.dto';
 import { GetUserProjectsResponseDto } from '../dtos/project/get-user-projects.dto';
 import { GetProjectsByAreaQueryDto } from '../dtos/project/get-projects-by-area.dto';
+import {
+  UpdateProjectStatusDto,
+  UpdateProjectStatusResponseDto,
+} from '../dtos/project/update-project-status.dto';
 
 // Use Cases
 import { CreateProjectFromLifeWheelAreaUseCase } from '../../application/use-cases/project/create-project-from-lifewheel-area.use-case';
 import { GetUserProjectsUseCase } from '../../application/use-cases/project/get-user-projects.use-case';
 import { GetProjectsByAreaUseCase } from '../../application/use-cases/project/get-projects-by-area.use-case';
+import { UpdateProjectStatusUseCase } from '../../application/use-cases/project/update-project-status.use-case';
 
 @ApiTags('Projects')
 @Controller('projects')
@@ -44,6 +51,7 @@ export class ProjectController {
     private readonly createProjectFromLifeWheelAreaUseCase: CreateProjectFromLifeWheelAreaUseCase,
     private readonly getUserProjectsUseCase: GetUserProjectsUseCase,
     private readonly getProjectsByAreaUseCase: GetProjectsByAreaUseCase,
+    private readonly updateProjectStatusUseCase: UpdateProjectStatusUseCase,
   ) {}
 
   @Post('from-lifewheel-area')
@@ -161,6 +169,53 @@ export class ProjectController {
       }
       if (error instanceof Error && error.message.includes('Invalid')) {
         throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
+  }
+
+  @Put(':projectId/status')
+  @DefaultThrottle() // 🌐 Rate limited
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Update project status',
+    description:
+      'Updates the status of a project. Possible values: ACTIVE, SOMEDAY, COMPLETED, CANCELLED.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Project status updated successfully',
+    type: UpdateProjectStatusResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - invalid status',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Project not found',
+  })
+  async updateProjectStatus(
+    @Param('projectId') projectId: string,
+    @Body() updateStatusDto: UpdateProjectStatusDto,
+    @CurrentUser() user: { sub: string },
+  ): Promise<UpdateProjectStatusResponseDto> {
+    try {
+      const result = await this.updateProjectStatusUseCase.execute({
+        userId: user.sub,
+        projectId,
+        status: updateStatusDto.status,
+      });
+
+      return result.project;
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message.includes('not found')) {
+          throw new NotFoundException(error.message);
+        }
+        if (error.message.includes('Invalid')) {
+          throw new BadRequestException(error.message);
+        }
       }
       throw error;
     }

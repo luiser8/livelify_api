@@ -251,10 +251,8 @@ model ProjectGoal {
   goalType  GoalType // BE, DO, HAVE
   content   String
 
-  cost      Float?   // 💰 costo asociado
-  saved     Float?   // 💵 ahorro/acumulado
-
   actions   GtdAction[]
+  budget    GoalBudget? // 💰 Presupuesto calculado del goal (contiene cost y saved)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -322,15 +320,41 @@ model Budget {
 }
 
 // ========================
+// GOAL BUDGET (Presupuesto por Goal)
+// ========================
+model GoalBudget {
+  id              String      @id @default(uuid())
+  goalId          String      @unique
+  goal            ProjectGoal @relation(fields: [goalId], references: [id])
+
+  baseCapital     Float       // Capital base del goal (ej: 3000)
+  multiplier      Float       @default(1.3) // Factor multiplicador (ej: 1.3)
+  totalCapital    Float       // Capital total calculado (baseCapital * multiplier)
+
+  monthlyBudget   Float       // IMO: totalCapital / meses del proyecto
+  dailyBudget     Float       // IDO: totalCapital / días del proyecto
+
+  projectMonths   Int         // Meses del proyecto
+  projectDays     Int         // Días del proyecto
+
+  currencyId      String
+  currency        Currency    @relation(fields: [currencyId], references: [id])
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+// ========================
 // CURRENCY
 // ========================
 model Currency {
-  id       String   @id @default(uuid())
-  code     String   @unique // Ej: "USD", "MXN"
-  name     String   // Ej: "US Dollar", "Peso Mexicano"
-  symbol   String   // Ej: "$"
+  id          String        @id @default(uuid())
+  code        String        @unique // Ej: "USD", "MXN"
+  name        String        // Ej: "US Dollar", "Peso Mexicano"
+  symbol      String        // Ej: "$"
 
-  budgets  Budget[]
+  budgets     Budget[]
+  goalBudgets GoalBudget[]
 }
 
 // ========================

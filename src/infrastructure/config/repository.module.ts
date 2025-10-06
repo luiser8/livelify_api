@@ -20,6 +20,7 @@ import { CurrencyRepository } from '../repositories/currency/currency.repository
 import { ContextRepository } from '../repositories/context/context.repository';
 import { ProjectGoalRepository } from '../repositories/goal/project-goal.repository';
 import { GtdActionRepository } from '../repositories/action/gtd-action.repository';
+import { GoalBudgetRepository } from '../repositories/goal-budget/goal-budget.repository';
 
 // Tokens
 import {
@@ -66,6 +67,9 @@ import {
   PROJECT_GOAL_REPOSITORY_TOKEN,
   GTD_ACTION_REPOSITORY_TOKEN,
 } from '../../application/ports/goals-actions';
+
+//Goal Budgets
+import { GOAL_BUDGET_REPOSITORY_TOKEN } from '../../application/ports/goal-budgets';
 
 // Question
 import { QuestionRepository } from '../repositories/question/question.repository';
@@ -145,6 +149,10 @@ import { QuestionRepository } from '../repositories/question/question.repository
       provide: GTD_ACTION_REPOSITORY_TOKEN,
       useClass: GtdActionRepository,
     },
+    {
+      provide: GOAL_BUDGET_REPOSITORY_TOKEN,
+      useClass: GoalBudgetRepository,
+    },
   ],
   exports: [
     USER_REPOSITORY_TOKEN,
@@ -165,6 +173,7 @@ import { QuestionRepository } from '../repositories/question/question.repository
     CONTEXT_REPOSITORY_TOKEN,
     PROJECT_GOAL_REPOSITORY_TOKEN,
     GTD_ACTION_REPOSITORY_TOKEN,
+    GOAL_BUDGET_REPOSITORY_TOKEN,
   ],
 })
 export class RepositoryModule {}

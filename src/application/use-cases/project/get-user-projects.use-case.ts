@@ -2,10 +2,12 @@ import { Injectable, Inject } from '@nestjs/common';
 import { UserId } from '../../../domain/value-objects/user/user-id.value-object';
 import type { GtdProjectRepositoryInterface } from '../../../domain/repositories/project/gtd-project.repository.interface';
 import type { GtdProjectDetailRepositoryInterface } from '../../../domain/repositories/project/gtd-project-detail.repository.interface';
+import type { BudgetRepositoryInterface } from '../../../domain/repositories/budget/budget.repository.interface';
 import {
   GTD_PROJECT_REPOSITORY_TOKEN,
   GTD_PROJECT_DETAIL_REPOSITORY_TOKEN,
 } from '../../ports/projects';
+import { BUDGET_REPOSITORY_TOKEN } from '../../ports/budget';
 
 export interface GetUserProjectsRequest {
   userId: string;
@@ -29,6 +31,13 @@ export interface ProjectWithDetailResponse {
     totalActions: number;
     progressPercentage: number;
   };
+  budget?: {
+    id: string;
+    monthlyIncomeTarget?: number;
+    dailyIncomeTarget?: number;
+    currencyCode: string;
+    currencySymbol: string;
+  };
 }
 
 export interface GetUserProjectsResponse {
@@ -45,6 +54,8 @@ export class GetUserProjectsUseCase {
     private readonly gtdProjectRepository: GtdProjectRepositoryInterface,
     @Inject(GTD_PROJECT_DETAIL_REPOSITORY_TOKEN)
     private readonly gtdProjectDetailRepository: GtdProjectDetailRepositoryInterface,
+    @Inject(BUDGET_REPOSITORY_TOKEN)
+    private readonly budgetRepository: BudgetRepositoryInterface,
   ) {}
 
   async execute(
@@ -55,13 +66,16 @@ export class GetUserProjectsUseCase {
     // 1. Obtener todos los proyectos del usuario
     const projects = await this.gtdProjectRepository.findByUserId(userId);
 
-    // 2. Para cada proyecto, obtener su detalle
+    // 2. Para cada proyecto, obtener su detalle y budget
     const projectsWithDetails: ProjectWithDetailResponse[] = [];
 
     for (const project of projects) {
       const detail = await this.gtdProjectDetailRepository.findByProjectId(
         project.id,
       );
+
+      // Obtener el budget del proyecto
+      const budget = await this.budgetRepository.findByProjectId(project.id);
 
       projectsWithDetails.push({
         id: project.id.getValue(),
@@ -81,6 +95,15 @@ export class GetUserProjectsUseCase {
               completedActions: detail.completedActions,
               totalActions: detail.totalActions,
               progressPercentage: detail.progressPercentage,
+            }
+          : undefined,
+        budget: budget
+          ? {
+              id: budget.id.getValue(),
+              monthlyIncomeTarget: budget.monthlyIncomeTarget,
+              dailyIncomeTarget: budget.dailyIncomeTarget,
+              currencyCode: budget.currency?.code || 'USD',
+              currencySymbol: budget.currency?.symbol || '$',
             }
           : undefined,
       });

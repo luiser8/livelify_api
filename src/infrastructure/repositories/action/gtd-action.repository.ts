@@ -64,6 +64,24 @@ export class GtdActionRepository implements GtdActionRepositoryInterface {
     return actions.map((action) => this.toDomainEntity(action));
   }
 
+  async findByProjectId(projectId: string): Promise<GtdAction[]> {
+    const actions = await this.prisma.gtdAction.findMany({
+      where: {
+        goal: {
+          detail: {
+            projectId: projectId,
+          },
+        },
+      },
+      include: {
+        context: true,
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return actions.map((action) => this.toDomainEntity(action));
+  }
+
   async findByContextId(contextId: ContextId): Promise<GtdAction[]> {
     const actions = await this.prisma.gtdAction.findMany({
       where: { contextId: contextId.getValue() },
