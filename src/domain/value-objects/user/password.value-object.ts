@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import * as bcrypt from 'bcrypt';
 
 export class Password {
@@ -9,9 +5,7 @@ export class Password {
 
   constructor(password: string, isHashed: boolean = false) {
     if (!isHashed && !this.isValid(password)) {
-      throw new Error(
-        'Password must be at least 8 characters long and contain uppercase, lowercase, number and special character',
-      );
+      throw new Error('Password must be at least 6 characters long');
     }
     this.value = password;
   }
@@ -39,10 +33,8 @@ export class Password {
   }
 
   private isValid(password: string): boolean {
-    // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return passwordRegex.test(password);
+    // At least 6 characters
+    return password.length >= 6;
   }
 
   public static fromHash(hashedPassword: string): Password {
