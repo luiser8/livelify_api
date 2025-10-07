@@ -1,50 +1,56 @@
 steps:
   # ===================================================================
   # PASO 1: Construir la imagen de Docker
-  # Se pasan TODOS los secretos como argumentos de compilación.
+  # Este paso solo empaqueta la aplicación. No necesita secretos.
   # ===================================================================
 - name: 'gcr.io/cloud-builders/docker'
-  entrypoint: 'bash'
+  id: Build
   args:
-    - '-c'
-    - |
-      docker build \
-        --build-arg DATABASE_URL="$$DATABASE_URL" \
-        --build-arg APP_JWT_SECRET="$$APP_JWT_SECRET" \
-        --build-arg APP_ENV="$$APP_ENV" \
-        --build-arg APP_PORT="$$APP_PORT" \
-        --build-arg APP_PREFIX="$$APP_PREFIX" \
-        --build-arg APP_VERSION="$$APP_VERSION" \
-        --build-arg APP_TITLE="$$APP_TITLE" \
-        --build-arg APP_DESCRIPTION="$$APP_DESCRIPTION" \
-        --build-arg APP_JWT_EXPIRE="$$APP_JWT_EXPIRE" \
-        --build-arg APP_JWT_REFRESH_EXPIRE="$$APP_JWT_REFRESH_EXPIRE" \
-        --build-arg APP_SWAGGER_UI="$$APP_SWAGGER_UI" \
-        --build-arg APP_ALLOWED_ORIGINS="$$APP_ALLOWED_ORIGINS" \
-        --build-arg LOG_LEVEL="$$LOG_LEVEL" \
-        --build-arg THROTTLE_TTL="$$THROTTLE_TTL" \
-        --build-arg THROTTLE_LIMIT="$$THROTTLE_LIMIT" \
-        -t "us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA" \
-        .
-  # La lista completa de variables que este paso necesita.
-  secretEnv: [
-      'DATABASE_URL', 'APP_JWT_SECRET', 'APP_ENV', 'APP_PORT', 'APP_PREFIX', 'APP_VERSION',
-      'APP_TITLE', 'APP_DESCRIPTION', 'APP_JWT_EXPIRE', 'APP_JWT_REFRESH_EXPIRE',
-      'APP_SWAGGER_UI', 'APP_ALLOWED_ORIGINS', 'LOG_LEVEL', 'THROTTLE_TTL', 'THROTTLE_LIMIT'
-    ]
+    - 'build'
+    - '-t'
+    - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA'
+    - '.'
 
   # ===================================================================
   # PASO 2: Subir la imagen a Artifact Registry
   # ===================================================================
 - name: 'gcr.io/cloud-builders/docker'
-  args:
-    - 'push'
-    - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA'
+  id: Push
+  args: ['push', 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA']
+  waitFor:
+    - Build
 
   # ===================================================================
-  # PASO 3: Desplegar en Cloud Run, inyectando todos los secretos
+  # PASO 3: Ejecutar la migración de la base de datos
+  # Utiliza la imagen recién subida para ejecutar una tarea única (Job)
+  # que tiene conexión a Cloud SQL.
   # ===================================================================
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  id: Migrate
+  entrypoint: gcloud
+  args:
+    - 'run'
+    - 'jobs'
+    - 'execute'
+    - '${_SERVICE_NAME}-migrator'
+    - '--image'
+    - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA'
+    - '--region'
+    - 'us-central1'
+    - '--wait'
+    - '--task-timeout=300'
+    - '--set-secrets=DATABASE_URL=DATABASE_URL:latest'
+    - '--command'
+    - 'pnpm'
+    - '--args=exec,prisma,migrate,deploy'
+  waitFor:
+    - Push
+
+  # ===================================================================
+  # PASO 4: Desplegar el servicio principal en Cloud Run
+  # ===================================================================
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  id: Deploy
   entrypoint: gcloud
   args:
     - 'run'
@@ -59,51 +65,19 @@ steps:
     - '--allow-unauthenticated'
     - '--project'
     - '${_PROJECT_ID}'
-
-    # --- INYECTAR TODOS LOS SECRETOS EN CLOUD RUN ---
-    # Ya no se usa '--set-env-vars'. Todo se maneja con '--update-secrets'.
+    # Inyecta todos los secretos necesarios para la ejecución de la app.
     - '--update-secrets=DATABASE_URL=DATABASE_URL:latest,APP_JWT_SECRET=APP_JWT_SECRET:latest,APP_ENV=APP_ENV:latest,APP_PORT=APP_PORT:latest,APP_PREFIX=APP_PREFIX:latest,APP_VERSION=APP_VERSION:latest,APP_TITLE=APP_TITLE:latest,APP_DESCRIPTION=APP_DESCRIPTION:latest,APP_JWT_EXPIRE=APP_JWT_EXPIRE:latest,APP_JWT_REFRESH_EXPIRE=APP_JWT_REFRESH_EXPIRE:latest,APP_SWAGGER_UI=APP_SWAGGER_UI:latest,APP_ALLOWED_ORIGINS=APP_ALLOWED_ORIGINS:latest,LOG_LEVEL=LOG_LEVEL:latest,THROTTLE_TTL=THROTTLE_TTL:latest,THROTTLE_LIMIT=THROTTLE_LIMIT:latest'
+  waitFor:
+    - Migrate
 
-# Variables que puedes cambiar desde la configuración del Trigger en Cloud Build.
+# Variables que puedes cambiar desde la configuración del Trigger de Cloud Build.
 substitutions:
   _SERVICE_NAME: 'livelify-api'
   _PROJECT_ID: 'livelify-dev'
 
+# Opciones de registro.
 options:
   logging: CLOUD_LOGGING_ONLY
 
-# ===================================================================
-# LISTA COMPLETA de secretos que estarán disponibles para la compilación.
-# ===================================================================
-availableSecrets:
-  secretManager:
-    - versionName: projects/${PROJECT_ID}/secrets/DATABASE_URL/versions/latest
-      env: 'DATABASE_URL'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_JWT_SECRET/versions/latest
-      env: 'APP_JWT_SECRET'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_ENV/versions/latest
-      env: 'APP_ENV'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_PORT/versions/latest
-      env: 'APP_PORT'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_PREFIX/versions/latest
-      env: 'APP_PREFIX'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_VERSION/versions/latest
-      env: 'APP_VERSION'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_TITLE/versions/latest
-      env: 'APP_TITLE'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_DESCRIPTION/versions/latest
-      env: 'APP_DESCRIPTION'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_JWT_EXPIRE/versions/latest
-      env: 'APP_JWT_EXPIRE'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_JWT_REFRESH_EXPIRE/versions/latest
-      env: 'APP_JWT_REFRESH_EXPIRE'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_SWAGGER_UI/versions/latest
-      env: 'APP_SWAGGER_UI'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_ALLOWED_ORIGINS/versions/latest
-      env: 'APP_ALLOWED_ORIGINS'
-    - versionName: projects/${PROJECT_ID}/secrets/LOG_LEVEL/versions/latest
-      env: 'LOG_LEVEL'
-    - versionName: projects/${PROJECT_ID}/secrets/THROTTLE_TTL/versions/latest
-      env: 'THROTTLE_TTL'
-    - versionName: projects/${PROJECT_ID}/secrets/THROTTLE_LIMIT/versions/latest
-      env: 'THROTTLE_LIMIT'
+# La sección 'availableSecrets' ya no es necesaria aquí porque
+# el paso de 'build' no requiere acceso a secretos.
