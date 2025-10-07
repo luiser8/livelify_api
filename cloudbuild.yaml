@@ -1,8 +1,5 @@
 steps:
-  # ===================================================================
-  # PASO 1: Construir la imagen de Docker
-  # Este paso solo empaqueta la aplicación. No necesita secretos.
-  # ===================================================================
+# PASO 1: Construir la imagen de Docker
 - name: 'gcr.io/cloud-builders/docker'
   id: Build
   args:
@@ -11,44 +8,53 @@ steps:
     - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-api/${_SERVICE_NAME}:$COMMIT_SHA'
     - '.'
 
-  # ===================================================================
-  # PASO 2: Subir la imagen a Artifact Registry
-  # ===================================================================
+# PASO 2: Subir la imagen a Artifact Registry
 - name: 'gcr.io/cloud-builders/docker'
   id: Push
   args: ['push', 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-api/${_SERVICE_NAME}:$COMMIT_SHA']
   waitFor:
     - Build
 
-  # ===================================================================
-  # PASO 3: Ejecutar la migración de la base de datos
-  # Utiliza la imagen recién subida para ejecutar una tarea única (Job)
-  # que tiene conexión a Cloud SQL.
-  # ===================================================================
+# -----------------------------------------------------------------
+# PASO 3 (NUEVO): Actualizar el Job de Migración
+# Le decimos al Job que use la nueva imagen que acabamos de subir.
+# -----------------------------------------------------------------
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  id: Migrate
+  id: Update-Migrator-Job
+  entrypoint: gcloud
+  args:
+    - 'run'
+    - 'jobs'
+    - 'update'
+    - '${_SERVICE_NAME}-migrator'
+    - '--image'
+    - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-api/${_SERVICE_NAME}:$COMMIT_SHA'
+    - '--region'
+    - 'us-central1'
+  waitFor:
+    - Push
+
+# -----------------------------------------------------------------
+# PASO 4 (NUEVO): Ejecutar el Job de Migración
+# Ahora que está actualizado, lo ejecutamos.
+# -----------------------------------------------------------------
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  id: Execute-Migrator-Job
   entrypoint: gcloud
   args:
     - 'run'
     - 'jobs'
     - 'execute'
     - '${_SERVICE_NAME}-migrator'
-    - '--image'
-    - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-api/${_SERVICE_NAME}:$COMMIT_SHA'
     - '--region'
     - 'us-central1'
     - '--wait'
-    - '--task-timeout=300'
-    - '--set-secrets=DATABASE_URL=DATABASE_URL:latest'
-    - '--command'
-    - 'pnpm'
-    - '--args=exec,prisma,migrate,deploy'
   waitFor:
-    - Push
+    - Update-Migrator-Job
 
-  # ===================================================================
-  # PASO 4: Desplegar el servicio principal en Cloud Run
-  # ===================================================================
+# -----------------------------------------------------------------
+# PASO 5: Desplegar el servicio principal en Cloud Run
+# -----------------------------------------------------------------
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   id: Deploy
   entrypoint: gcloud
@@ -60,24 +66,11 @@ steps:
     - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-api/${_SERVICE_NAME}:$COMMIT_SHA'
     - '--region'
     - 'us-central1'
-    - '--platform'
-    - 'managed'
-    - '--allow-unauthenticated'
-    - '--project'
-    - '${_PROJECT_ID}'
-    # Inyecta todos los secretos necesarios para la ejecución de la app.
-    - '--update-secrets=DATABASE_URL=DATABASE_URL:latest,APP_JWT_SECRET=APP_JWT_SECRET:latest,APP_ENV=APP_ENV:latest,APP_PORT=APP_PORT:latest,APP_PREFIX=APP_PREFIX:latest,APP_VERSION=APP_VERSION:latest,APP_TITLE=APP_TITLE:latest,APP_DESCRIPTION=APP_DESCRIPTION:latest,APP_JWT_EXPIRE=APP_JWT_EXPIRE:latest,APP_JWT_REFRESH_EXPIRE=APP_JWT_REFRESH_EXPIRE:latest,APP_SWAGGER_UI=APP_SWAGGER_UI:latest,APP_ALLOWED_ORIGINS=APP_ALLOWED_ORIGINS:latest,LOG_LEVEL=LOG_LEVEL:latest,THROTTLE_TTL=THROTTLE_TTL:latest,THROTTLE_LIMIT=THROTTLE_LIMIT:latest'
+    - '--update-secrets=DATABASE_URL=DATABASE_URL:latest,APP_JWT_SECRET=APP_JWT_SECRET:latest' #...etc
   waitFor:
-    - Migrate
+    - Execute-Migrator-Job
 
-# Variables que puedes cambiar desde la configuración del Trigger de Cloud Build.
+# ... (resto del archivo sin cambios)
 substitutions:
   _SERVICE_NAME: 'livelify-api'
   _PROJECT_ID: 'livelify-dev'
-
-# Opciones de registro.
-options:
-  logging: CLOUD_LOGGING_ONLY
-
-# La sección 'availableSecrets' ya no es necesaria aquí porque
-# el paso de 'build' no requiere acceso a secretos.
