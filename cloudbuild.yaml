@@ -62,7 +62,7 @@ steps:
 
     # --- INYECTAR TODOS LOS SECRETOS EN CLOUD RUN ---
     # Ya no se usa '--set-env-vars'. Todo se maneja con '--update-secrets'.
-    - '--update-secrets=DATABASE_URL=DATABASE_URL_PROD:latest,APP_JWT_SECRET=APP_JWT_SECRET_PROD:latest,APP_ENV=APP_ENV_PROD:latest,APP_PORT=APP_PORT_PROD:latest,APP_PREFIX=APP_PREFIX_PROD:latest,APP_VERSION=APP_VERSION_PROD:latest,APP_TITLE=APP_TITLE_PROD:latest,APP_DESCRIPTION=APP_DESCRIPTION_PROD:latest,APP_JWT_EXPIRE=APP_JWT_EXPIRE_PROD:latest,APP_JWT_REFRESH_EXPIRE=APP_JWT_REFRESH_EXPIRE_PROD:latest,APP_SWAGGER_UI=APP_SWAGGER_UI_PROD:latest,APP_ALLOWED_ORIGINS=APP_ALLOWED_ORIGINS_PROD:latest,LOG_LEVEL=LOG_LEVEL_PROD:latest,THROTTLE_TTL=THROTTLE_TTL_PROD:latest,THROTTLE_LIMIT=THROTTLE_LIMIT_PROD:latest'
+    - '--update-secrets=DATABASE_URL=DATABASE_URL:latest,APP_JWT_SECRET=APP_JWT_SECRET:latest,APP_ENV=APP_ENV:latest,APP_PORT=APP_PORT:latest,APP_PREFIX=APP_PREFIX:latest,APP_VERSION=APP_VERSION:latest,APP_TITLE=APP_TITLE:latest,APP_DESCRIPTION=APP_DESCRIPTION:latest,APP_JWT_EXPIRE=APP_JWT_EXPIRE:latest,APP_JWT_REFRESH_EXPIRE=APP_JWT_REFRESH_EXPIRE:latest,APP_SWAGGER_UI=APP_SWAGGER_UI:latest,APP_ALLOWED_ORIGINS=APP_ALLOWED_ORIGINS:latest,LOG_LEVEL=LOG_LEVEL:latest,THROTTLE_TTL=THROTTLE_TTL:latest,THROTTLE_LIMIT=THROTTLE_LIMIT:latest'
 
 # Variables que puedes cambiar desde la configuración del Trigger en Cloud Build.
 substitutions:
@@ -77,33 +77,33 @@ options:
 # ===================================================================
 availableSecrets:
   secretManager:
-    - versionName: projects/${PROJECT_ID}/secrets/DATABASE_URL_PROD/versions/latest
+    - versionName: projects/${PROJECT_ID}/secrets/DATABASE_URL/versions/latest
       env: 'DATABASE_URL'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_JWT_SECRET_PROD/versions/latest
+    - versionName: projects/${PROJECT_ID}/secrets/APP_JWT_SECRET/versions/latest
       env: 'APP_JWT_SECRET'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_ENV_PROD/versions/latest
+    - versionName: projects/${PROJECT_ID}/secrets/APP_ENV/versions/latest
       env: 'APP_ENV'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_PORT_PROD/versions/latest
+    - versionName: projects/${PROJECT_ID}/secrets/APP_PORT/versions/latest
       env: 'APP_PORT'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_PREFIX_PROD/versions/latest
+    - versionName: projects/${PROJECT_ID}/secrets/APP_PREFIX/versions/latest
       env: 'APP_PREFIX'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_VERSION_PROD/versions/latest
+    - versionName: projects/${PROJECT_ID}/secrets/APP_VERSION/versions/latest
       env: 'APP_VERSION'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_TITLE_PROD/versions/latest
+    - versionName: projects/${PROJECT_ID}/secrets/APP_TITLE/versions/latest
       env: 'APP_TITLE'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_DESCRIPTION_PROD/versions/latest
+    - versionName: projects/${PROJECT_ID}/secrets/APP_DESCRIPTION/versions/latest
       env: 'APP_DESCRIPTION'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_JWT_EXPIRE_PROD/versions/latest
+    - versionName: projects/${PROJECT_ID}/secrets/APP_JWT_EXPIRE/versions/latest
       env: 'APP_JWT_EXPIRE'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_JWT_REFRESH_EXPIRE_PROD/versions/latest
+    - versionName: projects/${PROJECT_ID}/secrets/APP_JWT_REFRESH_EXPIRE/versions/latest
       env: 'APP_JWT_REFRESH_EXPIRE'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_SWAGGER_UI_PROD/versions/latest
+    - versionName: projects/${PROJECT_ID}/secrets/APP_SWAGGER_UI/versions/latest
       env: 'APP_SWAGGER_UI'
-    - versionName: projects/${PROJECT_ID}/secrets/APP_ALLOWED_ORIGINS_PROD/versions/latest
+    - versionName: projects/${PROJECT_ID}/secrets/APP_ALLOWED_ORIGINS/versions/latest
       env: 'APP_ALLOWED_ORIGINS'
-    - versionName: projects/${PROJECT_ID}/secrets/LOG_LEVEL_PROD/versions/latest
+    - versionName: projects/${PROJECT_ID}/secrets/LOG_LEVEL/versions/latest
       env: 'LOG_LEVEL'
-    - versionName: projects/${PROJECT_ID}/secrets/THROTTLE_TTL_PROD/versions/latest
+    - versionName: projects/${PROJECT_ID}/secrets/THROTTLE_TTL/versions/latest
       env: 'THROTTLE_TTL'
-    - versionName: projects/${PROJECT_ID}/secrets/THROTTLE_LIMIT_PROD/versions/latest
+    - versionName: projects/${PROJECT_ID}/secrets/THROTTLE_LIMIT/versions/latest
       env: 'THROTTLE_LIMIT'
