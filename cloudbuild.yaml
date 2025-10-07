@@ -1,57 +1,109 @@
 steps:
-  # 1. Construir la imagen de Docker, pasando el secreto DATABASE_URL de forma segura.
-  - name: 'gcr.io/cloud-builders/docker'
-    # Usamos un entrypoint de 'bash' para controlar la expansión de variables.
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      # El script de shell asegura que $$DATABASE_URL se resuelva a partir de la variable de entorno del paso.
-      - |
-        docker build \
-          --build-arg DATABASE_URL="$$DATABASE_URL" \
-          -t "us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA" \
-          .
-    # secretEnv hace que el secreto de Secret Manager esté disponible como una variable de entorno para ESTE paso.
-    secretEnv: ['DATABASE_URL']
+  # ===================================================================
+  # PASO 1: Construir la imagen de Docker
+  # Se pasan TODOS los secretos como argumentos de compilación.
+  # ===================================================================
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      docker build \
+        --build-arg DATABASE_URL="$$DATABASE_URL" \
+        --build-arg APP_JWT_SECRET="$$APP_JWT_SECRET" \
+        --build-arg APP_ENV="$$APP_ENV" \
+        --build-arg APP_PORT="$$APP_PORT" \
+        --build-arg APP_PREFIX="$$APP_PREFIX" \
+        --build-arg APP_VERSION="$$APP_VERSION" \
+        --build-arg APP_TITLE="$$APP_TITLE" \
+        --build-arg APP_DESCRIPTION="$$APP_DESCRIPTION" \
+        --build-arg APP_JWT_EXPIRE="$$APP_JWT_EXPIRE" \
+        --build-arg APP_JWT_REFRESH_EXPIRE="$$APP_JWT_REFRESH_EXPIRE" \
+        --build-arg APP_SWAGGER_UI="$$APP_SWAGGER_UI" \
+        --build-arg APP_ALLOWED_ORIGINS="$$APP_ALLOWED_ORIGINS" \
+        --build-arg LOG_LEVEL="$$LOG_LEVEL" \
+        --build-arg THROTTLE_TTL="$$THROTTLE_TTL" \
+        --build-arg THROTTLE_LIMIT="$$THROTTLE_LIMIT" \
+        -t "us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA" \
+        .
+  # La lista completa de variables que este paso necesita.
+  secretEnv: [
+      'DATABASE_URL', 'APP_JWT_SECRET', 'APP_ENV', 'APP_PORT', 'APP_PREFIX', 'APP_VERSION',
+      'APP_TITLE', 'APP_DESCRIPTION', 'APP_JWT_EXPIRE', 'APP_JWT_REFRESH_EXPIRE',
+      'APP_SWAGGER_UI', 'APP_ALLOWED_ORIGINS', 'LOG_LEVEL', 'THROTTLE_TTL', 'THROTTLE_LIMIT'
+    ]
 
-  # 2. Subir la imagen a Artifact Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA'
+  # ===================================================================
+  # PASO 2: Subir la imagen a Artifact Registry
+  # ===================================================================
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - 'push'
+    - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA'
 
-  # 3. Desplegar en Cloud Run
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: gcloud
-    args:
-      - 'run'
-      - 'deploy'
-      # Usamos tu variable _SERVICE_NAME para el nombre del servicio.
-      - '${_SERVICE_NAME}'
-      - '--image'
-      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA'
-      - '--region'
-      - 'us-central1'
-      - '--platform'
-      - 'managed'
-      - '--allow-unauthenticated'
-      - '--project'
-      - '${_PROJECT_ID}' # Variable definida en el trigger (ej. 'livelify-dev')
+  # ===================================================================
+  # PASO 3: Desplegar en Cloud Run, inyectando todos los secretos
+  # ===================================================================
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args:
+    - 'run'
+    - 'deploy'
+    - '${_SERVICE_NAME}'
+    - '--image'
+    - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify_api/${_SERVICE_NAME}:$COMMIT_SHA'
+    - '--region'
+    - 'us-central1'
+    - '--platform'
+    - 'managed'
+    - '--allow-unauthenticated'
+    - '--project'
+    - '${_PROJECT_ID}'
 
-# Definimos las variables que se pueden sustituir en el trigger.
+    # --- INYECTAR TODOS LOS SECRETOS EN CLOUD RUN ---
+    # Ya no se usa '--set-env-vars'. Todo se maneja con '--update-secrets'.
+    - '--update-secrets=DATABASE_URL=DATABASE_URL_PROD:latest,APP_JWT_SECRET=APP_JWT_SECRET_PROD:latest,APP_ENV=APP_ENV_PROD:latest,APP_PORT=APP_PORT_PROD:latest,APP_PREFIX=APP_PREFIX_PROD:latest,APP_VERSION=APP_VERSION_PROD:latest,APP_TITLE=APP_TITLE_PROD:latest,APP_DESCRIPTION=APP_DESCRIPTION_PROD:latest,APP_JWT_EXPIRE=APP_JWT_EXPIRE_PROD:latest,APP_JWT_REFRESH_EXPIRE=APP_JWT_REFRESH_EXPIRE_PROD:latest,APP_SWAGGER_UI=APP_SWAGGER_UI_PROD:latest,APP_ALLOWED_ORIGINS=APP_ALLOWED_ORIGINS_PROD:latest,LOG_LEVEL=LOG_LEVEL_PROD:latest,THROTTLE_TTL=THROTTLE_TTL_PROD:latest,THROTTLE_LIMIT=THROTTLE_LIMIT_PROD:latest'
+
+# Variables que puedes cambiar desde la configuración del Trigger en Cloud Build.
 substitutions:
   _SERVICE_NAME: 'livelify-api'
-  # Proporcionamos un valor por defecto para _PROJECT_ID.
-  # Este valor será SOBREESCRITO por la variable definida en tu Trigger.
-  # Esto previene el error si la variable no se pasa o en ejecuciones manuales.
   _PROJECT_ID: 'livelify-dev'
 
-# Opciones de registro para la compilación.
 options:
   logging: CLOUD_LOGGING_ONLY
 
-# Aquí definimos qué secretos de Secret Manager estarán disponibles para los pasos de esta compilación.
+# ===================================================================
+# LISTA COMPLETA de secretos que estarán disponibles para la compilación.
+# ===================================================================
 availableSecrets:
   secretManager:
-  - versionName: projects/${_PROJECT_ID}/secrets/DATABASE_URL/versions/latest
-    env: 'DATABASE_URL'
+    - versionName: projects/${PROJECT_ID}/secrets/DATABASE_URL_PROD/versions/latest
+      env: 'DATABASE_URL'
+    - versionName: projects/${PROJECT_ID}/secrets/APP_JWT_SECRET_PROD/versions/latest
+      env: 'APP_JWT_SECRET'
+    - versionName: projects/${PROJECT_ID}/secrets/APP_ENV_PROD/versions/latest
+      env: 'APP_ENV'
+    - versionName: projects/${PROJECT_ID}/secrets/APP_PORT_PROD/versions/latest
+      env: 'APP_PORT'
+    - versionName: projects/${PROJECT_ID}/secrets/APP_PREFIX_PROD/versions/latest
+      env: 'APP_PREFIX'
+    - versionName: projects/${PROJECT_ID}/secrets/APP_VERSION_PROD/versions/latest
+      env: 'APP_VERSION'
+    - versionName: projects/${PROJECT_ID}/secrets/APP_TITLE_PROD/versions/latest
+      env: 'APP_TITLE'
+    - versionName: projects/${PROJECT_ID}/secrets/APP_DESCRIPTION_PROD/versions/latest
+      env: 'APP_DESCRIPTION'
+    - versionName: projects/${PROJECT_ID}/secrets/APP_JWT_EXPIRE_PROD/versions/latest
+      env: 'APP_JWT_EXPIRE'
+    - versionName: projects/${PROJECT_ID}/secrets/APP_JWT_REFRESH_EXPIRE_PROD/versions/latest
+      env: 'APP_JWT_REFRESH_EXPIRE'
+    - versionName: projects/${PROJECT_ID}/secrets/APP_SWAGGER_UI_PROD/versions/latest
+      env: 'APP_SWAGGER_UI'
+    - versionName: projects/${PROJECT_ID}/secrets/APP_ALLOWED_ORIGINS_PROD/versions/latest
+      env: 'APP_ALLOWED_ORIGINS'
+    - versionName: projects/${PROJECT_ID}/secrets/LOG_LEVEL_PROD/versions/latest
+      env: 'LOG_LEVEL'
+    - versionName: projects/${PROJECT_ID}/secrets/THROTTLE_TTL_PROD/versions/latest
+      env: 'THROTTLE_TTL'
+    - versionName: projects/${PROJECT_ID}/secrets/THROTTLE_LIMIT_PROD/versions/latest
+      env: 'THROTTLE_LIMIT'
