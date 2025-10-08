@@ -34,6 +34,9 @@ FROM node:22-alpine
 
 WORKDIR /usr/src/app
 
+# Esta línea es IMPORTANTE para Prisma
+RUN apk add --no-cache openssl
+
 # Copiamos los artefactos necesarios desde la etapa 'builder'.
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/dist ./dist
