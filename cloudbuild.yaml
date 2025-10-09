@@ -88,7 +88,7 @@ steps:
 # Sustituciones para el Trigger de Cloud Build.
 substitutions:
   _SERVICE_NAME: 'livelify-api'
-  _PROJECT_ID: 'livelifydev'
+  _PROJECT_ID: 'livelify'
 
 # Opciones de registro.
 options:
