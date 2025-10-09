@@ -9,7 +9,6 @@ import { swaggerInit } from './swagger.config';
 import { configureSecurityHeaders, getSecurityInfo } from './security.config';
 import { ValidationPipe } from '@nestjs/common';
 import { CustomLoggerService } from './infrastructure/config/logger.service';
-import { PrismaClient } from '@prisma/client';
 
 const PORT = +(process.env.APP_PORT ?? 3000);
 const PREFIX = process.env.APP_PREFIX ?? '';
@@ -28,32 +27,6 @@ async function bootstrap() {
   logger.log('🚀 Starting Livelify API...');
   logger.log(`🌍 Environment: ${process.env.APP_ENV || 'development'}`);
   logger.log(`📊 Log Level: ${process.env.LOG_LEVEL || 'info'}`);
-
-  // Ejecutar migraciones solo en producción
-  if (process.env.NODE_ENV === 'production') {
-    try {
-      logger.log('🔄 Verificando migraciones de base de datos...');
-
-      const prisma = new PrismaClient();
-      await prisma.$connect();
-      logger.log('✅ Conectado a la base de datos');
-
-      // Aplicar migraciones pendientes
-      logger.log('📦 Aplicando migraciones...');
-      const { execSync } = require('child_process');
-      execSync('npx prisma migrate deploy', {
-        stdio: 'inherit',
-        env: process.env,
-      });
-
-      logger.log('✅ Migraciones aplicadas correctamente');
-      await prisma.$disconnect();
-    } catch (error) {
-      logger.error('❌ Error en migraciones:', error);
-      // Continuar aunque falle la migración
-      logger.warn('⚠️ Continuando sin migraciones...');
-    }
-  }
 
   // 🔒 Configure Security Headers
   configureSecurityHeaders(app);

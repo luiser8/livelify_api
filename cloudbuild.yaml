@@ -1,3 +1,6 @@
+# Este es el archivo cloudbuild.yaml completo y corregido.
+# Incluye los pasos para construir, migrar la base de datos y desplegar.
+
 steps:
   # ===================================================================
   # PASO 1: Construir la imagen de Docker
@@ -21,7 +24,44 @@ steps:
     - Build
 
   # ===================================================================
-  # PASO 3: Desplegar el servicio principal en Cloud Run
+  # PASO 3 (AÑADIDO): Actualizar el Job de Migración
+  # Le decimos al Job que use la nueva imagen que acabamos de subir.
+  # ===================================================================
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  id: Update-Migrator-Job
+  entrypoint: gcloud
+  args:
+    - 'run'
+    - 'jobs'
+    - 'update'
+    - '${_SERVICE_NAME}-migrator'
+    - '--image'
+    - 'us-central1-docker.pkg.dev/${PROJECT_ID}/livelify-api/${_SERVICE_NAME}:$COMMIT_SHA'
+    - '--region'
+    - 'us-central1'
+  waitFor:
+    - Push
+
+  # ===================================================================
+  # PASO 4 (AÑADIDO): Ejecutar el Job de Migración
+  # Ahora que está actualizado, lo ejecutamos.
+  # ===================================================================
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  id: Execute-Migrator-Job
+  entrypoint: gcloud
+  args:
+    - 'run'
+    - 'jobs'
+    - 'execute'
+    - '${_SERVICE_NAME}-migrator'
+    - '--region'
+    - 'us-central1'
+    - '--wait' # Espera a que la migración termine
+  waitFor:
+    - Update-Migrator-Job
+
+  # ===================================================================
+  # PASO 5: Desplegar el servicio principal en Cloud Run
   # Este paso solo se ejecuta si la migración fue exitosa.
   # ===================================================================
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -42,6 +82,8 @@ steps:
     - '${_PROJECT_ID}'
     # Inyecta la lista completa de secretos para la ejecución de la aplicación.
     - '--update-secrets=DATABASE_URL=DATABASE_URL:latest,APP_JWT_SECRET=APP_JWT_SECRET:latest,APP_ENV=APP_ENV:latest,APP_PORT=APP_PORT:latest,APP_PREFIX=APP_PREFIX:latest,APP_VERSION=APP_VERSION:latest,APP_TITLE=APP_TITLE:latest,APP_DESCRIPTION=APP_DESCRIPTION:latest,APP_JWT_EXPIRE=APP_JWT_EXPIRE:latest,APP_JWT_REFRESH_EXPIRE=APP_JWT_REFRESH_EXPIRE:latest,APP_SWAGGER_UI=APP_SWAGGER_UI:latest,APP_ALLOWED_ORIGINS=APP_ALLOWED_ORIGINS:latest,LOG_LEVEL=LOG_LEVEL:latest,THROTTLE_TTL=THROTTLE_TTL:latest,THROTTLE_LIMIT=THROTTLE_LIMIT:latest'
+  waitFor:
+    - Execute-Migrator-Job # Espera a que termine la migración
 
 # Sustituciones para el Trigger de Cloud Build.
 substitutions:
