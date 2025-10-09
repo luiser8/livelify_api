@@ -15,12 +15,12 @@ RUN pnpm install --unsafe-perm
 COPY . .
 
 # Generamos el cliente de Prisma (no necesita conexión a la BD)
-RUN pnpm exec prisma generate
+RUN pnpm prisma:generate
 
 # ❌ NO SE EJECUTAN MIGRACIONES AQUÍ
 
 # Construimos la aplicación TypeScript a JavaScript
-RUN pnpm run build
+RUN pnpm build
 
 # Eliminamos dependencias de desarrollo para aligerar node_modules
 RUN pnpm prune --prod
