@@ -10,7 +10,7 @@ import { configureSecurityHeaders, getSecurityInfo } from './security.config';
 import { ValidationPipe } from '@nestjs/common';
 import { CustomLoggerService } from './infrastructure/config/logger.service';
 
-const PORT = +(process.env.APP_PORT ?? 3000);
+const PORT = +(process.env.PORT ?? process.env.APP_PORT ?? 3000);
 const PREFIX = process.env.APP_PREFIX ?? '';
 const VERSION = process.env.APP_VERSION ?? 'v1';
 const GLOBAL_PREFIX = PREFIX ? `${PREFIX}/${VERSION}` : VERSION;
