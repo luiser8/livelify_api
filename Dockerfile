@@ -9,7 +9,8 @@ RUN corepack enable
 
 # Copiamos archivos de dependencias e instalamos todo
 COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --unsafe-perm
+RUN pnpm install
+#--unsafe-perm
 
 # Copiamos el resto del código
 COPY . .
@@ -23,7 +24,7 @@ RUN pnpm prisma:generate
 RUN pnpm build
 
 # Eliminamos dependencias de desarrollo para aligerar node_modules
-RUN pnpm prune --prod
+#RUN pnpm prune --prod
 
 # ---- Etapa 2: Runner ----
 # Esta es la imagen final, ligera y lista para producción.
