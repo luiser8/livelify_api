@@ -47,10 +47,10 @@ export class ProjectGoalRepository implements ProjectGoalRepositoryInterface {
 
   async findByProjectId(projectId: GtdProjectId): Promise<ProjectGoal[]> {
     const goals = await this.prisma.projectGoal.findMany({
-      where: { 
+      where: {
         detail: {
-          projectId: projectId.getValue()
-        }
+          projectId: projectId.getValue(),
+        },
       },
       orderBy: { id: 'asc' },
     });

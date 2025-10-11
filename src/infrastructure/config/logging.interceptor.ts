@@ -31,7 +31,7 @@ export class LoggingInterceptor implements NestInterceptor {
     // Log de entrada de la request
     this.logger.debug(
       `Incoming request: ${method} ${url} from ${ip} - ${userAgent}`,
-      'HTTP'
+      'HTTP',
     );
 
     return next.handle().pipe(

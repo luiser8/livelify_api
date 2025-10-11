@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Injectable, Inject } from '@nestjs/common';
 import { UserId } from '../../../domain/value-objects/user/user-id.value-object';
 import type { UserTokenRepositoryInterface } from '../../../domain/repositories/user/user-token.repository.interface';

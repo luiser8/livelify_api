@@ -20,7 +20,7 @@ export interface GtdProjectProps {
 
 export class GtdProject {
   detailId(detailId: any) {
-      throw new Error('Method not implemented.');
+    throw new Error('Method not implemented.');
   }
   private readonly _id: GtdProjectId;
   private readonly _lifeWheelAreaId: LifeWheelAreaId;

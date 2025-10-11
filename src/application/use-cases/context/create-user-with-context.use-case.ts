@@ -15,6 +15,8 @@ export interface CreateUserWithContextResponse {
   id: string;
   userId: string;
   name: string;
+  canDelete: boolean;
+  actionsCount: number;
   createdAt: Date;
 }
 
@@ -45,11 +47,13 @@ export class CreateUserWithContextUseCase {
     // 3. Persist context
     const savedUserContext = await this.userContextRepository.save(context);
 
-    // 4. Return response
+    // 4. Return response (new context always has 0 actions and can be deleted)
     return {
       id: savedUserContext.id.getValue(),
       userId: savedUserContext.userId.getValue(),
       name: savedUserContext.name,
+      canDelete: true, // New context has no actions
+      actionsCount: 0, // New context has no actions
       createdAt: savedUserContext.createdAt,
     };
   }

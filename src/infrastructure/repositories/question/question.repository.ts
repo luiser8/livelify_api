@@ -38,16 +38,18 @@ export class QuestionRepository implements QuestionRepositoryInterface {
       createdAt: value.createdAt,
       updatedAt: value.updatedAt,
       areaId: AreaId.fromString(value.areaId),
-      area: value.area ? {
-        id: value.area.id,
-        name: value.area.name,
-        description: value.area.description,
-        toPlainObject: () => ({
-          id: value.area!.id,
-          name: value.area!.name,
-          description: value.area!.description,
-        }),
-      } : undefined,
+      area: value.area
+        ? {
+            id: value.area.id,
+            name: value.area.name,
+            description: value.area.description,
+            toPlainObject: () => ({
+              id: value.area!.id,
+              name: value.area!.name,
+              description: value.area!.description,
+            }),
+          }
+        : undefined,
     });
   }
 }

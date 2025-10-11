@@ -156,10 +156,7 @@ export class GoalBudget {
   /**
    * Recalcula el presupuesto basado en una nueva duración del proyecto
    */
-  public recalculateBudget(
-    projectStartDate: Date,
-    projectEndDate: Date,
-  ): void {
+  public recalculateBudget(projectStartDate: Date, projectEndDate: Date): void {
     const { months, days } = GoalBudget.calculateProjectDuration(
       projectStartDate,
       projectEndDate,
@@ -187,9 +184,12 @@ export class GoalBudget {
     }
 
     this._baseCapital = newBaseCapital;
-    this._totalCapital = Math.round(newBaseCapital * this._multiplier * 100) / 100;
-    this._monthlyBudget = Math.round((this._totalCapital / this._projectMonths) * 100) / 100;
-    this._dailyBudget = Math.round((this._totalCapital / this._projectDays) * 100) / 100;
+    this._totalCapital =
+      Math.round(newBaseCapital * this._multiplier * 100) / 100;
+    this._monthlyBudget =
+      Math.round((this._totalCapital / this._projectMonths) * 100) / 100;
+    this._dailyBudget =
+      Math.round((this._totalCapital / this._projectDays) * 100) / 100;
 
     this.validate();
     this.touch();
@@ -204,9 +204,12 @@ export class GoalBudget {
     }
 
     this._multiplier = newMultiplier;
-    this._totalCapital = Math.round(this._baseCapital * newMultiplier * 100) / 100;
-    this._monthlyBudget = Math.round((this._totalCapital / this._projectMonths) * 100) / 100;
-    this._dailyBudget = Math.round((this._totalCapital / this._projectDays) * 100) / 100;
+    this._totalCapital =
+      Math.round(this._baseCapital * newMultiplier * 100) / 100;
+    this._monthlyBudget =
+      Math.round((this._totalCapital / this._projectMonths) * 100) / 100;
+    this._dailyBudget =
+      Math.round((this._totalCapital / this._projectDays) * 100) / 100;
 
     this.validate();
     this.touch();
@@ -224,7 +227,10 @@ export class GoalBudget {
       return 0;
     }
 
-    const accumulated = Math.min(this._dailyBudget * daysPassed, this._totalCapital);
+    const accumulated = Math.min(
+      this._dailyBudget * daysPassed,
+      this._totalCapital,
+    );
     return Math.round(accumulated * 100) / 100;
   }
 

@@ -1,15 +1,18 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Controller,
   Get,
   Post,
   Put,
+  Delete,
   Body,
+  Param,
   HttpCode,
   HttpStatus,
   UseGuards,
   ConflictException,
   NotFoundException,
+  ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -37,15 +40,26 @@ import { CreateUserWithProfileUseCase } from '../../application/use-cases/user/c
 import { GetUserByIdUseCase } from '../../application/use-cases/user/get-user-by-id.use-case';
 import { GetSubscriptionByUserIdUseCase } from '../../application/use-cases/subscription/get-subscription-by-user.use-case';
 import { UpdateUserProfileUseCase } from '../../application/use-cases/user/update-user-profile.use-case';
-import { CreateUserSubscriptionUseCase, CreateUserWithSubscriptionResponse } from '../../application/use-cases/subscription/create-user-with-subscription.use-case';
-import { UpdateUserSubscriptionUseCase, UpdateUserWithSubscriptionResponse } from '../../application/use-cases/subscription/update-user-subscription.use-case';
+import {
+  CreateUserSubscriptionUseCase,
+  CreateUserWithSubscriptionResponse,
+} from '../../application/use-cases/subscription/create-user-with-subscription.use-case';
+import {
+  UpdateUserSubscriptionUseCase,
+  UpdateUserWithSubscriptionResponse,
+} from '../../application/use-cases/subscription/update-user-subscription.use-case';
 import { CreateUserSubscriptionDto } from '../dtos/subscription/create-user-subscription.dto';
 import { UserSubscriptionResponseDto } from '../dtos/subscription/user-subscription.dto';
 import { CreateUserContextDto } from '../dtos/context/create-user-context.dto';
-import { ContextResponseDto } from '../dtos/context/create-context.dto';
-import { CreateUserWithContextResponse, CreateUserWithContextUseCase } from '../../application/use-cases/context/create-user-with-context.use-case';
+import { CreateUserContextResponseDto } from '../dtos/context/create-user-context-response.dto';
+import {
+  CreateUserWithContextResponse,
+  CreateUserWithContextUseCase,
+} from '../../application/use-cases/context/create-user-with-context.use-case';
 import { GetContextByUserIdUseCase } from '../../application/use-cases/context/get-context-by-user.use-case';
 import { GetUserContextsResponseDto } from '../dtos/context/context-response.dto';
+import { DeleteUserContextUseCase } from '../../application/use-cases/context/delete-user-context.use-case';
+import { DeleteUserContextResponseDto } from '../dtos/context/delete-user-context.dto';
 import { GetUserCompleteProfileUseCase } from '../../application/use-cases/user/get-user-complete-profile.use-case';
 import { UserCompleteProfileResponseDto } from '../dtos/user/user-complete-profile.dto';
 import { UpdateUserSubscriptionDto } from '../dtos/subscription/update-user-subscription.dto';
@@ -63,6 +77,7 @@ export class UserController {
     private readonly getSubscriptionByUserIdUseCase: GetSubscriptionByUserIdUseCase,
     private readonly createUserWithContextUseCase: CreateUserWithContextUseCase,
     private readonly getContextByUserIdUseCase: GetContextByUserIdUseCase,
+    private readonly deleteUserContextUseCase: DeleteUserContextUseCase,
     private readonly updateSubscriptionUseCase: UpdateUserSubscriptionUseCase,
     private readonly getUserCompleteProfileUseCase: GetUserCompleteProfileUseCase,
   ) {}
@@ -295,6 +310,7 @@ export class UserController {
   @ApiResponse({
     status: 201,
     description: 'Context added successfully',
+    type: CreateUserContextResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   @ApiResponse({
@@ -357,11 +373,13 @@ export class UserController {
         userId: user.sub,
       });
 
-      // Format response - remove id and userId, keep only name, createdAt, updatedAt
+      // Format response
       const formattedContexts =
         contexts?.map((context) => ({
           id: context.id,
           name: context.name,
+          canDelete: context.canDelete,
+          actionsCount: context.actionsCount,
           createdAt: context.createdAt,
           updatedAt: context.updatedAt,
         })) || [];
@@ -372,6 +390,58 @@ export class UserController {
     } catch (error) {
       if (error instanceof Error && error.message === 'User not found') {
         throw new NotFoundException('User not found');
+      }
+      throw error;
+    }
+  }
+
+  @Delete('delete-context/:contextId')
+  @DefaultThrottle() // 🌐 Rate limited
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Delete a user context',
+    description:
+      'Allows a user to delete one of their own contexts. Rate limited: 100 requests per minute per IP',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Context deleted successfully',
+    type: DeleteUserContextResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request - context has associated actions',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - invalid token' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - context does not belong to user',
+  })
+  @ApiResponse({ status: 404, description: 'Context not found' })
+  @ApiResponse({
+    status: 429,
+    description: 'Too Many Requests - rate limit exceeded',
+  })
+  async deleteContext(
+    @currentUserDecorator.CurrentUser() user: currentUserDecorator.JwtPayload,
+    @Param('contextId') contextId: string,
+  ): Promise<DeleteUserContextResponseDto> {
+    try {
+      const result = await this.deleteUserContextUseCase.execute({
+        contextId,
+        userId: user.sub,
+      });
+
+      return result;
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
       }
       throw error;
     }

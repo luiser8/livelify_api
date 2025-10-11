@@ -37,6 +37,31 @@ export class UserContextRepository implements UserContextRepositoryInterface {
     return this.toDomainEntity(savedContext);
   }
 
+  async findById(id: ContextId): Promise<Context | null> {
+    const context = await this.prisma.context.findUnique({
+      where: { id: id.getValue() },
+    });
+
+    if (!context) {
+      return null;
+    }
+
+    return this.toDomainEntity(context);
+  }
+
+  async delete(id: ContextId): Promise<void> {
+    await this.prisma.context.delete({
+      where: { id: id.getValue() },
+    });
+  }
+
+  async countActions(id: ContextId): Promise<number> {
+    const count = await this.prisma.gtdAction.count({
+      where: { contextId: id.getValue() },
+    });
+    return count;
+  }
+
   private toDomainEntity(context: {
     id: string;
     userId: string;

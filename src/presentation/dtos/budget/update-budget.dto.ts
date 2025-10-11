@@ -1,11 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsString,
-  IsNumber,
-  IsOptional,
-  Min,
-  Length,
-} from 'class-validator';
+import { IsString, IsNumber, IsOptional, Min, Length } from 'class-validator';
 import { BudgetResponseDto } from './create-budget.dto';
 
 export class UpdateBudgetDto {

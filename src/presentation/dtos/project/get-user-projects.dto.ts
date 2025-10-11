@@ -104,7 +104,8 @@ export class ProjectWithDetailDto {
 
   @ApiPropertyOptional({
     description: 'Project description',
-    example: 'A comprehensive plan to improve my physical fitness through regular exercise and proper nutrition.',
+    example:
+      'A comprehensive plan to improve my physical fitness through regular exercise and proper nutrition.',
   })
   description?: string;
 

@@ -37,4 +37,3 @@ export class UpdateProjectStatusResponseDto {
   })
   updatedAt: Date;
 }
-

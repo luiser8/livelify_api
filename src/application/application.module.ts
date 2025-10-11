@@ -35,6 +35,8 @@ import { GetUserActionsUseCase } from './use-cases/action/get-user-actions.use-c
 import { CompleteActionUseCase } from './use-cases/action/complete-action.use-case';
 import { CreateUserContextUseCase } from './use-cases/context/create-user-context.use-case';
 import { GetUserContextsUseCase } from './use-cases/context/get-user-contexts.use-case';
+import { GetContextByUserIdUseCase } from './use-cases/context/get-context-by-user.use-case';
+import { DeleteUserContextUseCase } from './use-cases/context/delete-user-context.use-case';
 import { GetSubscriptionByUserIdUseCase } from './use-cases/subscription/get-subscription-by-user.use-case';
 
 @Module({
@@ -85,6 +87,8 @@ import { GetSubscriptionByUserIdUseCase } from './use-cases/subscription/get-sub
     // Context
     CreateUserContextUseCase,
     GetUserContextsUseCase,
+    GetContextByUserIdUseCase,
+    DeleteUserContextUseCase,
   ],
   exports: [
     // Repository Module - needed for guards and other components
@@ -134,6 +138,8 @@ import { GetSubscriptionByUserIdUseCase } from './use-cases/subscription/get-sub
     // Context
     CreateUserContextUseCase,
     GetUserContextsUseCase,
+    GetContextByUserIdUseCase,
+    DeleteUserContextUseCase,
   ],
 })
 export class ApplicationModule {}

@@ -20,7 +20,8 @@ export class CreateProjectFromLifeWheelAreaDto {
 
   @ApiPropertyOptional({
     description: 'Project description',
-    example: 'A comprehensive plan to improve my physical fitness through regular exercise and proper nutrition.',
+    example:
+      'A comprehensive plan to improve my physical fitness through regular exercise and proper nutrition.',
   })
   @IsOptional()
   @IsString()
@@ -125,7 +126,8 @@ export class ProjectResponseDto {
 
   @ApiPropertyOptional({
     description: 'Project description',
-    example: 'A comprehensive plan to improve my physical fitness through regular exercise and proper nutrition.',
+    example:
+      'A comprehensive plan to improve my physical fitness through regular exercise and proper nutrition.',
   })
   description?: string;
 

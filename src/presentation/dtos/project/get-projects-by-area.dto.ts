@@ -10,4 +10,3 @@ export class GetProjectsByAreaQueryDto {
   @IsUUID()
   area: string;
 }
-

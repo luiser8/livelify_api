@@ -14,6 +14,18 @@ export class UserContextResponseDto {
   name: string;
 
   @ApiProperty({
+    description: 'Indicates if the context can be deleted (no associated actions)',
+    example: true,
+  })
+  canDelete: boolean;
+
+  @ApiProperty({
+    description: 'Number of actions associated with this context',
+    example: 0,
+  })
+  actionsCount: number;
+
+  @ApiProperty({
     description: 'Creation date',
     example: '2025-09-29T02:00:13.365Z',
   })

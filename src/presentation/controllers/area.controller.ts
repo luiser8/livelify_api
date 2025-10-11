@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Controller, Get, UseGuards, NotFoundException } from '@nestjs/common';
 import {
   ApiTags,
@@ -43,7 +42,7 @@ export class AreaController {
   async all(): Promise<GetAllAreasResponseDto> {
     try {
       const areas = await this.getAllAreaUseCase.execute();
-      
+
       // Format response
       const formattedAreas = areas.map((area, index) => ({
         id: area.id.getValue(), // Include ID

@@ -3,7 +3,10 @@ import { GtdActionId } from '../../../domain/value-objects/action/gtd-action-id.
 import type { GtdActionRepositoryInterface } from '../../../domain/repositories/action/gtd-action.repository.interface';
 import type { ProjectGoalRepositoryInterface } from '../../../domain/repositories/goal/project-goal.repository.interface';
 import type { GtdProjectDetailRepositoryInterface } from '../../../domain/repositories/project/gtd-project-detail.repository.interface';
-import { GTD_ACTION_REPOSITORY_TOKEN, PROJECT_GOAL_REPOSITORY_TOKEN } from '../../ports/goals-actions';
+import {
+  GTD_ACTION_REPOSITORY_TOKEN,
+  PROJECT_GOAL_REPOSITORY_TOKEN,
+} from '../../ports/goals-actions';
 import { GTD_PROJECT_DETAIL_REPOSITORY_TOKEN } from '../../ports/projects';
 
 export interface CompleteActionRequest {

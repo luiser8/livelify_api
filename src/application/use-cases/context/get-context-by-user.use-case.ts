@@ -12,6 +12,8 @@ export interface GetContextByUserIdResponse {
   id: string;
   userId: UserId;
   name: string;
+  canDelete: boolean;
+  actionsCount: number;
   createdAt: Date;
   updatedAt: Date;
   actions?: GtdAction[];
@@ -33,14 +35,22 @@ export class GetContextByUserIdUseCase {
     // 2. Find contexts
     const contexts = await this.userContextRepository.findByUserId(userId);
 
-    // 3. Retornar directamente el array (vacío si no hay)
-    return (contexts ?? []).map((c) => ({
-      id: c.id.getValue(),
-      userId: c.userId,
-      name: c.name,
-      //actions: c.actions.map((a) => a.toPlainObject()),
-      createdAt: c.createdAt,
-      updatedAt: c.updatedAt,
-    }));
+    // 3. For each context, count actions and determine if can be deleted
+    const contextsWithDeleteInfo = await Promise.all(
+      (contexts ?? []).map(async (c) => {
+        const actionsCount = await this.userContextRepository.countActions(c.id);
+        return {
+          id: c.id.getValue(),
+          userId: c.userId,
+          name: c.name,
+          canDelete: actionsCount === 0,
+          actionsCount,
+          createdAt: c.createdAt,
+          updatedAt: c.updatedAt,
+        };
+      }),
+    );
+
+    return contextsWithDeleteInfo;
   }
 }

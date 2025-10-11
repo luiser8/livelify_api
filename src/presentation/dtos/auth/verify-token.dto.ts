@@ -34,4 +34,3 @@ export class VerifyTokenResponseDto {
   })
   message: string;
 }
-

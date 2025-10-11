@@ -69,9 +69,10 @@ export class VerifyTokenUseCase {
       }
 
       // 4. Verify token exists in database (not revoked/logged out)
-      const storedToken =
-        await this.userTokenRepository.findByAccessToken(request.token);
-      
+      const storedToken = await this.userTokenRepository.findByAccessToken(
+        request.token,
+      );
+
       if (!storedToken) {
         this.logger.warn('Token not found in database (revoked or expired)');
         return {
@@ -90,8 +91,10 @@ export class VerifyTokenUseCase {
       }
 
       // 6. Token is valid
-      this.logger.log(`Token verified successfully for user: ${request.userId}`);
-      
+      this.logger.log(
+        `Token verified successfully for user: ${request.userId}`,
+      );
+
       return {
         valid: true,
         userId: payload.sub,
@@ -103,14 +106,14 @@ export class VerifyTokenUseCase {
       // JWT verification failed (expired, invalid signature, etc.)
       if (error instanceof Error) {
         this.logger.warn(`Token verification failed: ${error.message}`);
-        
+
         if (error.message.includes('expired')) {
           return {
             valid: false,
             message: 'Token has expired',
           };
         }
-        
+
         if (error.message.includes('invalid signature')) {
           return {
             valid: false,
@@ -126,4 +129,3 @@ export class VerifyTokenUseCase {
     }
   }
 }
-
