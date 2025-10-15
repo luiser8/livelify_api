@@ -45,15 +45,19 @@ export class SubscriptionController {
     try {
       const subscriptions = await this.getAllSubscriptionsUseCase.execute();
 
-      // Format response
+      // Format response with all new fields
       const formattedSubscriptions = subscriptions.map((subscription) => ({
-        id: subscription.id.getValue(), // Include ID
-        name: subscription.name.toString(), // Convert PlanType enum to string
+        id: subscription.id.getValue(),
+        name: subscription.name.toString(),
         description: subscription.description || '',
-        price: subscription.price,
-        planType: subscription.name.toString(), // Use name as planType
-        features: Object.keys(subscription.features || {}), // Convert features object to array of keys
-        isActive: true, // Default to true since entity doesn't have isActive
+        basePrice: subscription.basePrice,
+        pricePerMonth: subscription.pricePerMonth,
+        savings: subscription.savings,
+        discount: subscription.discount,
+        billingCycle: subscription.billingCycle,
+        bestFor: subscription.bestFor,
+        features: subscription.features,
+        isActive: true,
       }));
 
       return {

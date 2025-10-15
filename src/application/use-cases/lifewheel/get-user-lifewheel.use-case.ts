@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Inject } from '@nestjs/common';
 import { UserId } from '../../../domain/value-objects/user/user-id.value-object';
 import type { LifeWheelRepositoryInterface } from '../../../domain/repositories/lifewheel/lifewheel.repository.interface';
@@ -6,6 +8,8 @@ import {
   LIFEWHEEL_REPOSITORY_TOKEN,
   LIFEWHEEL_AREA_REPOSITORY_TOKEN,
 } from '../../ports/lifewheel';
+import { USER_AREAS_SELECTED_REPOSITORY } from 'src/application/ports/tokens';
+import type { UserAreasSelectedRepositoryInterface } from 'src/domain/repositories/user/user-areas-selected-repository.interface';
 
 export interface GetUserLifeWheelRequest {
   userId: string;
@@ -23,6 +27,13 @@ export interface GetUserLifeWheelResponse {
     createdAt: Date;
     updatedAt: Date;
   }[];
+  lifeAreasSelected:
+    | {
+        id: string;
+        areaId: string;
+        score: number;
+      }[]
+    | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,6 +45,8 @@ export class GetUserLifeWheelUseCase {
     private readonly lifeWheelRepository: LifeWheelRepositoryInterface,
     @Inject(LIFEWHEEL_AREA_REPOSITORY_TOKEN)
     private readonly lifeWheelAreaRepository: LifeWheelAreaRepositoryInterface,
+    @Inject(USER_AREAS_SELECTED_REPOSITORY)
+    private readonly lifeWheelAreaSelectedRepository: UserAreasSelectedRepositoryInterface,
   ) {}
 
   async execute(
@@ -55,6 +68,13 @@ export class GetUserLifeWheelUseCase {
       lifeWheel.id,
     );
 
+    // 2.1 Obtener las áreas seleccionadas por el usuario para este LifeWheel
+    const lifeWheelAreasSelected =
+      await this.lifeWheelAreaSelectedRepository.findByUserAndLifeWheel(
+        userId,
+        lifeWheel.id,
+      );
+
     // 3. Preparar la respuesta
     return {
       id: lifeWheel.id.getValue(),
@@ -68,6 +88,13 @@ export class GetUserLifeWheelUseCase {
         createdAt: lwa.createdAt,
         updatedAt: lwa.updatedAt,
       })),
+      lifeAreasSelected: lifeWheelAreasSelected.length
+        ? lifeWheelAreasSelected.map((lwa) => ({
+            id: lwa.id,
+            areaId: lwa.areaId.getValue(),
+            score: lwa.score,
+          }))
+        : null,
       createdAt: lifeWheel.createdAt,
       updatedAt: lifeWheel.updatedAt,
     };

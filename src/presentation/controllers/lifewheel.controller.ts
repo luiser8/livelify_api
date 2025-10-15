@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Controller,
   Get,
@@ -5,6 +6,8 @@ import {
   HttpStatus,
   UseGuards,
   NotFoundException,
+  Post,
+  Body,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -24,6 +27,11 @@ import { GetUserLifeWheelResponseDto } from '../dtos/lifewheel/get-user-lifewhee
 // Use Cases
 import { GetUserLifeWheelUseCase } from '../../application/use-cases/lifewheel/get-user-lifewheel.use-case';
 import { DefaultThrottle } from '../decorators/throttle.decorator';
+import {
+  CreateUserSelectedAreasResponse,
+  CreateUserSelectedAreasUseCase,
+} from 'src/application/use-cases/user/create-select-user-areas.use-case';
+import { CreateSelectUserAreasDto } from '../dtos/user/create-select-user-areas.dto';
 
 @ApiTags('LifeWheel')
 @Controller('lifewheel')
@@ -32,10 +40,11 @@ import { DefaultThrottle } from '../decorators/throttle.decorator';
 export class LifeWheelController {
   constructor(
     private readonly getUserLifeWheelUseCase: GetUserLifeWheelUseCase,
+    private readonly createUserSelectedAreasUseCase: CreateUserSelectedAreasUseCase,
   ) {}
 
   @Get('me')
-  @DefaultThrottle() // 🌐 Rate limited
+  @DefaultThrottle()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get current user LifeWheel with all areas and scores',
@@ -57,6 +66,46 @@ export class LifeWheelController {
     try {
       const result = await this.getUserLifeWheelUseCase.execute({
         userId: user.sub,
+      });
+
+      return result;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('not found')) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
+  }
+
+  @Post('add-lifewheel-areas')
+  @DefaultThrottle()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: "Add a new area to the user's LifeWheel",
+    description: 'Rate limited: 5 areas per 15 minutes per IP',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Area added successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict - user area already exists',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too Many Requests - rate limit exceeded',
+  })
+  async addAreaSelected(
+    @CurrentUser() user: { sub: string },
+    @Body() createSelectUserAreasDto: CreateSelectUserAreasDto,
+  ): Promise<CreateUserSelectedAreasResponse> {
+    try {
+      const result = await this.createUserSelectedAreasUseCase.execute({
+        userId: user.sub,
+        lifeWheelId: createSelectUserAreasDto.lifeWheelId,
+        areasIds: createSelectUserAreasDto.areaIds,
       });
 
       return result;

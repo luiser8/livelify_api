@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Controller,
   Get,
@@ -113,6 +114,8 @@ export class UserController {
         address: createUserDto.address,
         phone: createUserDto.phone,
         avatarUrl: createUserDto.avatarUrl,
+        acceptTermsAndPolicies: createUserDto.acceptTermsAndPolicies,
+        currencyId: createUserDto.currencyId,
       });
 
       return result;
@@ -196,6 +199,10 @@ export class UserController {
       const result = await this.createUserSubscriptionUseCase.execute({
         userId: user.sub,
         planId: createSubscriptionDto.planId,
+        currencyId: createSubscriptionDto.currencyId,
+        amountPaid: createSubscriptionDto.amountPaid,
+        paymentMethod: createSubscriptionDto.paymentMethod,
+        paymentProvider: createSubscriptionDto.paymentProvider,
       });
 
       if (result) {
@@ -246,6 +253,11 @@ export class UserController {
         id: updateSubscriptionDto.id,
         userId: user.sub,
         planId: updateSubscriptionDto.planId,
+        currencyId: updateSubscriptionDto.currencyId,
+        autoRenew: updateSubscriptionDto.autoRenew,
+        amountPaid: updateSubscriptionDto.amountPaid,
+        paymentMethod: updateSubscriptionDto.paymentMethod,
+        paymentProvider: updateSubscriptionDto.paymentProvider,
       });
 
       if (result) {

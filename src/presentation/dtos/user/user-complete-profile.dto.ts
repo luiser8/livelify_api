@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PaymentMethod, PaymentProvider } from '@prisma/client';
 
 // User basic info
 export class UserBasicInfoDto {
@@ -39,6 +40,86 @@ export class UserBasicInfoDto {
     required: false,
   })
   address?: string;
+
+  @ApiProperty({
+    description: 'Currency ID',
+    example: 'currency-usd-id',
+    required: false,
+  })
+  currencyId?: string;
+
+  @ApiProperty({
+    description: 'User accepted terms and conditions',
+    example: true,
+  })
+  acceptTermsAndPolicies: boolean;
+}
+
+// Subscription Plan info for complete profile
+export class SubscriptionPlanInfoDto {
+  @ApiProperty({
+    description: 'Plan ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  id: string;
+
+  @ApiProperty({
+    description: 'Plan name',
+    example: 'MONTHLY',
+    enum: ['MONTHLY', 'QUARTERLY', 'SEMESTER', 'ANNUAL'],
+  })
+  name: string;
+
+  @ApiProperty({
+    description: 'Plan description',
+    example: 'Perfect for trying out the platform',
+    required: false,
+  })
+  description?: string;
+
+  @ApiProperty({
+    description: 'Base price',
+    example: 19.99,
+  })
+  basePrice: number;
+
+  @ApiProperty({
+    description: 'Price per month',
+    example: 19.99,
+  })
+  pricePerMonth: number;
+
+  @ApiProperty({
+    description: 'Total savings',
+    example: 0,
+    required: false,
+  })
+  savings?: number;
+
+  @ApiProperty({
+    description: 'Discount percentage',
+    example: 0,
+    required: false,
+  })
+  discount?: number;
+
+  @ApiProperty({
+    description: 'Billing cycle in months',
+    example: 1,
+  })
+  billingCycle: number;
+
+  @ApiProperty({
+    description: 'Best for description',
+    example: 'Mensual',
+  })
+  bestFor: string;
+
+  @ApiProperty({
+    description: 'Plan features',
+    example: { actions: 1000, projects: 50, analytics: 'ENABLED' },
+  })
+  features: Record<string, any>;
 }
 
 // Subscription info
@@ -50,35 +131,83 @@ export class UserSubscriptionInfoDto {
   id: string;
 
   @ApiProperty({
-    description: 'Plan name',
-    example: 'PREMIUM',
+    description: 'Currency ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  planName: string;
+  currencyId: string;
 
   @ApiProperty({
-    description: 'Plan price',
-    example: 29.99,
-  })
-  price: number;
-
-  @ApiProperty({
-    description: 'Is active',
-    example: true,
-  })
-  isActive: boolean;
-
-  @ApiProperty({
-    description: 'Start date',
-    example: '2024-01-01T00:00:00.000Z',
+    description: 'Subscription start date',
+    example: '2025-01-01T00:00:00.000Z',
   })
   startDate: Date;
 
   @ApiProperty({
-    description: 'End date',
-    example: '2024-12-31T23:59:59.000Z',
+    description: 'Subscription end date',
+    example: '2025-02-01T00:00:00.000Z',
+  })
+  endDate: Date;
+
+  @ApiProperty({
+    description: 'Renewal date',
+    example: '2025-02-01T00:00:00.000Z',
     required: false,
   })
-  endDate?: Date;
+  renewalDate?: Date;
+
+  @ApiProperty({
+    description: 'Is subscription active',
+    example: true,
+  })
+  active: boolean;
+
+  @ApiProperty({
+    description: 'Auto-renew enabled',
+    example: true,
+  })
+  autoRenew: boolean;
+
+  @ApiProperty({
+    description: 'Amount paid for this subscription',
+    example: 19.99,
+    required: false,
+  })
+  amountPaid?: number;
+
+  @ApiProperty({
+    description: 'Payment method',
+    example: 'CREDIT_CARD',
+    enum: ['CREDIT_CARD', 'PAYPAL', 'BANK_TRANSFER'],
+    required: false,
+  })
+  paymentMethod?: PaymentMethod;
+
+  @ApiProperty({
+    description: 'Payment provider',
+    example: 'STRIPE',
+    enum: ['STRIPE', 'MERCADO_PAGO', 'OTHER'],
+    required: false,
+  })
+  paymentProvider?: PaymentProvider;
+
+  @ApiProperty({
+    description: 'Plan details',
+    type: SubscriptionPlanInfoDto,
+    required: false,
+  })
+  plan?: SubscriptionPlanInfoDto;
+
+  @ApiProperty({
+    description: 'Subscription creation date',
+    example: '2025-01-01T00:00:00.000Z',
+  })
+  createdAt: Date;
+
+  @ApiProperty({
+    description: 'Subscription last update date',
+    example: '2025-01-02T00:00:00.000Z',
+  })
+  updatedAt: Date;
 }
 
 // Context info

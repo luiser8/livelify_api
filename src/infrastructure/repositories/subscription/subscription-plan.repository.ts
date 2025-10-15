@@ -30,7 +30,12 @@ export class SubscriptionPlanRepository
     id: string;
     name: string;
     description: string | null;
-    price: number;
+    basePrice: number;
+    pricePerMonth: number;
+    savings: number | null;
+    discount: number | null;
+    billingCycle: number;
+    bestFor: string;
     features: Record<string, any> | null;
     createdAt?: Date;
     updatedAt?: Date;
@@ -39,7 +44,12 @@ export class SubscriptionPlanRepository
       id: SubscriptionPlanId.fromString(value.id),
       name: value.name as PlanType,
       description: value.description ?? '',
-      price: value.price,
+      basePrice: value.basePrice,
+      pricePerMonth: value.pricePerMonth,
+      savings: value.savings ?? undefined,
+      discount: value.discount ?? undefined,
+      billingCycle: value.billingCycle,
+      bestFor: value.bestFor,
       features: value.features ?? {},
       createdAt: value.createdAt,
       updatedAt: value.updatedAt,

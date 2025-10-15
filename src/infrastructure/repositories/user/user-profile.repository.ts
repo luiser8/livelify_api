@@ -21,6 +21,7 @@ export class UserProfileRepository implements UserProfileRepositoryInterface {
         address: profileData.address,
         phone: profileData.phone,
         avatarUrl: profileData.avatarUrl,
+        acceptTermsAndPolicies: profileData.acceptTermsAndPolicies,
         createdAt: profileData.createdAt,
         updatedAt: profileData.updatedAt,
       },
@@ -30,6 +31,7 @@ export class UserProfileRepository implements UserProfileRepositoryInterface {
         address: profileData.address,
         phone: profileData.phone,
         avatarUrl: profileData.avatarUrl,
+        acceptTermsAndPolicies: profileData.acceptTermsAndPolicies,
         updatedAt: profileData.updatedAt,
       },
     });
@@ -64,6 +66,7 @@ export class UserProfileRepository implements UserProfileRepositoryInterface {
         address: profileData.address,
         phone: profileData.phone,
         avatarUrl: profileData.avatarUrl,
+        acceptTermsAndPolicies: profileData.acceptTermsAndPolicies,
         updatedAt: profileData.updatedAt,
       },
     });
@@ -129,6 +132,7 @@ export class UserProfileRepository implements UserProfileRepositoryInterface {
     address: string;
     phone: string;
     avatarUrl: string | null;
+    acceptTermsAndPolicies: boolean;
     createdAt: Date;
     updatedAt: Date;
   }): UserProfile {
@@ -140,6 +144,7 @@ export class UserProfileRepository implements UserProfileRepositoryInterface {
       address: prismaProfile.address,
       phone: prismaProfile.phone,
       avatarUrl: prismaProfile.avatarUrl ?? undefined,
+      acceptTermsAndPolicies: prismaProfile.acceptTermsAndPolicies,
       createdAt: prismaProfile.createdAt,
       updatedAt: prismaProfile.updatedAt,
     });

@@ -20,12 +20,14 @@ import { ContextRepository } from '../repositories/context/context.repository';
 import { ProjectGoalRepository } from '../repositories/goal/project-goal.repository';
 import { GtdActionRepository } from '../repositories/action/gtd-action.repository';
 import { GoalBudgetRepository } from '../repositories/goal-budget/goal-budget.repository';
+import { UserAreasSelectedRepository } from '../repositories/user/user-areas-selected-repository';
 
 // Tokens
 import {
   USER_REPOSITORY_TOKEN,
   USER_PROFILE_REPOSITORY_TOKEN,
   USER_TOKEN_REPOSITORY_TOKEN,
+  USER_AREAS_SELECTED_REPOSITORY,
 } from '../../application/ports/tokens';
 
 //Subscriptions
@@ -152,6 +154,10 @@ import { QuestionRepository } from '../repositories/question/question.repository
       provide: GOAL_BUDGET_REPOSITORY_TOKEN,
       useClass: GoalBudgetRepository,
     },
+    {
+      provide: USER_AREAS_SELECTED_REPOSITORY,
+      useClass: UserAreasSelectedRepository,
+    },
   ],
   exports: [
     USER_REPOSITORY_TOKEN,
@@ -173,6 +179,7 @@ import { QuestionRepository } from '../repositories/question/question.repository
     PROJECT_GOAL_REPOSITORY_TOKEN,
     GTD_ACTION_REPOSITORY_TOKEN,
     GOAL_BUDGET_REPOSITORY_TOKEN,
+    USER_AREAS_SELECTED_REPOSITORY,
   ],
 })
 export class RepositoryModule {}

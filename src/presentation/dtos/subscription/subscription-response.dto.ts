@@ -9,34 +9,61 @@ export class SubscriptionResponseDto {
 
   @ApiProperty({
     description: 'Subscription plan name',
-    example: 'Premium',
+    example: 'MONTHLY',
+    enum: ['MONTHLY', 'QUARTERLY', 'SEMESTER', 'ANNUAL'],
   })
   name: string;
 
   @ApiProperty({
     description: 'Subscription plan description',
-    example: 'Full access to all features',
+    example: 'Perfect for trying out the platform',
+    required: false,
   })
-  description: string;
+  description?: string;
 
   @ApiProperty({
-    description: 'Monthly price',
-    example: 29.99,
+    description: 'Base price for the billing period',
+    example: 19.99,
   })
-  price: number;
+  basePrice: number;
 
   @ApiProperty({
-    description: 'Plan type',
-    example: 'PREMIUM',
+    description: 'Price per month (calculated)',
+    example: 19.99,
   })
-  planType: string;
+  pricePerMonth: number;
+
+  @ApiProperty({
+    description: 'Savings compared to monthly plan',
+    example: 0,
+    required: false,
+  })
+  savings?: number;
+
+  @ApiProperty({
+    description: 'Discount percentage',
+    example: 0,
+    required: false,
+  })
+  discount?: number;
+
+  @ApiProperty({
+    description: 'Billing cycle duration in months',
+    example: 1,
+  })
+  billingCycle: number;
+
+  @ApiProperty({
+    description: 'Best for description',
+    example: 'Mensual',
+  })
+  bestFor: string;
 
   @ApiProperty({
     description: 'Features included',
-    example: ['Unlimited projects', 'Advanced analytics', 'Priority support'],
-    type: [String],
+    example: { actions: 1000, projects: 50, analytics: 'ENABLED' },
   })
-  features: string[];
+  features: Record<string, any>;
 
   @ApiProperty({
     description: 'Whether the plan is active',

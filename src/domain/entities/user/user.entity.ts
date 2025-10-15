@@ -8,6 +8,7 @@ export interface UserProps {
   id?: UserId;
   email: Email;
   password: Password;
+  currencyId?: string;
   profile?: UserProfile;
   plan?: SubscriptionPlan;
   createdAt?: Date;
@@ -18,6 +19,7 @@ export class User {
   private readonly _id: UserId;
   private _email: Email;
   private _password: Password;
+  private _currencyId?: string;
   private _profile?: UserProfile;
   private _plan?: SubscriptionPlan;
   private readonly _createdAt: Date;
@@ -27,6 +29,7 @@ export class User {
     this._id = props.id || UserId.create();
     this._email = props.email;
     this._password = props.password;
+    this._currencyId = props.currencyId;
     this._profile = props.profile;
     this._plan = props.plan;
     this._createdAt = props.createdAt || new Date();
@@ -44,6 +47,10 @@ export class User {
 
   public get password(): Password {
     return this._password;
+  }
+
+  public get currencyId(): string | undefined {
+    return this._currencyId;
   }
 
   public get profile(): UserProfile | undefined {
@@ -82,6 +89,11 @@ export class User {
     this.touch();
   }
 
+  public updateCurrency(currencyId: string): void {
+    this._currencyId = currencyId;
+    this.touch();
+  }
+
   public hasProfile(): boolean {
     return this._profile !== undefined;
   }
@@ -115,6 +127,7 @@ export class User {
       id: this._id.getValue(),
       email: this._email.getValue(),
       password: this._password.getValue(),
+      currencyId: this._currencyId,
       profile: this._profile?.toPlainObject(),
       plan: this._plan ? this._plan.toPlainObject() : null,
       createdAt: this._createdAt,

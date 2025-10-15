@@ -2,7 +2,6 @@ import { Injectable, Inject } from '@nestjs/common';
 import { UserId } from '../../../domain/value-objects/user/user-id.value-object';
 import { USER_CONTEXT_REPOSITORY } from 'src/application/ports/contexts';
 import type { UserContextRepositoryInterface } from 'src/domain/repositories/user/user-context.repository.interface';
-import { GtdAction } from 'generated/prisma/wasm';
 
 export interface GetContextByUserIdRequest {
   userId: string;
@@ -16,7 +15,6 @@ export interface GetContextByUserIdResponse {
   actionsCount: number;
   createdAt: Date;
   updatedAt: Date;
-  actions?: GtdAction[];
 }
 
 @Injectable()

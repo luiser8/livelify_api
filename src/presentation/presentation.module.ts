@@ -28,6 +28,7 @@ import { BudgetController } from './controllers/budget.controller';
 import { CurrencyController } from './controllers/currency.controller';
 import { GoalController } from './controllers/goal.controller';
 import { ActionController } from './controllers/action.controller';
+import { DocumentsController } from './controllers/documents.controller';
 import { SubmitAreaAnswersUseCase } from 'src/application/use-cases/answer/submit-area-answers.use-case';
 import { GetUserLifeWheelUseCase } from 'src/application/use-cases/lifewheel/get-user-lifewheel.use-case';
 import { CreateProjectFromLifeWheelAreaUseCase } from 'src/application/use-cases/project/create-project-from-lifewheel-area.use-case';
@@ -43,6 +44,7 @@ import { CreateGtdActionUseCase } from 'src/application/use-cases/action/create-
 import { GetUserActionsUseCase } from 'src/application/use-cases/action/get-user-actions.use-case';
 import { CompleteActionUseCase } from 'src/application/use-cases/action/complete-action.use-case';
 import { VerifyTokenUseCase } from 'src/application/use-cases/auth/verify-token.use-case';
+import { CreateUserSelectedAreasUseCase } from 'src/application/use-cases/user/create-select-user-areas.use-case';
 
 @Module({
   imports: [ApplicationModule, TerminusModule, DatabaseModule],
@@ -60,6 +62,7 @@ import { VerifyTokenUseCase } from 'src/application/use-cases/auth/verify-token.
     CurrencyController,
     GoalController,
     ActionController,
+    DocumentsController,
   ],
   providers: [
     JwtAuthGuard,
@@ -86,6 +89,7 @@ import { VerifyTokenUseCase } from 'src/application/use-cases/auth/verify-token.
     CompleteActionUseCase,
     GetUserCompleteProfileUseCase,
     VerifyTokenUseCase,
+    CreateUserSelectedAreasUseCase,
   ],
   exports: [JwtAuthGuard],
 })

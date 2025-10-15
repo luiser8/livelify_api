@@ -27,6 +27,8 @@ interface Area {
 export interface QuestionProps {
   id?: QuestionId;
   text: string;
+  tip?: string;
+  haveMoreQuestions?: boolean;
   areaId: AreaId;
   answers?: Answer[];
   area?: Area; // The full Area object is optional
@@ -40,6 +42,8 @@ export interface QuestionProps {
 export class Question {
   private readonly _id: QuestionId;
   private _text: string;
+  private _tip?: string;
+  private _haveMoreQuestions: boolean;
   private readonly _areaId: AreaId;
   private _answers: Answer[];
   private readonly _area?: Area; // Store the optional Area object
@@ -49,6 +53,8 @@ export class Question {
   constructor(props: QuestionProps) {
     this._id = props.id || QuestionId.create();
     this._text = props.text;
+    this._tip = props.tip;
+    this._haveMoreQuestions = props.haveMoreQuestions ?? false;
     this._areaId = props.areaId;
     this._answers = props.answers || [];
     this._area = props.area;
@@ -65,6 +71,14 @@ export class Question {
 
   public get text(): string {
     return this._text;
+  }
+
+  public get tip(): string | undefined {
+    return this._tip;
+  }
+
+  public get haveMoreQuestions(): boolean {
+    return this._haveMoreQuestions;
   }
 
   public get areaId(): AreaId {
@@ -123,6 +137,8 @@ export class Question {
     return {
       id: this._id.getValue(),
       text: this._text,
+      tip: this._tip,
+      haveMoreQuestions: this._haveMoreQuestions,
       areaId: this._areaId.getValue(),
       answers: this._answers.map((a) => a.toPlainObject()),
       area: this._area ? this._area.toPlainObject() : undefined,

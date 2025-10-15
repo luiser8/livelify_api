@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserId } from '../../../domain/value-objects/user/user-id.value-object';
 import { CustomLoggerService } from '../../../infrastructure/config/logger.service';
+import type * as ms from 'ms';
 import type { UserRepositoryInterface } from '../../../domain/repositories/user/user.repository.interface';
 import type { UserTokenRepositoryInterface } from '../../../domain/repositories/user/user-token.repository.interface';
 import type { UserProfileRepositoryInterface } from '../../../domain/repositories/user/user-profile.repository.interface';
@@ -106,6 +107,7 @@ export class RefreshTokenUseCase {
         firstName: userProfile.getFirstName(),
         lastName: userProfile.getLastName(),
         phone: userProfile.getPhone(),
+        currencyId: user.currencyId,
         type: 'access',
         iat: Math.floor(Date.now() / 1000),
       };
@@ -116,14 +118,14 @@ export class RefreshTokenUseCase {
         firstName: userProfile.getFirstName(),
         lastName: userProfile.getLastName(),
         phone: userProfile.getPhone(),
+        currencyId: user.currencyId,
         type: 'refresh',
         iat: Math.floor(Date.now() / 1000),
       };
 
-      const accessTokenExpiresIn = this.configService.get<string>(
+      const accessTokenExpiresIn = (this.configService.get<string>(
         'APP_JWT_EXPIRE',
-        '1h',
-      );
+      ) || '1h') as ms.StringValue;
       const newAccessToken = await this.jwtService.signAsync(
         newAccessTokenPayload,
         {
@@ -131,10 +133,9 @@ export class RefreshTokenUseCase {
         },
       );
 
-      const refreshTokenExpiresIn = this.configService.get<string>(
+      const refreshTokenExpiresIn = (this.configService.get<string>(
         'APP_JWT_REFRESH_EXPIRE',
-        '24h',
-      );
+      ) || '24h') as ms.StringValue;
       const newRefreshToken = await this.jwtService.signAsync(
         newRefreshTokenPayload,
         {

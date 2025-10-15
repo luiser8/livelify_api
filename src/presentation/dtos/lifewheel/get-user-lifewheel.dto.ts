@@ -1,5 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+export class LifeWheelAreaSelectionDto {
+  id: string;
+  areaId: string;
+  score: number;
+}
 export class LifeWheelAreaDto {
   @ApiProperty({
     description: 'LifeWheelArea ID',
@@ -62,6 +67,12 @@ export class GetUserLifeWheelResponseDto {
     type: [LifeWheelAreaDto],
   })
   lifeAreas: LifeWheelAreaDto[];
+
+  @ApiProperty({
+    description: 'Life areas selected with their scores',
+    type: [LifeWheelAreaSelectionDto],
+  })
+  lifeAreasSelected: LifeWheelAreaSelectionDto[] | null;
 
   @ApiProperty({
     description: 'Creation date',

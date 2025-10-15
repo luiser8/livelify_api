@@ -17,6 +17,7 @@ import {
 import { GTD_PROJECT_REPOSITORY_TOKEN } from '../../ports/projects';
 import { BUDGET_REPOSITORY_TOKEN } from '../../ports/budget';
 import { GetSubscriptionByUserIdUseCase } from '../subscription/get-subscription-by-user.use-case';
+import { PaymentMethod, PaymentProvider } from '@prisma/client';
 
 export interface GetUserCompleteProfileRequest {
   userId: string;
@@ -30,14 +31,34 @@ export interface UserCompleteProfileResponse {
     lastName: string;
     phone?: string;
     address?: string;
+    currencyId?: string;
+    acceptTermsAndPolicies: boolean;
   };
   subscription?: {
     id: string;
-    planName: string;
-    price: number;
-    isActive: boolean;
+    currencyId: string;
     startDate: Date;
-    endDate?: Date;
+    endDate: Date;
+    renewalDate?: Date;
+    active: boolean;
+    autoRenew: boolean;
+    amountPaid?: number;
+    paymentMethod?: PaymentMethod;
+    paymentProvider?: PaymentProvider;
+    plan?: {
+      id: string;
+      name: string;
+      description?: string;
+      basePrice: number;
+      pricePerMonth: number;
+      savings?: number;
+      discount?: number;
+      billingCycle: number;
+      bestFor: string;
+      features: Record<string, any>;
+    };
+    createdAt: Date;
+    updatedAt: Date;
   };
   contexts: Array<{
     id: string;
@@ -130,11 +151,29 @@ export class GetUserCompleteProfileUseCase {
     let subscription:
       | {
           id: string;
-          planName: string;
-          price: number;
-          isActive: boolean;
+          currencyId: string;
           startDate: Date;
-          endDate?: Date;
+          endDate: Date;
+          renewalDate?: Date;
+          active: boolean;
+          autoRenew: boolean;
+          amountPaid?: number;
+          paymentMethod?: PaymentMethod;
+          paymentProvider?: PaymentProvider;
+          plan?: {
+            id: string;
+            name: string;
+            description?: string;
+            basePrice: number;
+            pricePerMonth: number;
+            savings?: number;
+            discount?: number;
+            billingCycle: number;
+            bestFor: string;
+            features: Record<string, any>;
+          };
+          createdAt: Date;
+          updatedAt: Date;
         }
       | undefined = undefined;
     try {
@@ -144,12 +183,32 @@ export class GetUserCompleteProfileUseCase {
         });
       if (subscriptionData) {
         subscription = {
-          id: subscriptionData.id || '',
-          planName: subscriptionData.plan?.name || '',
-          price: Number(subscriptionData.plan?.price) || 0,
-          isActive: subscriptionData.active || false,
-          startDate: subscriptionData.startDate || new Date(),
-          endDate: subscriptionData.renewalDate,
+          id: subscriptionData.id,
+          currencyId: subscriptionData.currencyId,
+          startDate: subscriptionData.startDate,
+          endDate: subscriptionData.endDate,
+          renewalDate: subscriptionData.renewalDate,
+          active: subscriptionData.active,
+          autoRenew: subscriptionData.autoRenew,
+          amountPaid: subscriptionData.amountPaid,
+          paymentMethod: subscriptionData.paymentMethod,
+          paymentProvider: subscriptionData.paymentProvider,
+          plan: subscriptionData.plan
+            ? {
+                id: subscriptionData.plan.id,
+                name: subscriptionData.plan.name,
+                description: subscriptionData.plan.description,
+                basePrice: subscriptionData.plan.basePrice,
+                pricePerMonth: subscriptionData.plan.pricePerMonth,
+                savings: subscriptionData.plan.savings,
+                discount: subscriptionData.plan.discount,
+                billingCycle: subscriptionData.plan.billingCycle,
+                bestFor: subscriptionData.plan.bestFor,
+                features: subscriptionData.plan.features,
+              }
+            : undefined,
+          createdAt: subscriptionData.createdAt,
+          updatedAt: subscriptionData.updatedAt,
         };
       }
     } catch {
@@ -343,6 +402,8 @@ export class GetUserCompleteProfileUseCase {
         lastName: user.profile?.lastName || '',
         phone: user.profile?.phone,
         address: user.profile?.address,
+        currencyId: user.currencyId,
+        acceptTermsAndPolicies: user.profile?.acceptTermsAndPolicies || false,
       },
       subscription,
       contexts: formattedContexts,

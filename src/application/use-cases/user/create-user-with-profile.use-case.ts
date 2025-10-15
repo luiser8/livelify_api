@@ -4,11 +4,13 @@ import { UserProfile } from '../../../domain/entities/user/user-profile.entity';
 import { Email } from '../../../domain/value-objects/user/email.value-object';
 import type { UserRepositoryInterface } from '../../../domain/repositories/user/user.repository.interface';
 import type { UserProfileRepositoryInterface } from '../../../domain/repositories/user/user-profile.repository.interface';
+import type { CurrencyRepositoryInterface } from '../../../domain/repositories/currency/currency.repository.interface';
 import { CreateLifeWheelWithAreasUseCase } from '../lifewheel/create-lifewheel-with-areas.use-case';
 import {
   USER_REPOSITORY_TOKEN,
   USER_PROFILE_REPOSITORY_TOKEN,
 } from '../../ports/tokens';
+import { CURRENCY_REPOSITORY_TOKEN } from '../../ports/budget';
 
 export interface CreateUserWithProfileRequest {
   email: string;
@@ -18,6 +20,8 @@ export interface CreateUserWithProfileRequest {
   address: string;
   phone: string;
   avatarUrl?: string;
+  acceptTermsAndPolicies: boolean;
+  currencyId?: string;
 }
 
 export interface CreateUserWithProfileResponse {
@@ -31,6 +35,7 @@ export interface CreateUserWithProfileResponse {
     address: string;
     phone: string;
     avatarUrl?: string;
+    acceptTermsAndPolicies: boolean;
   };
   lifeWheel: {
     id: string;
@@ -52,6 +57,8 @@ export class CreateUserWithProfileUseCase {
     private readonly userRepository: UserRepositoryInterface,
     @Inject(USER_PROFILE_REPOSITORY_TOKEN)
     private readonly userProfileRepository: UserProfileRepositoryInterface,
+    @Inject(CURRENCY_REPOSITORY_TOKEN)
+    private readonly currencyRepository: CurrencyRepositoryInterface,
     private readonly createLifeWheelWithAreasUseCase: CreateLifeWheelWithAreasUseCase,
   ) {}
 
@@ -67,13 +74,25 @@ export class CreateUserWithProfileUseCase {
       throw new Error('User with this email already exists');
     }
 
-    // 2. Create domain entity
-    const user = await User.create(request.email, request.password);
+    // 2. Get or validate currency
+    let currencyId = request.currencyId;
+    if (!currencyId) {
+      // Get USD currency by default
+      const usdCurrency = await this.currencyRepository.findByCode('USD');
+      if (!usdCurrency) {
+        throw new Error('Default currency USD not found in database');
+      }
+      currencyId = usdCurrency.id.getValue();
+    }
 
-    // 3. Persist user
+    // 3. Create domain entity
+    const user = await User.create(request.email, request.password);
+    user.updateCurrency(currencyId);
+
+    // 4. Persist user
     const savedUser = await this.userRepository.save(user);
 
-    // 4. Create user profile
+    // 5. Create user profile
     const profile = UserProfile.create({
       userId: savedUser.id,
       firstName: request.firstName,
@@ -81,22 +100,23 @@ export class CreateUserWithProfileUseCase {
       address: request.address,
       phone: request.phone,
       avatarUrl: request.avatarUrl,
+      acceptTermsAndPolicies: request.acceptTermsAndPolicies,
     });
 
-    // 5. Persist profile
+    // 6. Persist profile
     const savedProfile = await this.userProfileRepository.save(profile);
 
-    // 6. Update user with profile
+    // 7. Update user with profile
     savedUser.updateProfile(savedProfile);
     await this.userRepository.update(savedUser);
 
-    // 7. Create LifeWheel with all predefined areas
+    // 8. Create LifeWheel with all predefined areas
     const lifeWheelResponse =
       await this.createLifeWheelWithAreasUseCase.execute({
         userId: savedUser.id.getValue(),
       });
 
-    // 8. Return response
+    // 9. Return response
     return {
       id: savedUser.id.getValue(),
       email: savedUser.email.getValue(),
@@ -108,6 +128,7 @@ export class CreateUserWithProfileUseCase {
         address: savedProfile.address,
         phone: savedProfile.phone,
         avatarUrl: savedProfile.avatarUrl,
+        acceptTermsAndPolicies: savedProfile.acceptTermsAndPolicies,
       },
       lifeWheel: {
         id: lifeWheelResponse.id,

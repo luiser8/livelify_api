@@ -20,14 +20,27 @@ export class UserSubscriptionPlanRepository
         id: subscriptionData.id,
         userId: subscriptionData.userId,
         planId: subscriptionData.planId,
-        renewalDate: subscriptionData.renewalDate,
+        currencyId: subscriptionData.currencyId,
+        startDate: subscriptionData.startDate,
+        endDate: subscriptionData.endDate,
+        renewalDate: subscriptionData.renewalDate ?? new Date(),
         active: subscriptionData.active,
+        autoRenew: subscriptionData.autoRenew,
+        amountPaid: subscriptionData.amountPaid,
+        paymentMethod: subscriptionData.paymentMethod,
+        paymentProvider: subscriptionData.paymentProvider,
         createdAt: subscriptionData.createdAt,
         updatedAt: subscriptionData.updatedAt,
       },
       update: {
         planId: subscriptionData.planId,
-        userId: subscriptionData.userId,
+        currencyId: subscriptionData.currencyId,
+        endDate: subscriptionData.endDate,
+        renewalDate: subscriptionData.renewalDate ?? new Date(),
+        autoRenew: subscriptionData.autoRenew,
+        amountPaid: subscriptionData.amountPaid,
+        paymentMethod: subscriptionData.paymentMethod,
+        paymentProvider: subscriptionData.paymentProvider,
         updatedAt: subscriptionData.updatedAt,
       },
     });
@@ -60,9 +73,14 @@ export class UserSubscriptionPlanRepository
     const updatedUser = await this.prisma.userSubscription.update({
       where: { id },
       data: {
-        userId: userData.userId,
-        renewalDate: userData.renewalDate,
         planId: user.planId.getValue(),
+        currencyId: userData.currencyId,
+        endDate: userData.endDate,
+        renewalDate: userData.renewalDate ?? new Date(),
+        autoRenew: userData.autoRenew,
+        amountPaid: userData.amountPaid,
+        paymentMethod: userData.paymentMethod,
+        paymentProvider: userData.paymentProvider,
         updatedAt: new Date(),
       },
     });
@@ -71,10 +89,18 @@ export class UserSubscriptionPlanRepository
   }
 
   private toDomainEntity(prismaSubscription: {
-    renewalDate: Date;
     id: string;
     userId: string;
     planId: string;
+    currencyId: string;
+    startDate: Date;
+    endDate: Date;
+    renewalDate: Date | null;
+    active: boolean;
+    autoRenew: boolean;
+    amountPaid: number | null;
+    paymentMethod: string | null;
+    paymentProvider: string | null;
     createdAt: Date;
     updatedAt: Date;
   }): UserSubscription {
@@ -82,9 +108,17 @@ export class UserSubscriptionPlanRepository
       id: UserSubscriptionId.fromString(prismaSubscription.id),
       userId: UserId.fromString(prismaSubscription.userId),
       planId: SubscriptionPlanId.fromString(prismaSubscription.planId),
+      currencyId: prismaSubscription.currencyId,
+      startDate: prismaSubscription.startDate,
+      endDate: prismaSubscription.endDate,
+      renewalDate: prismaSubscription.renewalDate ?? undefined,
+      active: prismaSubscription.active,
+      autoRenew: prismaSubscription.autoRenew,
+      amountPaid: prismaSubscription.amountPaid ?? undefined,
+      paymentMethod: prismaSubscription.paymentMethod as any,
+      paymentProvider: prismaSubscription.paymentProvider as any,
       createdAt: prismaSubscription.createdAt,
       updatedAt: prismaSubscription.updatedAt,
-      renewalDate: prismaSubscription.renewalDate,
     });
   }
 }

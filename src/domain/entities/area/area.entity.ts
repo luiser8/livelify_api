@@ -132,10 +132,7 @@ export class Area {
   // Factory methods
   // ==========
   public static create(name: string, description: string): Area {
-    return new Area({
-      name,
-      description,
-    });
+    return new Area({ id: AreaId.create(), name, description });
   }
 
   public static reconstitute(props: AreaProps): Area {

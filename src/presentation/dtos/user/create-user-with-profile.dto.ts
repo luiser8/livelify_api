@@ -3,9 +3,9 @@ import {
   IsEmail,
   IsString,
   MinLength,
-  Matches,
   IsOptional,
   IsUrl,
+  IsBoolean,
 } from 'class-validator';
 
 export class CreateUserWithProfileDto {
@@ -72,4 +72,19 @@ export class CreateUserWithProfileDto {
   @IsOptional()
   @IsUrl({}, { message: 'Avatar URL must be a valid URL' })
   avatarUrl?: string;
+
+  @ApiProperty({
+    description: 'User must accept terms and conditions',
+    example: true,
+  })
+  @IsBoolean({ message: 'Accept terms and policies must be a boolean' })
+  acceptTermsAndPolicies: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Currency ID for the user (defaults to USD if not provided)',
+    example: 'currency-usd-id-here',
+  })
+  @IsOptional()
+  @IsString()
+  currencyId?: string;
 }

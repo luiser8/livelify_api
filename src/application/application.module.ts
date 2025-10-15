@@ -38,6 +38,7 @@ import { GetUserContextsUseCase } from './use-cases/context/get-user-contexts.us
 import { GetContextByUserIdUseCase } from './use-cases/context/get-context-by-user.use-case';
 import { DeleteUserContextUseCase } from './use-cases/context/delete-user-context.use-case';
 import { GetSubscriptionByUserIdUseCase } from './use-cases/subscription/get-subscription-by-user.use-case';
+import { CreateUserSelectedAreasUseCase } from './use-cases/user/create-select-user-areas.use-case';
 
 @Module({
   imports: [RepositoryModule],
@@ -64,6 +65,7 @@ import { GetSubscriptionByUserIdUseCase } from './use-cases/subscription/get-sub
     // LifeWheel
     CreateLifeWheelWithAreasUseCase,
     GetUserLifeWheelUseCase,
+    CreateUserSelectedAreasUseCase,
     // Answer
     SubmitAreaAnswersUseCase,
     // Project
@@ -115,6 +117,7 @@ import { GetSubscriptionByUserIdUseCase } from './use-cases/subscription/get-sub
     // LifeWheel
     CreateLifeWheelWithAreasUseCase,
     GetUserLifeWheelUseCase,
+    CreateUserSelectedAreasUseCase,
     // Answer
     SubmitAreaAnswersUseCase,
     // Project

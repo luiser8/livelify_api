@@ -20,7 +20,17 @@ model SubscriptionPlan {
   id          String    @id @default(uuid())
   name        PlanType  @unique
   description String?
-  price       Float     // Precio mensual
+
+  // Precios base y calculados
+  basePrice   Float     // Precio base del período (ej: 19.99 para mensual)
+  pricePerMonth Float   // Precio calculado por mes (ej: 19.99, 16.66, etc.)
+  savings     Float?    // Ahorro comparado con mensual
+  discount    Float?    // Porcentaje de descuento
+
+  // Metadatos del plan
+  billingCycle Int      // Duración en meses (1, 3, 6, 12)
+  bestFor      String   // "Mensual", "Trimestral", "Semestral", "Anual", etc.
+
   features    Json      // Lista de beneficios/características del plan
 
   subscriptions UserSubscription[]
@@ -37,12 +47,25 @@ model UserSubscription {
   planId           String
   plan             SubscriptionPlan @relation(fields: [planId], references: [id])
 
+  currencyId       String
+  currency         Currency         @relation(fields: [currencyId], references: [id])
+
+  // Información de pago y estado
   startDate        DateTime         @default(now())
-  renewalDate      DateTime
+  endDate          DateTime         // Fecha de finalización
+  renewalDate      DateTime?        // Próxima fecha de renovación
   active           Boolean          @default(true)
+  autoRenew        Boolean          @default(true)
+
+  // Información de transacción
+  amountPaid       Float?           // Monto realmente pagado
+  paymentMethod    PaymentMethod?   @default(CREDIT_CARD) // "CREDIT_CARD", "PAYPAL", "BANK_TRANSFER"
+  paymentProvider  PaymentProvider? @default(OTHER) // "STRIPE", "MERCADO_PAGO", "HOTMART","OTHER"
 
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
+
+  @@unique([userId, active]) // Solo una suscripción activa por usuario
 }
 
 // ========================
@@ -53,9 +76,12 @@ model User {
   email             String            @unique
   password          String
 
+  currencyId       String?
+  currency         Currency?          @relation(fields: [currencyId], references: [id])
+
   profile           UserProfile?
   tokens            UserToken[]
-  recovery          UserRecovery?
+  recovery          UserRecovery[]
 
   lifeWheel         LifeWheel[]
   contexts          Context[]         // ✅ Contextos globales de cada usuario
@@ -65,6 +91,8 @@ model User {
 
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
+
+  UserAreasSelected UserAreasSelected[]
 }
 
 model UserProfile {
@@ -77,6 +105,7 @@ model UserProfile {
   address   String
   phone     String
   avatarUrl String?
+  acceptTermsAndPolicies Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -97,12 +126,12 @@ model UserToken {
 
 model UserRecovery {
   id               String @id @default(uuid())
-  userId           String @unique
+  userId           String
   user             User   @relation(fields: [userId], references: [id])
 
-  recoveryEmail    String?
-  securityQuestion String?
-  securityAnswer   String?
+  type             RecoveryType? @default(REGISTER)
+  securityCode     String?
+  active           Boolean @default(true)
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -121,6 +150,8 @@ model LifeWheel {
 
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
+
+  UserAreasSelected UserAreasSelected[]
 }
 
 // MODIFICADO: LifeWheelArea ahora se relaciona con el modelo Area
@@ -159,12 +190,34 @@ model Area {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  UserAreasSelected UserAreasSelected[]
+}
+
+model UserAreasSelected {
+  id               String @id @default(uuid())
+  userId           String
+  user             User   @relation(fields: [userId], references: [id])
+
+  lifeWheelId     String
+  lifeWheel       LifeWheel    @relation(fields: [lifeWheelId], references: [id])
+
+  areaId          String
+  area            Area   @relation(fields: [areaId], references: [id])
+
+  score           Float    @default(0)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 // ✅ MODIFICADO: Question ahora depende de Area
 model Question {
   id      String   @id @default(uuid())
   text    String
+  tip     String?
+
+  haveMoreQuestions Boolean @default(false) // No tienen más de 10 preguntas, Si tienen más de 10 preguntas
 
   areaId  String
   area    Area     @relation(fields: [areaId], references: [id])
@@ -355,6 +408,8 @@ model Currency {
 
   budgets     Budget[]
   goalBudgets GoalBudget[]
+  userSubscriptions UserSubscription[]
+  users           User[]
 }
 
 // ========================
@@ -390,7 +445,27 @@ enum GoalType {
 }
 
 enum PlanType {
-  BASICO
-  INTERMEDIO
-  AVANZADO
+  MONTHLY
+  QUARTERLY
+  SEMESTER
+  ANNUAL
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  PAYPAL
+  BANK_TRANSFER
+}
+
+enum PaymentProvider {
+  STRIPE
+  MERCADO_PAGO
+  HOTMART
+  OTHER
+}
+
+enum RecoveryType {
+  REGISTER
+  RECOVER_PASSWORD
+  RECOVER_EMAIL
 }

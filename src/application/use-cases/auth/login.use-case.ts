@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { Email } from '../../../domain/value-objects/user/email.value-object';
 import { UserToken } from '../../../domain/entities/user/user-token.entity';
 import { CustomLoggerService } from '../../../infrastructure/config/logger.service';
+import type * as ms from 'ms';
 import type { UserRepositoryInterface } from '../../../domain/repositories/user/user.repository.interface';
 import type { UserTokenRepositoryInterface } from '../../../domain/repositories/user/user-token.repository.interface';
 import type { UserProfileRepositoryInterface } from '../../../domain/repositories/user/user-profile.repository.interface';
@@ -82,6 +83,7 @@ export class LoginUseCase {
         firstName: userProfile.getFirstName(),
         lastName: userProfile.getLastName(),
         phone: userProfile.getPhone(),
+        currencyId: user.currencyId,
         type: 'access',
         iat: Math.floor(Date.now() / 1000),
       };
@@ -92,14 +94,14 @@ export class LoginUseCase {
         firstName: userProfile.getFirstName(),
         lastName: userProfile.getLastName(),
         phone: userProfile.getPhone(),
+        currencyId: user.currencyId,
         type: 'refresh',
         iat: Math.floor(Date.now() / 1000),
       };
 
-      const accessTokenExpiresIn = this.configService.get<string>(
+      const accessTokenExpiresIn = (this.configService.get<string>(
         'APP_JWT_EXPIRE',
-        '1h',
-      );
+      ) || '1h') as ms.StringValue;
 
       // Validate JWT secret is available
       const jwtSecret = this.configService.get<string>('APP_JWT_SECRET');
@@ -107,14 +109,15 @@ export class LoginUseCase {
         throw new Error('JWT secret not configured');
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const accessToken = await this.jwtService.signAsync(accessTokenPayload, {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         expiresIn: accessTokenExpiresIn,
       });
 
-      const refreshTokenExpiresIn = this.configService.get<string>(
+      const refreshTokenExpiresIn = (this.configService.get<string>(
         'APP_JWT_REFRESH_EXPIRE',
-        '24h',
-      );
+      ) || '24h') as ms.StringValue;
       const refreshToken = await this.jwtService.signAsync(
         refreshTokenPayload,
         {
@@ -125,9 +128,12 @@ export class LoginUseCase {
       // 6. Calculate expiration date for access token
       const expiresAt = new Date();
       // Parse the expiration time (1h = 1 hour)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
       const timeMatch = accessTokenExpiresIn.match(/^(\d+)([hdm])$/);
       if (timeMatch) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
         const value = parseInt(timeMatch[1]);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
         const unit = timeMatch[2];
         switch (unit) {
           case 'h':

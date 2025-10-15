@@ -26,6 +26,7 @@ export interface UpdateUserProfileResponse {
   address: string;
   phone: string;
   avatarUrl?: string;
+  acceptTermsAndPolicies: boolean;
   updatedAt: Date;
 }
 
@@ -87,6 +88,7 @@ export class UpdateUserProfileUseCase {
       address: savedProfile.address,
       phone: savedProfile.phone,
       avatarUrl: savedProfile.avatarUrl,
+      acceptTermsAndPolicies: savedProfile.acceptTermsAndPolicies,
       updatedAt: savedProfile.updatedAt,
     };
   }

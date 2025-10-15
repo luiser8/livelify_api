@@ -8,6 +8,7 @@ export interface UserProfileProps {
   address: string;
   phone: string;
   avatarUrl?: string;
+  acceptTermsAndPolicies?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -20,6 +21,7 @@ export class UserProfile {
   private _address: string;
   private _phone: string;
   private _avatarUrl?: string;
+  private _acceptTermsAndPolicies: boolean;
   private readonly _createdAt: Date;
   private _updatedAt: Date;
 
@@ -31,6 +33,7 @@ export class UserProfile {
     this._address = props.address;
     this._phone = props.phone;
     this._avatarUrl = props.avatarUrl;
+    this._acceptTermsAndPolicies = props.acceptTermsAndPolicies ?? false;
     this._createdAt = props.createdAt || new Date();
     this._updatedAt = props.updatedAt || new Date();
   }
@@ -66,6 +69,10 @@ export class UserProfile {
 
   public get avatarUrl(): string | undefined {
     return this._avatarUrl;
+  }
+
+  public get acceptTermsAndPolicies(): boolean {
+    return this._acceptTermsAndPolicies;
   }
 
   public get createdAt(): Date {
@@ -144,6 +151,7 @@ export class UserProfile {
       address: this._address,
       phone: this._phone,
       avatarUrl: this._avatarUrl,
+      acceptTermsAndPolicies: this.acceptTermsAndPolicies,
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,
     };

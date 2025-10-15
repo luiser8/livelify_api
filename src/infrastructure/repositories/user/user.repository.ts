@@ -20,6 +20,7 @@ export class UserRepository implements UserRepositoryInterface {
         id: userData.id,
         email: userData.email,
         password: userData.password,
+        currencyId: userData.currencyId,
         createdAt: userData.createdAt,
         updatedAt: userData.updatedAt,
       },
@@ -60,24 +61,27 @@ export class UserRepository implements UserRepositoryInterface {
 
     return {
       id: subscription.id,
-      planName: subscription.plan?.name || 'UNKNOWN',
-      price: parseFloat(subscription.plan?.price.toString() || '0'),
-      isActive: subscription.active,
+      currencyId: subscription.currencyId,
       startDate: subscription.startDate,
-      endDate: subscription.renewalDate,
-      renewalDate: subscription.renewalDate,
+      endDate: subscription.endDate,
+      renewalDate: subscription.renewalDate ?? undefined,
       active: subscription.active,
+      autoRenew: subscription.autoRenew,
+      amountPaid: subscription.amountPaid ?? undefined,
+      paymentMethod: subscription.paymentMethod as any,
+      paymentProvider: subscription.paymentProvider as any,
       plan: subscription.plan
         ? {
             id: subscription.plan.id,
             name: subscription.plan.name,
             description: subscription.plan.description ?? '',
-            price: subscription.plan.price.toString(),
-            features: subscription.plan.features as {
-              actions: number;
-              projects: number;
-              analytics: string;
-            },
+            basePrice: subscription.plan.basePrice,
+            pricePerMonth: subscription.plan.pricePerMonth,
+            savings: subscription.plan.savings ?? undefined,
+            discount: subscription.plan.discount ?? undefined,
+            billingCycle: subscription.plan.billingCycle,
+            bestFor: subscription.plan.bestFor,
+            features: subscription.plan.features as Record<string, any>,
           }
         : undefined,
       createdAt: subscription.createdAt,
@@ -104,6 +108,7 @@ export class UserRepository implements UserRepositoryInterface {
       data: {
         email: userData.email,
         password: userData.password,
+        currencyId: userData.currencyId,
         updatedAt: userData.updatedAt,
       },
       include: {
@@ -188,6 +193,7 @@ export class UserRepository implements UserRepositoryInterface {
     id: string;
     email: string;
     password: string;
+    currencyId?: string | null;
     createdAt: Date;
     updatedAt: Date;
     profile?: {
@@ -237,6 +243,7 @@ export class UserRepository implements UserRepositoryInterface {
       id: userId,
       email,
       password,
+      currencyId: prismaUser.currencyId ?? undefined,
       profile,
       createdAt: prismaUser.createdAt,
       updatedAt: prismaUser.updatedAt,

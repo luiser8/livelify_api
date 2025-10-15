@@ -10,19 +10,53 @@ export class QuestionRepository implements QuestionRepositoryInterface {
   constructor(private readonly prisma: PrismaService) {}
 
   async findByAreaId(areaId: AreaId): Promise<Question[]> {
-    const question = await this.prisma.question.findMany({
+    const questions = await this.prisma.question.findMany({
       where: { areaId: areaId.getValue() },
       include: {
         area: true,
       },
     });
 
-    return question.map((q) => this.toDomainEntity(q));
+    return questions.map((q) => {
+      const question = q as unknown as {
+        id: string;
+        text: string;
+        tip: string | null;
+        haveMoreQuestions: boolean;
+        areaId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        area: {
+          id: string;
+          name: string;
+          description: string;
+        };
+      };
+
+      return this.toDomainEntity({
+        id: question.id,
+        text: question.text,
+        tip: question.tip,
+        haveMoreQuestions: question.haveMoreQuestions,
+        areaId: question.areaId,
+        createdAt: question.createdAt,
+        updatedAt: question.updatedAt,
+        area: question.area
+          ? {
+              id: question.area.id,
+              name: question.area.name,
+              description: question.area.description,
+            }
+          : undefined,
+      });
+    });
   }
 
   private toDomainEntity(value: {
     id: string;
     text: string;
+    tip?: string | null;
+    haveMoreQuestions: boolean;
     areaId: string;
     createdAt?: Date;
     updatedAt?: Date;
@@ -35,6 +69,8 @@ export class QuestionRepository implements QuestionRepositoryInterface {
     return Question.reconstitute({
       id: QuestionId.fromString(value.id),
       text: value.text,
+      tip: value.tip ?? undefined,
+      haveMoreQuestions: value.haveMoreQuestions,
       createdAt: value.createdAt,
       updatedAt: value.updatedAt,
       areaId: AreaId.fromString(value.areaId),

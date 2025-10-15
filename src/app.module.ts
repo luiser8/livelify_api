@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import type * as ms from 'ms';
 
 // Hexagonal Architecture Modules
 import { PresentationModule } from './presentation/presentation.module';
@@ -32,12 +33,16 @@ function getEnvFilePath(): string {
     JwtModule.registerAsync({
       global: true,
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('APP_JWT_SECRET'),
-        signOptions: {
-          expiresIn: configService.get<string>('APP_JWT_EXPIRE'),
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const expiresIn = (configService.get<string>('APP_JWT_EXPIRE') ||
+          '1h') as ms.StringValue;
+        return {
+          secret: configService.get<string>('APP_JWT_SECRET'),
+          signOptions: {
+            expiresIn,
+          },
+        };
+      },
     }),
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],

@@ -14,16 +14,17 @@ export class QuestionResponseDto {
   text: string;
 
   @ApiProperty({
-    description: 'Question type',
-    example: 'boolean',
+    description: 'Optional tip or hint for the question',
+    example: 'Consider activities like running, yoga, or gym workouts',
+    required: false,
   })
-  type: string;
+  tip?: string;
 
   @ApiProperty({
-    description: 'Question order within the area',
-    example: 1,
+    description: 'Indicates if there are more than 10 questions for this area',
+    example: false,
   })
-  order: number;
+  haveMoreQuestions: boolean;
 
   @ApiProperty({
     description: 'Whether the question is required',

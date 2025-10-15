@@ -8,22 +8,6 @@ export interface GetSubscriptionByUserIdRequest {
   userId: string;
 }
 
-export interface GetSubscriptionByUserIdResponse {
-  id: string;
-  startDate: Date;
-  renewalDate: Date;
-  active: boolean;
-  plan?: {
-    id: string;
-    name: string;
-    description: string;
-    price: string;
-    features: { actions: number; projects: number; analytics: string };
-  };
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 @Injectable()
 export class GetSubscriptionByUserIdUseCase {
   constructor(

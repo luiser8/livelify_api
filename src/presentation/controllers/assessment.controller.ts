@@ -56,13 +56,22 @@ export class AssessmentController {
       const questions = await this.getQuestionByAreaIdUseCase.execute(areaIdVO);
 
       // Format response
-      const formattedQuestions = questions.map((question) => ({
-        id: question.id.getValue(),
-        text: question.text,
-        type: question.type || 'boolean',
-        order: question.order || 0,
-        isRequired: question.isRequired !== false, // Default to true
-      }));
+      const formattedQuestions = questions.map((question) => {
+        const q = question as {
+          id: { getValue: () => string };
+          text: string;
+          tip?: string;
+          haveMoreQuestions: boolean;
+        };
+
+        return {
+          id: q.id.getValue(),
+          text: q.text,
+          tip: q.tip,
+          haveMoreQuestions: q.haveMoreQuestions,
+          isRequired: true,
+        };
+      });
 
       return {
         questions: formattedQuestions,

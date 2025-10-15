@@ -30,6 +30,12 @@ export class UserProfileResponseDto {
     example: 'https://example.com/avatar.jpg',
   })
   avatarUrl?: string;
+
+  @ApiProperty({
+    description: 'User accepted terms and conditions',
+    example: true,
+  })
+  acceptTermsAndPolicies: boolean;
 }
 
 export class UserResponseDto {
