@@ -26,8 +26,8 @@ async function main() {
       billingCycle: 1,
       bestFor: 'Mensual',
       features: {
-        projects: 10,
-        actions: 500,
+        projects: 3,
+        actions: 100,
         analytics: 'ENABLED',
       },
     },
@@ -41,8 +41,8 @@ async function main() {
       billingCycle: 3,
       bestFor: 'Trimestral',
       features: {
-        projects: 10,
-        actions: 500,
+        projects: 5,
+        actions: 200,
         analytics: 'ENABLED',
       },
     },
@@ -56,8 +56,8 @@ async function main() {
       billingCycle: 6,
       bestFor: 'Semestral',
       features: {
-        projects: 10,
-        actions: 500,
+        projects: 7,
+        actions: 300,
         analytics: 'ENABLED',
       },
     },
