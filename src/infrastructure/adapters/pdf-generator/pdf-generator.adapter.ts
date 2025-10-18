@@ -8,100 +8,207 @@ import type {
 
 @Injectable()
 export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
-  private drawSectionTitle(doc: PDFKit.PDFDocument, title: string, color = '#2563eb') {
-    doc.moveDown(1);
-    doc
-      .fontSize(20)
-      .fillColor(color)
-      .text(title, { align: 'left' });
-    this.drawDivider(doc, color);
+  private drawGradientBackground(
+    doc: PDFKit.PDFDocument,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    color1: string,
+    color2: string,
+  ) {
+    const gradient = doc.linearGradient(x, y, x + width, y);
+    gradient.stop(0, color1);
+    gradient.stop(1, color2);
+    doc.rect(x, y, width, height).fill(gradient);
   }
 
-  private drawDivider(doc: PDFKit.PDFDocument, color = '#e5e7eb') {
-    const y = doc.y + 6;
+  private drawCard(
+    doc: PDFKit.PDFDocument,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    bgColor = '#ffffff',
+    radius = 10,
+  ) {
+    // Shadow
     doc
-      .moveTo(50, y)
-      .lineTo(545, y)
-      .lineWidth(2)
-      .strokeColor(color)
-      .stroke();
-    doc.moveDown(1);
+      .save()
+      .fillColor('#00000010')
+      .roundedRect(x + 2, y + 2, width, height, radius)
+      .fill()
+      .restore();
+    
+    // Card background
+    doc.roundedRect(x, y, width, height, radius).fillAndStroke(bgColor, '#f3f4f6');
   }
 
-  private drawParagraph(doc: PDFKit.PDFDocument, text: string) {
-    doc
-      .fontSize(12)
-      .fillColor('#374151')
-      .text(text, { align: 'left' });
-    doc.moveDown(0.5);
-  }
+  private drawProgressBar(
+    doc: PDFKit.PDFDocument,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    value: number,
+    maxValue: number,
+    color: string,
+    showLabels = true,
+  ) {
+    const percentage = value / maxValue;
+    const filledWidth = width * percentage;
 
-  private drawBadge(doc: PDFKit.PDFDocument, label: string, bg = '#eef2ff', fg = '#4338ca') {
-    const startY = doc.y;
-    doc
-      .roundedRect(50, startY, 495, 28, 6)
-      .fillAndStroke(bg, '#ffffff');
-    doc
-      .fillColor(fg)
-      .fontSize(12)
-      .text(label, 60, startY + 8);
-    doc.moveDown(1.5);
-  }
+    // Background track
+    doc.roundedRect(x, y, width, height, height / 2).fill('#e5e7eb');
 
-  private drawScoreBar(doc: PDFKit.PDFDocument, label: string, score: number, icon: string) {
-    const getScoreColor = (value: number): string => {
-      if (value <= 4) return '#ef4444';
-      if (value <= 7) return '#f59e0b';
-      return '#10b981';
-    };
-
-    const barWidth = (score / 10) * 350;
-    const y = doc.y;
-
-    doc
-      .fontSize(12)
-      .fillColor('#111827')
-      .text(`${icon} ${label}`, 50, y);
-
-    const barY = y + 16;
-    doc.rect(200, barY, 350, 14).fillColor('#e5e7eb').fill();
-    doc
-      .rect(200, barY, barWidth, 14)
-      .fillColor(getScoreColor(score))
-      .fill();
-
-    doc
-      .fontSize(11)
-      .fillColor('#111827')
-      .text(`${score}/10`, 560, barY - 1, { width: 30, align: 'right' });
-
-    doc.moveDown(1.6);
-  }
-
-  private getInterpretation(score: number) {
-    if (score <= 4) {
-      return {
-        level: 'Área de Atención Prioritaria',
-        interpretation:
-          'Probable sensación de estancamiento o insatisfacción. Necesita foco inmediato y hábitos pequeños y consistentes.',
-        recommendation:
-          'Empieza con un hábito simple que puedas mantener a diario. Bloquea 15–20 minutos en tu agenda para eso.',
-      };
+    // Filled portion
+    if (filledWidth > 0) {
+      doc.roundedRect(x, y, filledWidth, height, height / 2).fill(color);
     }
-    if (score <= 7) {
-      return {
-        level: 'Área con Potencial de Mejora',
-        interpretation:
-          'Tienes base, pero falta consistencia o dirección clara para avanzar al siguiente nivel.',
-        recommendation:
-          'Define un objetivo específico a 3 meses y agenda bloques recurrentes para trabajarlo.',
-      };
+
+    // Value indicator circle
+    doc
+      .circle(x + filledWidth, y + height / 2, height / 2 + 2)
+      .fillAndStroke('#ffffff', color);
+    
+    if (showLabels) {
+      // Labels
+      doc
+        .fontSize(9)
+        .fillColor('#9ca3af')
+        .text('1', x - 15, y + height / 2 - 4);
+      doc.text('5', x + width / 2 - 5, y + height - 2);
+      doc.text('10', x + width + 5, y + height / 2 - 4);
     }
-    return {
-      level: 'Área Óptima',
-      interpretation: 'Vas por muy buen camino y tienes una rutina sólida que funciona para ti.',
-      recommendation: 'Evita estancarte: busca un reto superior o mentorea a otros para seguir creciendo.',
+  }
+
+  private drawHexagonRadar(
+    doc: PDFKit.PDFDocument,
+    centerX: number,
+    centerY: number,
+    radius: number,
+    scores: Record<string, number>,
+  ) {
+    const areas = ['personal', 'professional', 'health', 'finances', 'family', 'love'];
+    const labels = ['Personal', 'Profesional', 'Salud', 'Finanzas', 'Familia', 'Amor'];
+    const angleStep = (Math.PI * 2) / 6;
+
+    // Draw grid hexagons
+    for (let level = 1; level <= 3; level++) {
+      const levelRadius = (radius * level) / 3;
+      doc.strokeColor('#e5e7eb').lineWidth(1);
+      
+      for (let i = 0; i <= 6; i++) {
+        const angle = angleStep * i - Math.PI / 2;
+        const x = centerX + Math.cos(angle) * levelRadius;
+        const y = centerY + Math.sin(angle) * levelRadius;
+        
+        if (i === 0) {
+          doc.moveTo(x, y);
+        } else {
+          doc.lineTo(x, y);
+        }
+      }
+      doc.stroke();
+    }
+
+    // Draw axes
+    for (let i = 0; i < 6; i++) {
+      const angle = angleStep * i - Math.PI / 2;
+      const x = centerX + Math.cos(angle) * radius;
+      const y = centerY + Math.sin(angle) * radius;
+      
+      doc
+        .moveTo(centerX, centerY)
+        .lineTo(x, y)
+        .strokeColor('#e5e7eb')
+        .lineWidth(1)
+        .stroke();
+
+      // Labels
+      const labelX = centerX + Math.cos(angle) * (radius + 20);
+      const labelY = centerY + Math.sin(angle) * (radius + 20);
+      
+      doc
+        .fontSize(10)
+        .fillColor('#6b7280')
+        .text(labels[i], labelX - 25, labelY - 5, {
+          width: 50,
+          align: 'center',
+        });
+    }
+
+    // Draw data polygon
+    doc.save();
+    const dataPoints: Array<[number, number]> = [];
+    
+    areas.forEach((area, i) => {
+      const score = scores[area as keyof typeof scores] || 0;
+      const angle = angleStep * i - Math.PI / 2;
+      const distance = (radius * score) / 10;
+      const x = centerX + Math.cos(angle) * distance;
+      const y = centerY + Math.sin(angle) * distance;
+      dataPoints.push([x, y]);
+    });
+
+    // Fill polygon
+    doc.fillColor('#8b5cf6').opacity(0.3);
+    dataPoints.forEach(([x, y], i) => {
+      if (i === 0) doc.moveTo(x, y);
+      else doc.lineTo(x, y);
+    });
+    doc.closePath().fill();
+
+    // Stroke polygon
+    doc.strokeColor('#8b5cf6').opacity(1).lineWidth(2);
+    dataPoints.forEach(([x, y], i) => {
+      if (i === 0) doc.moveTo(x, y);
+      else doc.lineTo(x, y);
+    });
+    doc.closePath().stroke();
+
+    // Draw points
+    dataPoints.forEach(([x, y]) => {
+      doc.circle(x, y, 4).fillAndStroke('#8b5cf6', '#ffffff');
+    });
+
+    doc.restore();
+  }
+
+  private getAreaColor(area: string): string {
+    const colors: Record<string, string> = {
+      personal: '#8b5cf6',
+      professional: '#3b82f6',
+      health: '#10b981',
+      finances: '#f59e0b',
+      family: '#fb923c',
+      love: '#ec4899',
     };
+    return colors[area] || '#6b7280';
+  }
+
+  private getAreaIcon(area: string): string {
+    const icons: Record<string, string> = {
+      personal: '🔮',
+      professional: '💼',
+      health: '🥗',
+      finances: '💰',
+      family: '👪',
+      love: '❤️',
+    };
+    return icons[area] || '📊';
+  }
+
+  private getAreaLabel(area: string): string {
+    const labels: Record<string, string> = {
+      personal: 'Desarrollo Personal',
+      professional: 'Actividad Profesional',
+      health: 'Alimentación y Salud',
+      finances: 'Dinero y Finanzas',
+      family: 'Familia y Amigos',
+      love: 'Amor y Pareja',
+    };
+    return labels[area] || area;
   }
 
   async generateDiagnosticPdf(data: DiagnosticData): Promise<Buffer> {
@@ -109,136 +216,286 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
       try {
         const doc = new PDFDocument({
           size: 'A4',
-          margins: { top: 50, bottom: 50, left: 50, right: 50 },
+          margins: { top: 40, bottom: 40, left: 40, right: 40 },
         });
 
         const chunks: Buffer[] = [];
-
-        // Collect PDF chunks
         doc.on('data', (chunk) => chunks.push(chunk));
         doc.on('end', () => resolve(Buffer.concat(chunks)));
         doc.on('error', reject);
 
-        // Portada
+        const pageWidth = 595 - 80; // A4 width minus margins
+        const pageHeight = 842 - 80; // A4 height minus margins
+
+        // Page 1: Cover with radar chart
+        // Header gradient
+        this.drawGradientBackground(doc, 0, 0, 595, 200, '#8b5cf6', '#3b82f6');
+
+        // Title
+        doc
+          .fontSize(28)
+          .fillColor('#ffffff')
+          .text('Tu Diagnóstico Personalizado', 50, 50, { align: 'center' });
+        
+        doc
+          .fontSize(16)
+          .fillColor('#ffffff')
+          .opacity(0.9)
+          .text('Rueda de la Vida - Análisis Completo', 50, 90, { align: 'center' });
+
+        // User info card
+        this.drawCard(doc, 50, 140, pageWidth, 80);
+        doc
+          .fontSize(14)
+          .fillColor('#111827')
+          .opacity(1)
+          .text(`${data.name}`, 70, 160);
+        doc
+          .fontSize(11)
+          .fillColor('#6b7280')
+          .text(`${data.email}`, 70, 180);
+        doc
+          .fontSize(11)
+          .fillColor('#6b7280')
+          .text(`Fecha: ${new Date().toLocaleDateString('es-ES')}`, 70, 198);
+
+        // Average score card
+        this.drawCard(doc, 50, 240, pageWidth, 120);
+        doc
+          .fontSize(12)
+          .fillColor('#6b7280')
+          .text('Puntuación Promedio', 0, 255, { align: 'center' });
+        doc
+          .fontSize(48)
+          .fillColor('#8b5cf6')
+          .text(`${data.average.toFixed(1)}`, 0, 280, { align: 'center' });
+        doc
+          .fontSize(16)
+          .fillColor('#6b7280')
+          .text('/10', 0, 330, { align: 'center' });
+
+        // Hexagon radar chart
+        doc
+          .fontSize(14)
+          .fillColor('#111827')
+          .text('Visualización de tus Áreas', 50, 390);
+        
+        this.drawHexagonRadar(doc, 297, 500, 80, data.scores);
+
+        // Individual scores summary at bottom
+        const scoreY = 620;
+        const areas = Object.entries(data.scores);
+        const halfIndex = Math.ceil(areas.length / 2);
+        
+        // Left column
+        areas.slice(0, halfIndex).forEach(([area, score], index) => {
+          const y = scoreY + index * 25;
+          const icon = this.getAreaIcon(area);
+          const color = this.getAreaColor(area);
+          
+          doc
+            .fontSize(10)
+            .fillColor(color)
+            .text(`${icon}`, 60, y);
+          doc
+            .fontSize(10)
+            .fillColor('#374151')
+            .text(`${this.getAreaLabel(area)}`, 80, y);
+          doc
+            .fontSize(10)
+            .fillColor('#6b7280')
+            .text(`${score}/10`, 200, y, { width: 40, align: 'right' });
+        });
+
+        // Right column
+        areas.slice(halfIndex).forEach(([area, score], index) => {
+          const y = scoreY + index * 25;
+          const icon = this.getAreaIcon(area);
+          const color = this.getAreaColor(area);
+          
+          doc
+            .fontSize(10)
+            .fillColor(color)
+            .text(`${icon}`, 320, y);
+          doc
+            .fontSize(10)
+            .fillColor('#374151')
+            .text(`${this.getAreaLabel(area)}`, 340, y);
+          doc
+            .fontSize(10)
+            .fillColor('#6b7280')
+            .text(`${score}/10`, 460, y, { width: 40, align: 'right' });
+        });
+
+        // Page 2: Detailed analysis
+        doc.addPage();
+
+        // Header for page 2
         doc
           .fontSize(24)
           .fillColor('#111827')
-          .text('Tu Diagnóstico Personalizado', { align: 'center' });
-        doc
-          .fontSize(16)
-          .fillColor('#2563eb')
-          .text('El Informe de tu Rueda de la Vida', { align: 'center' });
-        doc.moveDown(1.2);
-        this.drawBadge(doc, `Preparado para: ${data.name}`);
-
-        // Datos del usuario
+          .text('Análisis Detallado por Área', 50, 50);
+        
         doc
           .fontSize(12)
-          .fillColor('#374151')
-          .text(`Nombre: ${data.name}`);
-        doc.text(`Email: ${data.email}`);
-        doc.moveDown(0.5);
-        doc
-          .fontSize(14)
-          .fillColor('#2563eb')
-          .text(`Puntuación Promedio: ${data.average.toFixed(1)}/10`, { align: 'left' });
-        this.drawDivider(doc);
+          .fillColor('#6b7280')
+          .text('Interpretación personalizada de tus resultados', 50, 80);
 
-        // ¿Qué es la Rueda de la Vida?
-        this.drawSectionTitle(doc, '¿Qué es la Rueda de la Vida?');
-        this.drawParagraph(
-          doc,
-          `¡Hola, ${data.name}! Felicidades por tomarte el tiempo para hacer este ejercicio. Este diagnóstico se basa en la Rueda de la Vida, una herramienta de coaching poderosa para evaluar tus áreas clave.`,
-        );
-        this.drawParagraph(
-          doc,
-          'Su objetivo es darte una visión gráfica y honesta de cómo te sientes con respecto a las áreas más importantes de tu vida en este momento.',
-        );
-        this.drawParagraph(
-          doc,
-          'Imagina tu vida como una rueda. Si algunos radios son muy cortos y otros muy largos, la rueda no gira suave. El objetivo no es un 10 en todo, sino lograr equilibrio y fluidez.',
-        );
+        // Draw each area analysis
+        let yPosition = 120;
+        const areaOrder = ['personal', 'professional', 'health', 'finances', 'family', 'love'];
 
-        // Áreas
-        this.drawSectionTitle(doc, 'Las Áreas que Componen tu Rueda');
-        this.drawParagraph(doc, '🔮 Desarrollo Personal — Crecimiento intelectual, mental y espiritual.');
-        this.drawParagraph(doc, '💼 Actividad Profesional — Satisfacción, propósito y crecimiento laboral.');
-        this.drawParagraph(doc, '🥗 Alimentación y Salud — Energía, descanso, ejercicio y bienestar físico.');
-        this.drawParagraph(doc, '💰 Dinero y Finanzas — Ingresos, control, ahorro y tranquilidad financiera.');
-        this.drawParagraph(doc, '👪 Familia y Amigos — Conexión, apoyo y calidad de relaciones.');
-        this.drawParagraph(doc, '❤️ Amor y Pareja — Comunicación, intimidad y satisfacción romántica o contigo.');
+        areaOrder.forEach((area) => {
+          if (yPosition > 650) {
+            doc.addPage();
+            yPosition = 60;
+          }
 
-        // Resultados
-        this.drawSectionTitle(doc, `Tus Resultados: ${data.name}`);
-        this.drawScoreBar(doc, 'Desarrollo Personal', data.scores.personal, '🔮');
-        this.drawScoreBar(doc, 'Actividad Profesional', data.scores.professional, '💼');
-        this.drawScoreBar(doc, 'Alimentación y Salud', data.scores.health, '🥗');
-        this.drawScoreBar(doc, 'Dinero y Finanzas', data.scores.finances, '💰');
-        this.drawScoreBar(doc, 'Familia y Amigos', data.scores.family, '👪');
-        this.drawScoreBar(doc, 'Amor y Pareja', data.scores.love, '❤️');
+          const score = data.scores[area as keyof typeof data.scores] || 0;
+          const color = this.getAreaColor(area);
+          const icon = this.getAreaIcon(area);
+          const label = this.getAreaLabel(area);
 
-        // Interpretaciones y recomendaciones
-        this.drawSectionTitle(doc, 'Qué Significan tus Puntuaciones');
-        const areas: Array<{ key: keyof typeof data.scores; title: string; icon: string }> = [
-          { key: 'personal', title: 'Desarrollo Personal', icon: '🔮' },
-          { key: 'professional', title: 'Actividad Profesional', icon: '💼' },
-          { key: 'health', title: 'Alimentación y Salud', icon: '🥗' },
-          { key: 'finances', title: 'Dinero y Finanzas', icon: '💰' },
-          { key: 'family', title: 'Familia y Amigos', icon: '👪' },
-          { key: 'love', title: 'Amor y Pareja', icon: '❤️' },
-        ];
+          // Area card
+          this.drawCard(doc, 50, yPosition, pageWidth, 100);
 
-        areas.forEach(({ key, title, icon }) => {
-          const value = data.scores[key];
-          const info = this.getInterpretation(value);
-          this.drawBadge(doc, `${icon} Área: ${title} — Tu Puntuación: ${value}/10`, '#ecfeff', '#0e7490');
-          this.drawParagraph(doc, `Nivel: ${info.level}`);
-          this.drawParagraph(doc, `Interpretación: ${info.interpretation}`);
-          this.drawParagraph(doc, `Recomendación: ${info.recommendation}`);
+          // Icon and title
+          doc
+            .fontSize(16)
+            .fillColor(color)
+            .text(icon, 70, yPosition + 15);
+          doc
+            .fontSize(14)
+            .fillColor('#111827')
+            .text(label, 100, yPosition + 17);
+          
+          // Score badge
+          doc
+            .fontSize(20)
+            .fillColor(color)
+            .text(`${score}`, pageWidth - 30, yPosition + 15, {
+              width: 60,
+              align: 'right',
+            });
+          doc
+            .fontSize(12)
+            .fillColor('#6b7280')
+            .text('/10', pageWidth + 5, yPosition + 20, {
+              width: 25,
+              align: 'right',
+            });
+
+          // Progress bar
+          this.drawProgressBar(
+            doc,
+            70,
+            yPosition + 50,
+            pageWidth - 40,
+            12,
+            score,
+            10,
+            color,
+            true,
+          );
+
+          // Interpretation
+          const interpretation = this.getInterpretation(score);
+          doc
+            .fontSize(9)
+            .fillColor('#6b7280')
+            .text(interpretation.level, 70, yPosition + 75);
+
+          yPosition += 120;
         });
 
-        // Cierre y CTA
-        this.drawSectionTitle(doc, 'Tienes tu Diagnóstico. ¿Y ahora qué?');
-        this.drawParagraph(
-          doc,
-          `Felicidades, ${data.name}. La claridad sin acción no transforma. Este PDF es tu mapa; elige tu siguiente paso y conviértelo en hábito.`,
-        );
-        this.drawParagraph(
-          doc,
-          'Vuelve ahora a la página donde hiciste tu Rueda de la Vida y descubre el plan de acción para equilibrar tu rueda y avanzar.',
-        );
+        // Page 3: Action plan
+        doc.addPage();
 
-        const btnY = doc.y + 10;
-        doc.roundedRect(120, btnY, 360, 30, 6).fillColor('#ef4444').fill();
+        // Call to action header
+        this.drawGradientBackground(doc, 0, 0, 595, 150, '#f97316', '#dc2626');
+        
+        doc
+          .fontSize(24)
+          .fillColor('#ffffff')
+          .text('¿Y ahora qué?', 50, 50, { align: 'center' });
+        
+        doc
+          .fontSize(14)
+          .fillColor('#ffffff')
+          .opacity(0.95)
+          .text(
+            'Has dado el primer paso. La claridad sin acción no transforma.',
+            50,
+            90,
+            { align: 'center' },
+          );
+
+        // Action card
+        this.drawCard(doc, 50, 180, pageWidth, 200);
+        doc
+          .fontSize(16)
+          .fillColor('#111827')
+          .opacity(1)
+          .text('Tu Plan de Transformación te espera', 70, 200);
+        
         doc
           .fontSize(12)
+          .fillColor('#6b7280')
+          .text(
+            'Basado en tus resultados, hemos preparado un plan personalizado con:',
+            70,
+            230,
+          );
+        
+        const features = [
+          '✓ 8 módulos transformadores',
+          '✓ Ejercicios prácticos paso a paso',
+          '✓ Acompañamiento personalizado',
+          '✓ Comunidad de apoyo',
+          '✓ Garantía de resultados',
+        ];
+        
+        features.forEach((feature, index) => {
+          doc
+            .fontSize(11)
+            .fillColor('#10b981')
+            .text(feature, 80, 260 + index * 20);
+        });
+
+        // CTA button
+        const btnY = 400;
+        this.drawGradientBackground(doc, 150, btnY, 315, 50, '#8b5cf6', '#3b82f6');
+        doc
+          .roundedRect(150, btnY, 315, 50, 25)
+          .lineWidth(0)
+          .stroke();
+        
+        doc
+          .fontSize(14)
           .fillColor('#ffffff')
-          .text('VOLVER AHORA Y DESCUBRIR MI PLAN DE ACCIÓN', 120, btnY + 9, {
-            width: 360,
+          .text('DESCUBRE TU PLAN PERSONALIZADO', 150, btnY + 18, {
+            width: 315,
             align: 'center',
           });
-        // Clickable link area over the CTA button
-        doc.link(120, btnY, 360, 30, 'https://ifraindmg.com/');
-        doc.moveDown(3);
+        
+        // Make button clickable
+        doc.link(150, btnY, 315, 50, 'https://ifraindmg.com/');
 
-        // Footer with date
+        // Footer
         doc
           .fontSize(10)
           .fillColor('#6b7280')
           .text(
-            `Generado el ${new Date().toLocaleDateString('es-ES', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}`,
+            'Este diagnóstico es el inicio de tu transformación.',
+            50,
+            500,
             { align: 'center' },
           );
-
-        doc.moveDown(0.5);
+        
         doc
           .fontSize(10)
-          .fillColor('#2563eb')
-          .text('Livelify - Tu Coach Personal', { align: 'center' });
+          .fillColor('#8b5cf6')
+          .text('www.ifraindmg.com', 50, 520, { align: 'center' });
 
         // Finalize PDF
         doc.end();
@@ -246,5 +503,24 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
         reject(error);
       }
     });
+  }
+
+  private getInterpretation(score: number) {
+    if (score <= 4) {
+      return {
+        level: 'Necesita atención prioritaria',
+        color: '#ef4444',
+      };
+    }
+    if (score <= 7) {
+      return {
+        level: 'Área con oportunidad de mejora',
+        color: '#f59e0b',
+      };
+    }
+    return {
+      level: 'Área en buen estado',
+      color: '#10b981',
+    };
   }
 }
