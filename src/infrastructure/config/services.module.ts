@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { EmailAdapter } from '../adapters/email/email.adapter';
-import { PdfGeneratorAdapter } from '../adapters/pdf-generator/pdf-generator.adapter';
+import { SendGridEmailAdapter } from '../adapters/email/sendgrid-email.adapter';
+import { SendGridMarketingAdapter } from '../adapters/sendgrid-marketing/sendgrid-marketing.adapter';
 import { DiagnosticRepository } from '../repositories/diagnostic/diagnostic.repository';
 import { DatabaseModule } from './database.module';
 import { EMAIL_SERVICE_TOKEN } from '../../application/ports/email';
-import { PDF_GENERATOR_SERVICE_TOKEN } from '../../application/ports/pdf-generator';
+import { SENDGRID_MARKETING_SERVICE_TOKEN } from '../../application/ports/sendgrid-marketing';
 import { DIAGNOSTIC_REPOSITORY_TOKEN } from '../../application/ports/diagnostic-repository';
 
 @Module({
@@ -12,11 +12,11 @@ import { DIAGNOSTIC_REPOSITORY_TOKEN } from '../../application/ports/diagnostic-
   providers: [
     {
       provide: EMAIL_SERVICE_TOKEN,
-      useClass: EmailAdapter,
+      useClass: SendGridEmailAdapter,
     },
     {
-      provide: PDF_GENERATOR_SERVICE_TOKEN,
-      useClass: PdfGeneratorAdapter,
+      provide: SENDGRID_MARKETING_SERVICE_TOKEN,
+      useClass: SendGridMarketingAdapter,
     },
     {
       provide: DIAGNOSTIC_REPOSITORY_TOKEN,
@@ -25,7 +25,7 @@ import { DIAGNOSTIC_REPOSITORY_TOKEN } from '../../application/ports/diagnostic-
   ],
   exports: [
     EMAIL_SERVICE_TOKEN,
-    PDF_GENERATOR_SERVICE_TOKEN,
+    SENDGRID_MARKETING_SERVICE_TOKEN,
     DIAGNOSTIC_REPOSITORY_TOKEN,
   ],
 })

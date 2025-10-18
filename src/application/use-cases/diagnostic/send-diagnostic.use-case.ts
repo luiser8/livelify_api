@@ -1,13 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Inject, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { EMAIL_SERVICE_TOKEN } from '../../ports/email';
 import type { EmailServiceInterface } from '../../ports/email';
-import { PDF_GENERATOR_SERVICE_TOKEN } from '../../ports/pdf-generator';
-import type { PdfGeneratorServiceInterface } from '../../ports/pdf-generator';
-import { DIAGNOSTIC_REPOSITORY_TOKEN } from '../../ports/diagnostic-repository';
-import type { DiagnosticRepositoryInterface } from '../../ports/diagnostic-repository';
-import { Diagnostic } from '../../../domain/entities/diagnostic.entity';
+import { SENDGRID_MARKETING_SERVICE_TOKEN } from '../../ports/sendgrid-marketing';
+import type { SendGridMarketingServiceInterface } from '../../ports/sendgrid-marketing';
 
 export interface SendDiagnosticRequest {
   name: string;
@@ -26,8 +22,8 @@ export interface SendDiagnosticRequest {
 export interface SendDiagnosticResponse {
   success: boolean;
   message: string;
-  diagnosticId: string;
-  emailSent?: boolean;
+  addedToSendGrid: boolean;
+  emailSent: boolean;
 }
 
 @Injectable()
@@ -35,77 +31,65 @@ export class SendDiagnosticUseCase {
   constructor(
     @Inject(EMAIL_SERVICE_TOKEN)
     private readonly emailService: EmailServiceInterface,
-    @Inject(PDF_GENERATOR_SERVICE_TOKEN)
-    private readonly pdfGenerator: PdfGeneratorServiceInterface,
-    @Inject(DIAGNOSTIC_REPOSITORY_TOKEN)
-    private readonly diagnosticRepository: DiagnosticRepositoryInterface,
-    private readonly configService: ConfigService,
+    @Inject(SENDGRID_MARKETING_SERVICE_TOKEN)
+    private readonly sendGridMarketing: SendGridMarketingServiceInterface,
   ) {}
 
   async execute(
     request: SendDiagnosticRequest,
   ): Promise<SendDiagnosticResponse> {
     try {
-      // 1. Create and save diagnostic entity in PostgreSQL
-      const diagnostic = Diagnostic.create(
-        request.name,
-        request.email,
-        request.scores,
-        request.average,
-      );
-
-      const savedDiagnostic = await this.diagnosticRepository.save(diagnostic);
-      console.log('✅ Diagnostic saved in database:', savedDiagnostic.getId());
-
-      // 2. Check if email sending is enabled
-      const sendEmailEnabled =
-        this.configService.get<string>('DIAGNOSTIC_SEND_EMAIL', 'true') ===
-        'true';
-
-      let emailSent = false;
-
-      if (sendEmailEnabled) {
-        // 3. Generate PDF from diagnostic data
-        const pdfBuffer = await this.pdfGenerator.generateDiagnosticPdf({
-          name: request.name,
+      // 1. Add contact to SendGrid marketing list
+      let addedToSendGrid = false;
+      try {
+        const sendGridResult = await this.sendGridMarketing.addContactToList({
           email: request.email,
-          scores: request.scores,
-          average: request.average,
+          customFields: {
+            nombre_cliente: request.name,
+            puntuacion_promedio: request.average.toFixed(1),
+            score_desarrollo: request.scores.personal,
+            score_profesional: request.scores.professional,
+            score_salud: request.scores.health,
+            score_finanzas: request.scores.finances,
+            score_familia: request.scores.family,
+            score_amor: request.scores.love,
+          },
         });
 
-        // 4. Prepare email content
-        const emailHtml = this.generateEmailHtml(request);
+        addedToSendGrid = sendGridResult.success;
 
-        // 5. Send email with PDF attachment
-        await this.emailService.sendEmail({
-          to: request.email,
-          subject: 'Tu Diagnóstico de la Rueda de la Vida - Livelify',
-          html: emailHtml,
-          text: `Hola ${request.name},\n\nGracias por completar tu diagnóstico de la Rueda de la Vida. Tu puntuación promedio es ${request.average}/10.\n\nAdjunto encontrarás un PDF detallado con tus resultados.\n\nSaludos,\nEquipo Livelify`,
-          attachments: [
-            {
-              filename: `diagnostico-rueda-vida-${Date.now()}.pdf`,
-              content: pdfBuffer,
-              contentType: 'application/pdf',
-            },
-          ],
-        });
-
-        emailSent = true;
-        console.log('✅ Email sent to:', request.email);
-      } else {
-        console.log(
-          '⚠️ Email sending is disabled (DIAGNOSTIC_SEND_EMAIL=false)',
+        if (sendGridResult.success) {
+          console.log('✅ Contact added to SendGrid marketing list');
+        } else {
+          console.warn(
+            '⚠️ Failed to add contact to SendGrid:',
+            sendGridResult.error,
+          );
+        }
+      } catch (sendGridError) {
+        console.error(
+          '❌ SendGrid error (non-blocking):',
+          sendGridError.message,
         );
       }
 
+      // 2. Send email via SendGrid
+      const emailHtml = this.generateEmailHtml(request);
+
+      await this.emailService.sendEmail({
+        to: request.email,
+        subject: 'Tu Diagnóstico de la Rueda de la Vida - Livelify',
+        html: emailHtml,
+        text: `Hola ${request.name},\n\nGracias por completar tu diagnóstico de la Rueda de la Vida. Tu puntuación promedio es ${request.average}/10.\n\nSaludos,\nEquipo Livelify`,
+      });
+
+      console.log('✅ Email sent to:', request.email);
+
       return {
         success: true,
-        message: emailSent
-          ? 'Diagnostic saved and email sent successfully'
-          : 'Diagnostic saved successfully (email disabled)',
-        diagnosticId: savedDiagnostic.getId(),
-        emailSent,
+        message: 'Diagnostic saved and email sent successfully',
+        addedToSendGrid,
+        emailSent: true,
       };
     } catch (error) {
       throw new Error(`Failed to process diagnostic: ${error.message}`);
@@ -197,7 +181,7 @@ export class SendDiagnosticUseCase {
             </div>
 
             <p style="margin-top: 30px;">
-              Adjunto encontrarás un PDF detallado con tus resultados que puedes guardar o imprimir.
+              Revisa tus resultados arriba y descubre cómo mejorar cada área de tu vida.
             </p>
             
             <p>
