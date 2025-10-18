@@ -205,11 +205,6 @@ export class SendDiagnosticUseCase {
               Únete a Livelify para comenzar a mejorar cada área de tu vida con nuestro coaching personalizado.
             </p>
 
-            <div style="text-align: center; margin-top: 30px;">
-              <a href="#" style="background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                Comenzar Ahora
-              </a>
-            </div>
           </div>
           
           <div class="footer">

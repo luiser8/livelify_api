@@ -39,7 +39,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
       .roundedRect(x + 2, y + 2, width, height, radius)
       .fill()
       .restore();
-    
+
     // Card background
     doc
       .roundedRect(x, y, width, height, radius)
@@ -72,7 +72,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
     doc
       .circle(x + filledWidth, y + height / 2, height / 2 + 2)
       .fillAndStroke('#ffffff', color);
-    
+
     if (showLabels) {
       // Labels
       doc
@@ -113,12 +113,12 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
     for (let level = 1; level <= 3; level++) {
       const levelRadius = (radius * level) / 3;
       doc.strokeColor('#e5e7eb').lineWidth(1);
-      
+
       for (let i = 0; i <= 6; i++) {
         const angle = angleStep * i - Math.PI / 2;
         const x = centerX + Math.cos(angle) * levelRadius;
         const y = centerY + Math.sin(angle) * levelRadius;
-        
+
         if (i === 0) {
           doc.moveTo(x, y);
         } else {
@@ -133,7 +133,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
       const angle = angleStep * i - Math.PI / 2;
       const x = centerX + Math.cos(angle) * radius;
       const y = centerY + Math.sin(angle) * radius;
-      
+
       doc
         .moveTo(centerX, centerY)
         .lineTo(x, y)
@@ -144,7 +144,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
       // Labels
       const labelX = centerX + Math.cos(angle) * (radius + 20);
       const labelY = centerY + Math.sin(angle) * (radius + 20);
-      
+
       doc
         .fontSize(10)
         .fillColor('#6b7280')
@@ -157,9 +157,9 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
     // Draw data polygon
     doc.save();
     const dataPoints: Array<[number, number]> = [];
-    
+
     areas.forEach((area, i) => {
-      const score = scores[area as keyof typeof scores] || 0;
+      const score = scores[area] || 0;
       const angle = angleStep * i - Math.PI / 2;
       const distance = (radius * score) / 10;
       const x = centerX + Math.cos(angle) * distance;
@@ -217,106 +217,155 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
 
   private getAreaDescription(area: string): string {
     const descriptions: Record<string, string> = {
-      personal: 'Se refiere a tu crecimiento intelectual, mental y espiritual. Incluye el aprendizaje de nuevas habilidades, tus hobbies, la lectura, tu mentalidad y tu conexión contigo mismo.',
-      professional: 'Evalúa tu satisfacción con tu carrera, trabajo o negocio. ¿Sientes que tu trabajo tiene un propósito? ¿Estás creciendo profesionalmente? ¿Te sientes valorado y recompensado?',
-      health: 'Mide tu bienestar físico. Esto incluye tu nivel de energía, la calidad de tu alimentación, tu sueño, el ejercicio físico y tu salud general. Es el motor de todo lo demás.',
-      finances: 'Representa tu relación con el dinero. ¿Tus ingresos cubren tus necesidades y deseos? ¿Tienes capacidad de ahorro? ¿Sientes control y paz financiera, o estrés y escasez?',
-      family: 'Tu red de apoyo y conexiones sociales. Evalúa la calidad de tus relaciones con familiares, amigos y tu comunidad. ¿Te sientes conectado, apoyado y parte de algo?',
+      personal:
+        'Se refiere a tu crecimiento intelectual, mental y espiritual. Incluye el aprendizaje de nuevas habilidades, tus hobbies, la lectura, tu mentalidad y tu conexión contigo mismo.',
+      professional:
+        'Evalúa tu satisfacción con tu carrera, trabajo o negocio. ¿Sientes que tu trabajo tiene un propósito? ¿Estás creciendo profesionalmente? ¿Te sientes valorado y recompensado?',
+      health:
+        'Mide tu bienestar físico. Esto incluye tu nivel de energía, la calidad de tu alimentación, tu sueño, el ejercicio físico y tu salud general. Es el motor de todo lo demás.',
+      finances:
+        'Representa tu relación con el dinero. ¿Tus ingresos cubren tus necesidades y deseos? ¿Tienes capacidad de ahorro? ¿Sientes control y paz financiera, o estrés y escasez?',
+      family:
+        'Tu red de apoyo y conexiones sociales. Evalúa la calidad de tus relaciones con familiares, amigos y tu comunidad. ¿Te sientes conectado, apoyado y parte de algo?',
       love: 'Se enfoca en tu relación romántica. Si estás en una, ¿cómo es la comunicación, la intimidad y el compañerismo? Si estás soltero, ¿cómo te sientes con esa situación y con tu relación amorosa contigo mismo?',
     };
     return descriptions[area] || '';
   }
 
-  private getAreaInterpretation(area: string, score: number): { interpretation: string; recommendation: string } {
+  private getAreaInterpretation(
+    area: string,
+    score: number,
+  ): { interpretation: string; recommendation: string } {
     const interpretations: Record<string, any> = {
       personal: {
         low: {
-          interpretation: 'Es probable que sientas que tu crecimiento personal está estancado. Quizás has dejado de aprender cosas nuevas o no dedicas tiempo para ti mismo, tu mente o tus hobbies. Esta es un área fundamental que necesita tu atención.',
-          recommendation: 'Revisa qué es lo que te gustaría aprender. Comienza dedicando solo 15 minutos al día a leer un libro sobre un tema que te interese o escuchar un podcast de crecimiento. La clave es empezar pequeño pero ser constante.',
+          interpretation:
+            'Es probable que sientas que tu crecimiento personal está estancado. Quizás has dejado de aprender cosas nuevas o no dedicas tiempo para ti mismo, tu mente o tus hobbies. Esta es un área fundamental que necesita tu atención.',
+          recommendation:
+            'Revisa qué es lo que te gustaría aprender. Comienza dedicando solo 15 minutos al día a leer un libro sobre un tema que te interese o escuchar un podcast de crecimiento. La clave es empezar pequeño pero ser constante.',
         },
         medium: {
-          interpretation: 'Tienes cierta conciencia sobre la importancia de tu desarrollo, pero quizás no es una prioridad constante. Hay avances, pero sientes que podrías estar haciendo más para crecer y nutrir tu mente. Tienes una buena base, pero hay mucho punto de mejora.',
-          recommendation: 'Es hora de establecer una rutina. Define un objetivo de aprendizaje claro para los próximos 3 meses (ej. "terminar un curso online"). Bloquea tiempo en tu agenda para esta actividad, tal como lo harías con una reunión importante.',
+          interpretation:
+            'Tienes cierta conciencia sobre la importancia de tu desarrollo, pero quizás no es una prioridad constante. Hay avances, pero sientes que podrías estar haciendo más para crecer y nutrir tu mente. Tienes una buena base, pero hay mucho punto de mejora.',
+          recommendation:
+            'Es hora de establecer una rutina. Define un objetivo de aprendizaje claro para los próximos 3 meses (ej. "terminar un curso online"). Bloquea tiempo en tu agenda para esta actividad, tal como lo harías con una reunión importante.',
         },
         high: {
-          interpretation: '¡Felicidades! Sientes que estás en un camino de crecimiento constante. Probablemente lees, estudias y te dedicas tiempo a ti mismo de forma regular.',
-          recommendation: '¡No te estanques! El crecimiento real está en la incomodidad. Es el momento de "subir de nivel". Si ya lees mucho, intenta escribir. Si ya sabes de un tema, enséñalo. Ponte un desafío que te parezca grande e intimidante para seguir evolucionando.',
+          interpretation:
+            '¡Felicidades! Sientes que estás en un camino de crecimiento constante. Probablemente lees, estudias y te dedicas tiempo a ti mismo de forma regular.',
+          recommendation:
+            '¡No te estanques! El crecimiento real está en la incomodidad. Es el momento de "subir de nivel". Si ya lees mucho, intenta escribir. Si ya sabes de un tema, enséñalo. Ponte un desafío que te parezca grande e intimidante para seguir evolucionando.',
         },
       },
       professional: {
         low: {
-          interpretation: 'Es muy probable que sientas una fuerte insatisfacción, estrés o estancamiento en tu trabajo o carrera. Puede que no te sientas valorado o que tu trabajo no se alinee con tus valores.',
-          recommendation: 'Revisa qué es lo que específicamente no te gusta. ¿Es la tarea, el jefe, la cultura? Actualiza tu CV y empieza a explorar otras opciones, no para cambiarte mañana, sino para ver qué hay en el mercado.',
+          interpretation:
+            'Es muy probable que sientas una fuerte insatisfacción, estrés o estancamiento en tu trabajo o carrera. Puede que no te sientas valorado o que tu trabajo no se alinee con tus valores.',
+          recommendation:
+            'Revisa qué es lo que específicamente no te gusta. ¿Es la tarea, el jefe, la cultura? Actualiza tu CV y empieza a explorar otras opciones, no para cambiarte mañana, sino para ver qué hay en el mercado.',
         },
         medium: {
-          interpretation: 'Estás "bien", pero no "genial". Tu trabajo paga las cuentas, pero quizás le falta chispa, propósito o un camino claro de crecimiento. Sientes que tienes mucho potencial por aprovechar.',
-          recommendation: 'Busca una conversación con tu superior para pedir feedback y hablar de tu futuro. Propón un nuevo proyecto que te entusiasme o identifica una habilidad que, si la desarrollas, te permitirá asumir más responsabilidades.',
+          interpretation:
+            'Estás "bien", pero no "genial". Tu trabajo paga las cuentas, pero quizás le falta chispa, propósito o un camino claro de crecimiento. Sientes que tienes mucho potencial por aprovechar.',
+          recommendation:
+            'Busca una conversación con tu superior para pedir feedback y hablar de tu futuro. Propón un nuevo proyecto que te entusiasme o identifica una habilidad que, si la desarrollas, te permitirá asumir más responsabilidades.',
         },
         high: {
-          interpretation: '¡Excelente! Disfrutas de tu trabajo, te sientes retado y valorado. Sientes que estás en el lugar correcto y aportando valor.',
-          recommendation: 'Es el momento perfecto para evolucionar y no estancarte. ¿Cómo puedes ser un mentor para otros en tu equipo? ¿Puedes empezar un proyecto paralelo (side-hustle) basado en tu expertise? Ponte incómodo buscando el siguiente gran salto profesional.',
+          interpretation:
+            '¡Excelente! Disfrutas de tu trabajo, te sientes retado y valorado. Sientes que estás en el lugar correcto y aportando valor.',
+          recommendation:
+            'Es el momento perfecto para evolucionar y no estancarte. ¿Cómo puedes ser un mentor para otros en tu equipo? ¿Puedes empezar un proyecto paralelo (side-hustle) basado en tu expertise? Ponte incómodo buscando el siguiente gran salto profesional.',
         },
       },
       health: {
         low: {
-          interpretation: 'Es probable que te sientas bajo de energía, cansado o insatisfecho con tu estado físico. Quizás comes de forma desordenada, no duermes bien o el sedentarismo se ha apoderado de ti.',
-          recommendation: 'No intentes cambiar todo de golpe. Revisa tu día y elige un solo hábito para empezar. ¿Puede ser tomar 2 litros de agua al día? ¿O caminar 20 minutos? ¿O dormir 7 horas? Enfócate solo en eso durante una semana.',
+          interpretation:
+            'Es probable que te sientas bajo de energía, cansado o insatisfecho con tu estado físico. Quizás comes de forma desordenada, no duermes bien o el sedentarismo se ha apoderado de ti.',
+          recommendation:
+            'No intentes cambiar todo de golpe. Revisa tu día y elige un solo hábito para empezar. ¿Puede ser tomar 2 litros de agua al día? ¿O caminar 20 minutos? ¿O dormir 7 horas? Enfócate solo en eso durante una semana.',
         },
         medium: {
-          interpretation: 'A veces lo haces bien, a veces mal. Eres consciente de lo que "deberías" hacer, pero te falta consistencia. Tienes puntos de mejora claros para sentirte con más energía.',
-          recommendation: 'La clave para ti es la planificación. Planifica tus comidas del fin de semana o deja lista tu ropa de ejercicio la noche anterior. Agenda tus entrenamientos en el calendario como si fueran una reunión. La consistencia vence a la intensidad.',
+          interpretation:
+            'A veces lo haces bien, a veces mal. Eres consciente de lo que "deberías" hacer, pero te falta consistencia. Tienes puntos de mejora claros para sentirte con más energía.',
+          recommendation:
+            'La clave para ti es la planificación. Planifica tus comidas del fin de semana o deja lista tu ropa de ejercicio la noche anterior. Agenda tus entrenamientos en el calendario como si fueran una reunión. La consistencia vence a la intensidad.',
         },
         high: {
-          interpretation: '¡Felicidades! Tienes una rutina sólida de alimentación, descanso y ejercicio. Te sientes con energía y vitalidad la mayor parte del tiempo.',
-          recommendation: 'Es hora de un nuevo desafío para no aburrirte. Ponte un reto físico que te ponga incómodo: ¿correr una 10k? ¿Probar un nuevo deporte como la escalada o el boxeo? ¿Aprender a cocinar recetas de alta cocina saludable? Sigue evolucionando.',
+          interpretation:
+            '¡Felicidades! Tienes una rutina sólida de alimentación, descanso y ejercicio. Te sientes con energía y vitalidad la mayor parte del tiempo.',
+          recommendation:
+            'Es hora de un nuevo desafío para no aburrirte. Ponte un reto físico que te ponga incómodo: ¿correr una 10k? ¿Probar un nuevo deporte como la escalada o el boxeo? ¿Aprender a cocinar recetas de alta cocina saludable? Sigue evolucionando.',
         },
       },
       finances: {
         low: {
-          interpretation: 'Sientes estrés, ansiedad o escasez en relación al dinero. Quizás las deudas te agobian, no llegas a fin de mes o simplemente no tienes control sobre a dónde se va tu dinero.',
-          recommendation: 'El primer paso es la claridad. Haz un presupuesto simple. Durante una semana, anota absolutamente todos tus gastos. Te sorprenderás. Identifica un "gasto hormiga" (como ese café diario) que puedas reducir.',
+          interpretation:
+            'Sientes estrés, ansiedad o escasez en relación al dinero. Quizás las deudas te agobian, no llegas a fin de mes o simplemente no tienes control sobre a dónde se va tu dinero.',
+          recommendation:
+            'El primer paso es la claridad. Haz un presupuesto simple. Durante una semana, anota absolutamente todos tus gastos. Te sorprenderás. Identifica un "gasto hormiga" (como ese café diario) que puedas reducir.',
         },
         medium: {
-          interpretation: 'Cubres tus gastos, pero no avanzas. Vives "al día" o ahorras muy poco y sin constancia. Sientes que podrías administrarte mejor y generar más, pero no sabes por dónde empezar.',
-          recommendation: 'Automatiza tu ahorro. Configura una transferencia automática para que, apenas recibas tu sueldo, un 5% o 10% se vaya a una cuenta de ahorros que no toques. Empieza a leer sobre cómo generar ingresos adicionales.',
+          interpretation:
+            'Cubres tus gastos, pero no avanzas. Vives "al día" o ahorras muy poco y sin constancia. Sientes que podrías administrarte mejor y generar más, pero no sabes por dónde empezar.',
+          recommendation:
+            'Automatiza tu ahorro. Configura una transferencia automática para que, apenas recibas tu sueldo, un 5% o 10% se vaya a una cuenta de ahorros que no toques. Empieza a leer sobre cómo generar ingresos adicionales.',
         },
         high: {
-          interpretation: 'Tienes control de tus finanzas, ahorras de forma consistente y vives con tranquilidad financiera.',
-          recommendation: 'El siguiente nivel es hacer que tu dinero trabaje para ti. Si solo estás ahorrando, tu dinero está perdiendo valor. Es hora de aprender sobre inversiones (fondos, acciones, etc.) para construir patrimonio a largo plazo y no estancarte solo en "ahorrar".',
+          interpretation:
+            'Tienes control de tus finanzas, ahorras de forma consistente y vives con tranquilidad financiera.',
+          recommendation:
+            'El siguiente nivel es hacer que tu dinero trabaje para ti. Si solo estás ahorrando, tu dinero está perdiendo valor. Es hora de aprender sobre inversiones (fondos, acciones, etc.) para construir patrimonio a largo plazo y no estancarte solo en "ahorrar".',
         },
       },
       family: {
         low: {
-          interpretation: 'Es probable que te sientas solo, desconectado o que tengas relaciones conflictivas con tus seres queridos. La rutina te ha alejado de tus amigos o familia.',
-          recommendation: 'Esta área requiere proactividad. Revisa tu lista de contactos. Elige a una persona (amigo o familiar) con la que no hablas hace tiempo y envíale un mensaje hoy mismo, solo para saber cómo está.',
+          interpretation:
+            'Es probable que te sientas solo, desconectado o que tengas relaciones conflictivas con tus seres queridos. La rutina te ha alejado de tus amigos o familia.',
+          recommendation:
+            'Esta área requiere proactividad. Revisa tu lista de contactos. Elige a una persona (amigo o familiar) con la que no hablas hace tiempo y envíale un mensaje hoy mismo, solo para saber cómo está.',
         },
         medium: {
-          interpretation: 'Tienes buenas relaciones, pero quizás las das por sentado. La rutina y el trabajo consumen tu tiempo y ves menos de lo que te gustaría a la gente que quieres. Hay mucho potencial para reconectar.',
-          recommendation: 'Enfócate en la calidad sobre la cantidad. Agenda una "cita" (un café, una comida, una videollamada) con un amigo o familiar esta semana. Ponlo en tu calendario. Un momento de conexión real es mejor que mil mensajes de texto.',
+          interpretation:
+            'Tienes buenas relaciones, pero quizás las das por sentado. La rutina y el trabajo consumen tu tiempo y ves menos de lo que te gustaría a la gente que quieres. Hay mucho potencial para reconectar.',
+          recommendation:
+            'Enfócate en la calidad sobre la cantidad. Agenda una "cita" (un café, una comida, una videollamada) con un amigo o familiar esta semana. Ponlo en tu calendario. Un momento de conexión real es mejor que mil mensajes de texto.',
         },
         high: {
-          interpretation: 'Tienes una red de apoyo sólida, te sientes querido y dedicas tiempo de calidad a tus relaciones. ¡Es un pilar en tu vida!',
-          recommendation: 'Tu reto es no darlo por sentado y ser el pilar para otros. ¿Cómo puedes profundizar aún más esas conexiones? Organiza tú el próximo encuentro. Expresa tu gratitud activamente. Piensa en cómo puedes ayudar a tus amigos a conectar entre ellos.',
+          interpretation:
+            'Tienes una red de apoyo sólida, te sientes querido y dedicas tiempo de calidad a tus relaciones. ¡Es un pilar en tu vida!',
+          recommendation:
+            'Tu reto es no darlo por sentado y ser el pilar para otros. ¿Cómo puedes profundizar aún más esas conexiones? Organiza tú el próximo encuentro. Expresa tu gratitud activamente. Piensa en cómo puedes ayudar a tus amigos a conectar entre ellos.',
         },
       },
       love: {
         low: {
-          interpretation: '(Si estás en pareja) Es probable que haya conflicto, distancia, aburrimiento o falta de comunicación. (Si estás soltero) Es probable que te sientas frustrado, solo o pesimista respecto a encontrar a alguien.',
-          recommendation: '(En pareja) Inicia una conversación honesta. Pregunta: "¿Cómo estás realmente con nosotros?". (Soltero) Deja de buscar fuera y trabaja en la relación contigo mismo. Haz esa actividad que siempre has querido hacer a solas.',
+          interpretation:
+            '(Si estás en pareja) Es probable que haya conflicto, distancia, aburrimiento o falta de comunicación. (Si estás soltero) Es probable que te sientas frustrado, solo o pesimista respecto a encontrar a alguien.',
+          recommendation:
+            '(En pareja) Inicia una conversación honesta. Pregunta: "¿Cómo estás realmente con nosotros?". (Soltero) Deja de buscar fuera y trabaja en la relación contigo mismo. Haz esa actividad que siempre has querido hacer a solas.',
         },
         medium: {
-          interpretation: '(En pareja) La relación es estable, pero ha caído en la rutina. Se quieren, pero falta "chispa". (Si estás soltero) Estás bien contigo mismo, pero te gustaría conocer a alguien y tener una conexión.',
-          recommendation: '(En pareja) ¡Salgan de la rutina! Establezcan una "noche de cita" semanal, sin teléfonos, para reconectar. (Soltero) Apúntate a una actividad social nueva (clases de baile, club de lectura, gimnasio) donde puedas conocer gente nueva con tus mismos intereses.',
+          interpretation:
+            '(En pareja) La relación es estable, pero ha caído en la rutina. Se quieren, pero falta "chispa". (Si estás soltero) Estás bien contigo mismo, pero te gustaría conocer a alguien y tener una conexión.',
+          recommendation:
+            '(En pareja) ¡Salgan de la rutina! Establezcan una "noche de cita" semanal, sin teléfonos, para reconectar. (Soltero) Apúntate a una actividad social nueva (clases de baile, club de lectura, gimnasio) donde puedas conocer gente nueva con tus mismos intereses.',
         },
         high: {
-          interpretation: '¡Felicidades! Te sientes pleno, conectado, amado y feliz en esta área, ya sea en una relación próspera o en una soltería elegida y disfrutada.',
-          recommendation: 'El reto es seguir nutriendo esta área. Las relaciones (contigo o con otro) son como plantas. Sigan "conquistándose" a diario. Establezcan metas a futuro juntos (o contigo mismo). ¿Qué gran aventura pueden planear para seguir evolucionando?',
+          interpretation:
+            '¡Felicidades! Te sientes pleno, conectado, amado y feliz en esta área, ya sea en una relación próspera o en una soltería elegida y disfrutada.',
+          recommendation:
+            'El reto es seguir nutriendo esta área. Las relaciones (contigo o con otro) son como plantas. Sigan "conquistándose" a diario. Establezcan metas a futuro juntos (o contigo mismo). ¿Qué gran aventura pueden planear para seguir evolucionando?',
         },
       },
     };
 
     const level = score <= 4 ? 'low' : score <= 7 ? 'medium' : 'high';
-    return interpretations[area]?.[level] || { interpretation: '', recommendation: '' };
+    return (
+      interpretations[area]?.[level] || {
+        interpretation: '',
+        recommendation: '',
+      }
+    );
   }
 
   async generateDiagnosticPdf(data: DiagnosticData): Promise<Buffer> {
@@ -345,7 +394,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
           .text('Tu Diagnóstico Personalizado', 50, 50, {
             align: 'center',
           });
-        
+
         doc
           .fontSize(16)
           .fillColor('#ffffff')
@@ -361,26 +410,20 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
           .fillColor('#6b7280')
           .opacity(1)
           .text('Preparado para:', 70, 155);
-        doc
-          .fontSize(16)
-          .fillColor('#111827')
-          .text(data.name, 70, 175);
-        doc
-          .fontSize(11)
-          .fillColor('#6b7280')
-          .text(data.email, 70, 198);
+        doc.fontSize(16).fillColor('#111827').text(data.name, 70, 175);
+        doc.fontSize(11).fillColor('#6b7280').text(data.email, 70, 198);
 
         // Introduction section
         doc
           .fontSize(16)
           .fillColor('#111827')
           .text('¿Qué es la Rueda de la Vida?', 50, 250);
-        
+
         doc
           .fontSize(11)
           .fillColor('#374151')
           .text(`¡Hola, ${data.name}!`, 50, 280);
-        
+
         doc
           .fontSize(10)
           .fillColor('#374151')
@@ -388,28 +431,28 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
             'Felicidades por tomarte el tiempo para hacer este ejercicio. Lo que tienes en tus manos es un diagnóstico basado en la Rueda de la Vida, una de las herramientas de coaching y autoconocimiento más poderosas que existen.',
             50,
             305,
-            { width: pageWidth, align: 'justify' }
+            { width: pageWidth, align: 'justify' },
           );
 
         doc.text(
           'Su objetivo es simple: darte una visión gráfica y honesta de cómo te sientes con respecto a las áreas clave de tu vida en este preciso momento.',
           50,
           355,
-          { width: pageWidth, align: 'justify' }
+          { width: pageWidth, align: 'justify' },
         );
 
         doc.text(
           'Imagina tu vida como una rueda. Si algunos radios (las áreas) son muy cortos (puntuación baja) y otros muy largos (puntuación alta), la rueda no podrá girar suavemente. Esto se traduce en estrés, estancamiento y sensación de desequilibrio.',
           50,
           405,
-          { width: pageWidth, align: 'justify' }
+          { width: pageWidth, align: 'justify' },
         );
 
         doc.text(
           'El objetivo no es tener un "10" en todo, sino encontrar un equilibrio que te brinde satisfacción y te permita avanzar con fluidez. Este informe es tu punto de partida. No es "bueno" ni "malo", es simplemente tu mapa actual. Y ahora que tienes el mapa, puedes decidir la ruta.',
           50,
           475,
-          { width: pageWidth, align: 'justify' }
+          { width: pageWidth, align: 'justify' },
         );
 
         // Average score at bottom
@@ -436,7 +479,14 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
           .text('Las Áreas que Componen tu Rueda', 50, 50);
 
         let yPos = 90;
-        const areaOrder = ['personal', 'professional', 'health', 'finances', 'family', 'love'];
+        const areaOrder = [
+          'personal',
+          'professional',
+          'health',
+          'finances',
+          'family',
+          'love',
+        ];
 
         areaOrder.forEach((area) => {
           if (yPos > 650) {
@@ -448,15 +498,15 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
           const label = this.getAreaLabel(area);
           const description = this.getAreaDescription(area);
 
-          doc
-            .fontSize(12)
-            .fillColor(color)
-            .text(label, 50, yPos);
-          
+          doc.fontSize(12).fillColor(color).text(label, 50, yPos);
+
           doc
             .fontSize(9)
             .fillColor('#374151')
-            .text(description, 50, yPos + 18, { width: pageWidth, align: 'justify' });
+            .text(description, 50, yPos + 18, {
+              width: pageWidth,
+              align: 'justify',
+            });
 
           yPos += 80;
         });
@@ -485,12 +535,12 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
           const label = this.getAreaLabel(area);
 
           this.drawCard(doc, 50, scoreY, pageWidth, 60);
-          
+
           doc
             .fontSize(11)
             .fillColor('#111827')
             .text(label, 70, scoreY + 12);
-          
+
           doc
             .fontSize(18)
             .fillColor(color)
@@ -521,7 +571,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
           .fontSize(20)
           .fillColor('#111827')
           .text('Qué Significan tus Puntuaciones', 50, 50);
-        
+
         doc
           .fontSize(11)
           .fillColor('#6b7280')
@@ -529,7 +579,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
             'A continuación, analizamos cada área de tu vida según la puntuación que asignaste. Usa esto como una guía para reflexionar y decidir tus próximos pasos.',
             50,
             80,
-            { width: pageWidth, align: 'justify' }
+            { width: pageWidth, align: 'justify' },
           );
 
         yPos = 120;
@@ -538,11 +588,17 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
           const score = data.scores[area as keyof typeof data.scores] || 0;
           const color = this.getAreaColor(area);
           const label = this.getAreaLabel(area);
-          const { interpretation, recommendation } = this.getAreaInterpretation(area, score);
-          
-          const level = score <= 4 ? 'Área de Atención Prioritaria' : 
-                        score <= 7 ? 'Área con Potencial de Mejora' : 
-                        'Área Óptima';
+          const { interpretation, recommendation } = this.getAreaInterpretation(
+            area,
+            score,
+          );
+
+          const level =
+            score <= 4
+              ? 'Área de Atención Prioritaria'
+              : score <= 7
+                ? 'Área con Potencial de Mejora'
+                : 'Área Óptima';
 
           // Check if we need a new page
           if (yPos > 500) {
@@ -551,16 +607,13 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
           }
 
           // Area header
-          doc
-            .fontSize(14)
-            .fillColor(color)
-            .text(`Área: ${label}`, 50, yPos);
-          
+          doc.fontSize(14).fillColor(color).text(`Área: ${label}`, 50, yPos);
+
           doc
             .fontSize(12)
             .fillColor('#111827')
             .text(`Tu Puntuación: ${score} / 10`, 50, yPos + 20);
-          
+
           doc
             .fontSize(10)
             .fillColor('#6b7280')
@@ -571,22 +624,28 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
             .fontSize(10)
             .fillColor('#111827')
             .text('Interpretación:', 50, yPos + 58);
-          
+
           doc
             .fontSize(9)
             .fillColor('#374151')
-            .text(interpretation, 50, yPos + 75, { width: pageWidth, align: 'justify' });
+            .text(interpretation, 50, yPos + 75, {
+              width: pageWidth,
+              align: 'justify',
+            });
 
           // Recommendation
           doc
             .fontSize(10)
             .fillColor('#111827')
             .text('Recomendación:', 50, yPos + 145);
-          
+
           doc
             .fontSize(9)
             .fillColor('#374151')
-            .text(recommendation, 50, yPos + 162, { width: pageWidth, align: 'justify' });
+            .text(recommendation, 50, yPos + 162, {
+              width: pageWidth,
+              align: 'justify',
+            });
 
           yPos += 250;
         });
@@ -596,7 +655,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
 
         // Call to action header
         this.drawGradientBackground(doc, 0, 0, 595, 150, '#f97316', '#dc2626');
-        
+
         doc
           .fontSize(24)
           .fillColor('#ffffff')
@@ -609,7 +668,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
           .fillColor('#ffffff')
           .opacity(0.95)
           .text(`Felicidades, ${data.name}.`, 50, 90, { align: 'center' });
-        
+
         doc
           .fontSize(11)
           .fillColor('#ffffff')
@@ -617,7 +676,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
             'Acabas de hacer algo que el 90% de las personas evita: mirarte honestamente en el espejo.',
             50,
             110,
-            { align: 'center' }
+            { align: 'center' },
           );
 
         // Action text
@@ -629,7 +688,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
             'Ahora tienes claridad total. Sabes exactamente qué áreas de tu vida están frenando tu potencial. Sabes dónde estás estancado.',
             50,
             180,
-            { width: pageWidth, align: 'justify' }
+            { width: pageWidth, align: 'justify' },
           );
 
         doc
@@ -639,7 +698,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
             'Pero seamos brutalmente honestos: La claridad es inútil si no va seguida de ACCIÓN.',
             50,
             220,
-            { width: pageWidth, align: 'justify' }
+            { width: pageWidth, align: 'justify' },
           );
 
         doc
@@ -649,7 +708,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
             'Este PDF es tu mapa. Es la "radiografía" de tu situación actual. Pero no es la cura.',
             50,
             260,
-            { width: pageWidth, align: 'justify' }
+            { width: pageWidth, align: 'justify' },
           );
 
         doc
@@ -659,7 +718,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
             'Esos números bajos que viste no van a subir mágicamente. El estrés financiero, la falta de energía o la insatisfacción profesional no desaparecen solo porque ahora les pusiste un número.',
             50,
             300,
-            { width: pageWidth, align: 'justify' }
+            { width: pageWidth, align: 'justify' },
           );
 
         doc
@@ -669,7 +728,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
             'Sin un plan. Sin un sistema. Sin la guía correcta... es muy probable que en 6 meses tu Rueda de la Vida se vea exactamente igual.',
             50,
             360,
-            { width: pageWidth, align: 'justify' }
+            { width: pageWidth, align: 'justify' },
           );
 
         doc
@@ -684,18 +743,16 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
             'Puedes cerrar este PDF, guardarlo en una carpeta y volver a la rutina que te dio estos resultados...',
             50,
             440,
-            { width: pageWidth, align: 'justify' }
+            { width: pageWidth, align: 'justify' },
           );
 
         doc
           .fontSize(11)
           .fillColor('#111827')
-          .text(
-            '...O puedes tomar una decisión.',
-            50,
-            480,
-            { width: pageWidth, align: 'justify' }
-          );
+          .text('...O puedes tomar una decisión.', 50, 480, {
+            width: pageWidth,
+            align: 'justify',
+          });
 
         doc
           .fontSize(11)
@@ -704,12 +761,12 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
             'La decisión de que este diagnóstico no sea un final, sino el punto de partida de tu transformación.',
             50,
             510,
-            { width: pageWidth, align: 'justify' }
+            { width: pageWidth, align: 'justify' },
           );
 
         // CTA section
         this.drawCard(doc, 50, 560, pageWidth, 140);
-        
+
         doc
           .fontSize(11)
           .fillColor('#111827')
@@ -717,7 +774,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
             'VUELVE AHORA MISMO A LA PÁGINA DONDE HICISTE TU RUEDA DE LA VIDA.',
             70,
             580,
-            { width: pageWidth - 40, align: 'center' }
+            { width: pageWidth - 40, align: 'center' },
           );
 
         doc
@@ -727,17 +784,22 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
             'Justo allí, debajo de la herramienta que acabas de usar, he revelado la solución exacta que necesitas para pasar del diagnóstico a la transformación real.',
             70,
             610,
-            { width: pageWidth - 40, align: 'center' }
+            { width: pageWidth - 40, align: 'center' },
           );
 
         // CTA button
         const btnY = 660;
-        this.drawGradientBackground(doc, 150, btnY, 315, 40, '#8b5cf6', '#3b82f6');
-        doc
-          .roundedRect(150, btnY, 315, 40, 20)
-          .lineWidth(0)
-          .stroke();
-        
+        this.drawGradientBackground(
+          doc,
+          150,
+          btnY,
+          315,
+          40,
+          '#8b5cf6',
+          '#3b82f6',
+        );
+        doc.roundedRect(150, btnY, 315, 40, 20).lineWidth(0).stroke();
+
         doc
           .fontSize(11)
           .fillColor('#ffffff')
@@ -745,7 +807,7 @@ export class PdfGeneratorAdapter implements PdfGeneratorServiceInterface {
             width: 315,
             align: 'center',
           });
-        
+
         // Make button clickable
         doc.link(150, btnY, 315, 40, 'https://ifraindmg.com/');
 

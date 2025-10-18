@@ -34,6 +34,13 @@ services:
       - THROTTLE_AUTH_LIMIT=5
       - THROTTLE_STRICT_TTL=60000
       - THROTTLE_STRICT_LIMIT=10
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_SECURE=false
+      - SMTP_USER=info@flowpartners.cl
+      - SMTP_PASSWORD=xxxx-xxxx-xxxx-xxxx
+      - SMTP_FROM=Flowpartners <noreply@flow.cl>
+      - DIAGNOSTIC_SEND_EMAIL=false
     command: pnpm start
     depends_on:
       - livelify
