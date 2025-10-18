@@ -24,7 +24,7 @@ export const THROTTLE_LEVELS = {
  * For documentation, health checks, public info
  */
 export const PublicThrottle = () =>
-  Throttle({ default: { limit: 10, ttl: 60000 } }); // 10 requests per minute for testing
+  Throttle({ default: { limit: 10, ttl: 60000 } }); // 10 requests per minute
 
 /**
  * 🌐 Default Rate Limiting - Standard usage
