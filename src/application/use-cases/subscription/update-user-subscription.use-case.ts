@@ -69,8 +69,11 @@ export class UpdateUserSubscriptionUseCase {
     // 3. Calculate new end date if plan is changing
     let endDate = existingSubscription.endDate;
     let renewalDate = existingSubscription.renewalDate;
-    
-    if (request.planId && request.planId !== existingSubscription.planId.getValue()) {
+
+    if (
+      request.planId &&
+      request.planId !== existingSubscription.planId.getValue()
+    ) {
       // Recalculate dates when changing plan
       endDate = new Date();
       endDate.setMonth(endDate.getMonth() + 1); // Default 1 month, should be based on new plan
@@ -82,21 +85,25 @@ export class UpdateUserSubscriptionUseCase {
     const updatedSubscription = UserSubscription.reconstitute({
       id: existingSubscription.id,
       userId: existingUser.id,
-      planId: request.planId 
-        ? new SubscriptionPlanId(request.planId) 
+      planId: request.planId
+        ? new SubscriptionPlanId(request.planId)
         : existingSubscription.planId,
       currencyId: request.currencyId || existingSubscription.currencyId,
       endDate,
       renewalDate,
-      amountPaid: request.amountPaid !== undefined 
-        ? request.amountPaid 
-        : existingSubscription.amountPaid,
-      paymentMethod: request.paymentMethod || existingSubscription.paymentMethod,
-      paymentProvider: request.paymentProvider || existingSubscription.paymentProvider,
+      amountPaid:
+        request.amountPaid !== undefined
+          ? request.amountPaid
+          : existingSubscription.amountPaid,
+      paymentMethod:
+        request.paymentMethod || existingSubscription.paymentMethod,
+      paymentProvider:
+        request.paymentProvider || existingSubscription.paymentProvider,
       active: existingSubscription.active,
-      autoRenew: request.autoRenew !== undefined 
-        ? request.autoRenew 
-        : existingSubscription.autoRenew,
+      autoRenew:
+        request.autoRenew !== undefined
+          ? request.autoRenew
+          : existingSubscription.autoRenew,
       startDate: existingSubscription.startDate,
       createdAt: existingSubscription.createdAt,
     });

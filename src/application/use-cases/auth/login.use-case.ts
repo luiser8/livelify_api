@@ -109,9 +109,7 @@ export class LoginUseCase {
         throw new Error('JWT secret not configured');
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const accessToken = await this.jwtService.signAsync(accessTokenPayload, {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         expiresIn: accessTokenExpiresIn,
       });
 
@@ -128,12 +126,11 @@ export class LoginUseCase {
       // 6. Calculate expiration date for access token
       const expiresAt = new Date();
       // Parse the expiration time (1h = 1 hour)
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+
       const timeMatch = accessTokenExpiresIn.match(/^(\d+)([hdm])$/);
       if (timeMatch) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
         const value = parseInt(timeMatch[1]);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+
         const unit = timeMatch[2];
         switch (unit) {
           case 'h':

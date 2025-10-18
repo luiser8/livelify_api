@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsBoolean, IsNumber, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsNumber,
+  IsEnum,
+} from 'class-validator';
 import { PaymentMethod, PaymentProvider } from '@prisma/client';
 
 export class UpdateUserSubscriptionDto {

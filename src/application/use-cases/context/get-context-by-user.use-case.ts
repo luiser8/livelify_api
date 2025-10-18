@@ -36,7 +36,9 @@ export class GetContextByUserIdUseCase {
     // 3. For each context, count actions and determine if can be deleted
     const contextsWithDeleteInfo = await Promise.all(
       (contexts ?? []).map(async (c) => {
-        const actionsCount = await this.userContextRepository.countActions(c.id);
+        const actionsCount = await this.userContextRepository.countActions(
+          c.id,
+        );
         return {
           id: c.id.getValue(),
           userId: c.userId,

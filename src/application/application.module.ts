@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { RepositoryModule } from '../infrastructure/config/repository.module';
+import { ServicesModule } from '../infrastructure/config/services.module';
 
 // User Use Cases
 import { CreateUserWithProfileUseCase } from './use-cases/user/create-user-with-profile.use-case';
@@ -40,8 +41,11 @@ import { DeleteUserContextUseCase } from './use-cases/context/delete-user-contex
 import { GetSubscriptionByUserIdUseCase } from './use-cases/subscription/get-subscription-by-user.use-case';
 import { CreateUserSelectedAreasUseCase } from './use-cases/user/create-select-user-areas.use-case';
 
+// Diagnostic Use Cases
+import { SendDiagnosticUseCase } from './use-cases/diagnostic/send-diagnostic.use-case';
+
 @Module({
-  imports: [RepositoryModule],
+  imports: [RepositoryModule, ServicesModule],
   providers: [
     // User Use Cases
     CreateUserWithProfileUseCase,
@@ -91,10 +95,13 @@ import { CreateUserSelectedAreasUseCase } from './use-cases/user/create-select-u
     GetUserContextsUseCase,
     GetContextByUserIdUseCase,
     DeleteUserContextUseCase,
+    // Diagnostic
+    SendDiagnosticUseCase,
   ],
   exports: [
     // Repository Module - needed for guards and other components
     RepositoryModule,
+    ServicesModule,
     // User Use Cases
     CreateUserWithProfileUseCase,
     GetUserByIdUseCase,
@@ -143,6 +150,8 @@ import { CreateUserSelectedAreasUseCase } from './use-cases/user/create-select-u
     GetUserContextsUseCase,
     GetContextByUserIdUseCase,
     DeleteUserContextUseCase,
+    // Diagnostic
+    SendDiagnosticUseCase,
   ],
 })
 export class ApplicationModule {}

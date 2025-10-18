@@ -60,7 +60,7 @@ export class CreateUserSubscriptionUseCase {
     const startDate = new Date();
     const endDate = new Date();
     endDate.setMonth(endDate.getMonth() + 1); // Default 1 month, should be based on plan
-    
+
     const renewalDate = new Date(endDate);
     renewalDate.setDate(renewalDate.getDate() + 1); // Next day after end date
 

@@ -7,7 +7,7 @@ export interface SubscriptionPlanProps {
   id?: SubscriptionPlanId;
   name: PlanType;
   description?: string;
-  
+
   // Precios base y calculados
   basePrice: number; // Precio base del período
   pricePerMonth: number; // Precio calculado por mes
@@ -17,7 +17,7 @@ export interface SubscriptionPlanProps {
   // Metadatos del plan
   billingCycle: number; // Duración en meses (1, 3, 6, 12)
   bestFor: string; // "Mensual", "Trimestral", "Semestral", "Anual"
-  
+
   features: Record<string, any>;
   createdAt?: Date;
   updatedAt?: Date;
@@ -27,17 +27,17 @@ export class SubscriptionPlan {
   private readonly _id: SubscriptionPlanId;
   private _name: PlanType;
   private _description?: string;
-  
+
   // Precios
   private _basePrice: number;
   private _pricePerMonth: number;
   private _savings?: number;
   private _discount?: number;
-  
+
   // Metadatos
   private _billingCycle: number;
   private _bestFor: string;
-  
+
   private _features: Record<string, any>;
   private readonly _createdAt: Date;
   private _updatedAt: Date;
@@ -46,15 +46,15 @@ export class SubscriptionPlan {
     this._id = props.id || SubscriptionPlanId.create();
     this._name = props.name;
     this._description = props.description;
-    
+
     this._basePrice = props.basePrice;
     this._pricePerMonth = props.pricePerMonth;
     this._savings = props.savings;
     this._discount = props.discount;
-    
+
     this._billingCycle = props.billingCycle;
     this._bestFor = props.bestFor;
-    
+
     this._features = props.features;
     this._createdAt = props.createdAt || new Date();
     this._updatedAt = props.updatedAt || new Date();

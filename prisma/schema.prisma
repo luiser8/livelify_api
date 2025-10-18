@@ -469,3 +469,29 @@ enum RecoveryType {
   RECOVER_PASSWORD
   RECOVER_EMAIL
 }
+
+// ========================
+// DIAGNOSTIC (Rueda de la Vida - Web de Ventas)
+// ========================
+model Diagnostic {
+  id         String   @id @default(uuid())
+
+  name       String   // Nombre del usuario
+  email      String   // Email del usuario
+
+  // Puntuaciones de cada área (0-10)
+  personal      Int    // Área personal
+  professional  Int    // Área profesional
+  health        Int    // Salud
+  finances      Int    // Finanzas
+  family        Int    // Familia
+  love          Int    // Amor/Relaciones
+
+  average    Float    // Promedio calculado
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([email])
+  @@index([createdAt])
+}

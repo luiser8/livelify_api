@@ -9,21 +9,21 @@ export interface UserSubscriptionProps {
   userId: UserId;
   planId: SubscriptionPlanId;
   plan?: SubscriptionPlan;
-  
+
   currencyId: string; // ID de la moneda utilizada
-  
+
   // Información de pago y estado
   startDate?: Date;
   endDate: Date; // Fecha de finalización
   renewalDate?: Date; // Próxima fecha de renovación
   active?: boolean;
   autoRenew?: boolean;
-  
+
   // Información de transacción
   amountPaid?: number; // Monto realmente pagado
   paymentMethod?: PaymentMethod;
   paymentProvider?: PaymentProvider;
-  
+
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -33,23 +33,23 @@ export class UserSubscription {
   private readonly _userId: UserId;
   private readonly _planId: SubscriptionPlanId;
   _plan?: SubscriptionPlan;
-  
+
   private _currencyId: string;
-  
+
   // Fechas
   private readonly _startDate: Date;
   private _endDate: Date;
   private _renewalDate?: Date;
-  
+
   // Estado
   private _active: boolean;
   private _autoRenew: boolean;
-  
+
   // Pago
   private _amountPaid?: number;
   private _paymentMethod?: PaymentMethod;
   private _paymentProvider?: PaymentProvider;
-  
+
   private readonly _createdAt: Date;
   private _updatedAt: Date;
 
@@ -58,20 +58,20 @@ export class UserSubscription {
     this._userId = props.userId;
     this._planId = props.planId;
     this._plan = props.plan;
-    
+
     this._currencyId = props.currencyId;
-    
+
     this._startDate = props.startDate || new Date();
     this._endDate = props.endDate;
     this._renewalDate = props.renewalDate;
-    
+
     this._active = props.active ?? true;
     this._autoRenew = props.autoRenew ?? true;
-    
+
     this._amountPaid = props.amountPaid;
     this._paymentMethod = props.paymentMethod;
     this._paymentProvider = props.paymentProvider;
-    
+
     this._createdAt = props.createdAt || new Date();
     this._updatedAt = props.updatedAt || new Date();
   }

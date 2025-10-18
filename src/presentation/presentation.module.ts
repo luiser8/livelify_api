@@ -7,6 +7,7 @@ import { DatabaseModule } from '../infrastructure/config/database.module';
 import { UserController } from './controllers/user.controller';
 import { AuthController } from './controllers/auth.controller';
 import { HealthController } from './controllers/health.controller';
+import { DiagnosticController } from './controllers/diagnostic.controller';
 
 // Guards
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -45,6 +46,7 @@ import { GetUserActionsUseCase } from 'src/application/use-cases/action/get-user
 import { CompleteActionUseCase } from 'src/application/use-cases/action/complete-action.use-case';
 import { VerifyTokenUseCase } from 'src/application/use-cases/auth/verify-token.use-case';
 import { CreateUserSelectedAreasUseCase } from 'src/application/use-cases/user/create-select-user-areas.use-case';
+import { SendDiagnosticUseCase } from 'src/application/use-cases/diagnostic/send-diagnostic.use-case';
 
 @Module({
   imports: [ApplicationModule, TerminusModule, DatabaseModule],
@@ -63,6 +65,7 @@ import { CreateUserSelectedAreasUseCase } from 'src/application/use-cases/user/c
     GoalController,
     ActionController,
     DocumentsController,
+    DiagnosticController,
   ],
   providers: [
     JwtAuthGuard,
@@ -90,6 +93,7 @@ import { CreateUserSelectedAreasUseCase } from 'src/application/use-cases/user/c
     GetUserCompleteProfileUseCase,
     VerifyTokenUseCase,
     CreateUserSelectedAreasUseCase,
+    SendDiagnosticUseCase,
   ],
   exports: [JwtAuthGuard],
 })

@@ -20,7 +20,8 @@ export class CreateUserContextResponseDto {
   name: string;
 
   @ApiProperty({
-    description: 'Indicates if the context can be deleted (always true for new contexts)',
+    description:
+      'Indicates if the context can be deleted (always true for new contexts)',
     example: true,
   })
   canDelete: boolean;
@@ -37,4 +38,3 @@ export class CreateUserContextResponseDto {
   })
   createdAt: Date;
 }
-

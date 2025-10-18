@@ -14,7 +14,8 @@ export class UserContextResponseDto {
   name: string;
 
   @ApiProperty({
-    description: 'Indicates if the context can be deleted (no associated actions)',
+    description:
+      'Indicates if the context can be deleted (no associated actions)',
     example: true,
   })
   canDelete: boolean;
