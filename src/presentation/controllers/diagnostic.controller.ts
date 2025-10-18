@@ -1,9 +1,10 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from '../decorators/public.decorator';
 import { PublicThrottle } from '../decorators/throttle.decorator';
 import { SendDiagnosticDto } from '../dtos/diagnostic';
 import { SendDiagnosticUseCase } from '../../application/use-cases/diagnostic/send-diagnostic.use-case';
+import { ApiKeyGuard } from '../guards/api-key.guard';
 
 @ApiTags('Diagnostic')
 @Controller('diagnostic')
@@ -13,7 +14,13 @@ export class DiagnosticController {
   @Post('send')
   @Public()
   @PublicThrottle()
+  @UseGuards(ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
+  @ApiHeader({
+    name: 'X-Api-Key',
+    description: 'API key for diagnostic endpoint',
+    required: true,
+  })
   @ApiOperation({
     summary: 'Send diagnostic report via email',
     description:

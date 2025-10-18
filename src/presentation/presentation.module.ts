@@ -11,6 +11,7 @@ import { DiagnosticController } from './controllers/diagnostic.controller';
 
 // Guards
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ApiKeyGuard } from './guards/api-key.guard';
 import { GetSubscriptionByUserIdUseCase } from 'src/application/use-cases/subscription/get-subscription-by-user.use-case';
 import { CreateUserWithContextUseCase } from 'src/application/use-cases/context/create-user-with-context.use-case';
 import { GetContextByUserIdUseCase } from 'src/application/use-cases/context/get-context-by-user.use-case';
@@ -69,6 +70,7 @@ import { SendDiagnosticUseCase } from 'src/application/use-cases/diagnostic/send
   ],
   providers: [
     JwtAuthGuard,
+    ApiKeyGuard,
     GetSubscriptionByUserIdUseCase,
     CreateUserWithContextUseCase,
     GetContextByUserIdUseCase,
