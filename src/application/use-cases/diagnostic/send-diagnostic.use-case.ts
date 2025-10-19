@@ -2,6 +2,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { SENDGRID_MARKETING_SERVICE_TOKEN } from '../../ports/sendgrid-marketing';
 import type { SendGridMarketingServiceInterface } from '../../ports/sendgrid-marketing';
+import { SendGridEmailAdapter } from '../../../infrastructure/adapters/email/sendgrid-email.adapter';
 
 export interface SendDiagnosticRequest {
   name: string;
@@ -29,6 +30,7 @@ export class SendDiagnosticUseCase {
   constructor(
     @Inject(SENDGRID_MARKETING_SERVICE_TOKEN)
     private readonly sendGridMarketing: SendGridMarketingServiceInterface,
+    private readonly sendGridEmail: SendGridEmailAdapter,
   ) {}
 
   async execute(
@@ -69,11 +71,30 @@ export class SendDiagnosticUseCase {
         );
       }
 
+      // 2. Send email via SendGrid with Dynamic Template
+      let emailSent = false;
+      try {
+        await this.sendGridEmail.sendEmail(request.email, {
+          nombre_cliente: request.name,
+          puntuacion_promedio: request.average.toFixed(1),
+          score_desarrollo: request.scores.personal,
+          score_profesional: request.scores.professional,
+          score_salud: request.scores.health,
+          score_finanzas: request.scores.finances,
+          score_familia: request.scores.family,
+          score_amor: request.scores.love,
+        });
+        emailSent = true;
+        console.log('✅ Email sent to:', request.email);
+      } catch (emailError) {
+        console.error('❌ Email error (non-blocking):', emailError.message);
+      }
+
       return {
         success: true,
-        message: 'Diagnostic saved and email sent successfully',
+        message: 'Contact added to SendGrid and email sent successfully',
         addedToSendGrid,
-        emailSent: true,
+        emailSent,
       };
     } catch (error) {
       throw new Error(`Failed to process diagnostic: ${error.message}`);
