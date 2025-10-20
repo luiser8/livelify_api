@@ -31,6 +31,12 @@ export class LifeWheelAreaDto {
   score: number;
 
   @ApiProperty({
+    description: 'Indicates if the area has archived answers. True if area has answers, false if no answers yet.',
+    example: true,
+  })
+  isArchived: boolean;
+
+  @ApiProperty({
     description: 'Creation date',
     example: '2023-01-01T00:00:00.000Z',
   })

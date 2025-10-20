@@ -9,6 +9,7 @@ export interface AnswerProps {
   userId: UserId;
   questionId: QuestionId;
   lifeWheelAreaId: LifeWheelAreaId;
+  isArchived?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -19,6 +20,7 @@ export class Answer {
   private readonly _userId: UserId;
   private readonly _questionId: QuestionId;
   private readonly _lifeWheelAreaId: LifeWheelAreaId;
+  private _isArchived: boolean;
   private readonly _createdAt: Date;
   private _updatedAt: Date;
 
@@ -28,6 +30,7 @@ export class Answer {
     this._userId = props.userId;
     this._questionId = props.questionId;
     this._lifeWheelAreaId = props.lifeWheelAreaId;
+    this._isArchived = props.isArchived !== undefined ? props.isArchived : true;
     this._createdAt = props.createdAt || new Date();
     this._updatedAt = props.updatedAt || new Date();
   }
@@ -63,11 +66,20 @@ export class Answer {
     return this._updatedAt;
   }
 
+  public get isArchived(): boolean {
+    return this._isArchived;
+  }
+
   // ==========
   // Business Methods
   // ==========
   public updateValue(newValue: boolean): void {
     this._value = newValue;
+    this.touch();
+  }
+
+  public updateIsArchived(isArchived: boolean): void {
+    this._isArchived = isArchived;
     this.touch();
   }
 
@@ -105,6 +117,7 @@ export class Answer {
     userId: string;
     questionId: string;
     lifeWheelAreaId: string;
+    isArchived: boolean;
     createdAt: Date;
     updatedAt: Date;
   } {
@@ -114,6 +127,7 @@ export class Answer {
       userId: this._userId.getValue(),
       questionId: this._questionId.getValue(),
       lifeWheelAreaId: this._lifeWheelAreaId.getValue(),
+      isArchived: this._isArchived,
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,
     };

@@ -21,6 +21,7 @@ export class AnswerRepository implements AnswerRepositoryInterface {
         userId: answerData.userId,
         questionId: answerData.questionId,
         lifeWheelAreaId: answerData.lifeWheelAreaId,
+        isArchived: answerData.isArchived,
         createdAt: answerData.createdAt,
         updatedAt: answerData.updatedAt,
       },
@@ -45,6 +46,7 @@ export class AnswerRepository implements AnswerRepositoryInterface {
           },
           update: {
             value: answerData.value,
+            isArchived: answerData.isArchived,
             updatedAt: answerData.updatedAt,
           },
           create: {
@@ -53,6 +55,7 @@ export class AnswerRepository implements AnswerRepositoryInterface {
             userId: answerData.userId,
             questionId: answerData.questionId,
             lifeWheelAreaId: answerData.lifeWheelAreaId,
+            isArchived: answerData.isArchived,
             createdAt: answerData.createdAt,
             updatedAt: answerData.updatedAt,
           },
@@ -122,6 +125,7 @@ export class AnswerRepository implements AnswerRepositoryInterface {
       where: { id: answerData.id },
       data: {
         value: answerData.value,
+        isArchived: answerData.isArchived,
         updatedAt: answerData.updatedAt,
       },
     });
@@ -183,6 +187,7 @@ export class AnswerRepository implements AnswerRepositoryInterface {
       userId: UserId.fromString(value.userId),
       questionId: QuestionId.fromString(value.questionId),
       lifeWheelAreaId: LifeWheelAreaId.fromString(value.lifeWheelAreaId),
+      isArchived: value.isArchived !== undefined ? value.isArchived : true,
       createdAt: value.createdAt,
       updatedAt: value.updatedAt,
     });

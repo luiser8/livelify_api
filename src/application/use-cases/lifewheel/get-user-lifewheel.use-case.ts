@@ -2,9 +2,11 @@ import { Injectable, Inject } from '@nestjs/common';
 import { UserId } from '../../../domain/value-objects/user/user-id.value-object';
 import type { LifeWheelRepositoryInterface } from '../../../domain/repositories/lifewheel/lifewheel.repository.interface';
 import type { LifeWheelAreaRepositoryInterface } from '../../../domain/repositories/lifewheel/lifewheel-area.repository.interface';
+import type { AnswerRepositoryInterface } from '../../../domain/repositories/answer/answer.repository.interface';
 import {
   LIFEWHEEL_REPOSITORY_TOKEN,
   LIFEWHEEL_AREA_REPOSITORY_TOKEN,
+  ANSWER_REPOSITORY_TOKEN,
 } from '../../ports/lifewheel';
 import { USER_AREAS_SELECTED_REPOSITORY } from 'src/application/ports/tokens';
 import type { UserAreasSelectedRepositoryInterface } from 'src/domain/repositories/user/user-areas-selected-repository.interface';
@@ -22,6 +24,7 @@ export interface GetUserLifeWheelResponse {
     areaId: string;
     areaName: string;
     score: number;
+    isArchived: boolean;
     createdAt: Date;
     updatedAt: Date;
   }[];
@@ -43,6 +46,8 @@ export class GetUserLifeWheelUseCase {
     private readonly lifeWheelRepository: LifeWheelRepositoryInterface,
     @Inject(LIFEWHEEL_AREA_REPOSITORY_TOKEN)
     private readonly lifeWheelAreaRepository: LifeWheelAreaRepositoryInterface,
+    @Inject(ANSWER_REPOSITORY_TOKEN)
+    private readonly answerRepository: AnswerRepositoryInterface,
     @Inject(USER_AREAS_SELECTED_REPOSITORY)
     private readonly lifeWheelAreaSelectedRepository: UserAreasSelectedRepositoryInterface,
   ) {}
@@ -73,19 +78,36 @@ export class GetUserLifeWheelUseCase {
         lifeWheel.id,
       );
 
-    // 3. Preparar la respuesta
+    // 3. Para cada área, verificar si tiene respuestas para determinar isArchived
+    const lifeAreasWithArchiveStatus = await Promise.all(
+      lifeWheelAreas.map(async (lwa) => {
+        const answerCount =
+          await this.answerRepository.countAnswersByUserAndLifeWheelArea(
+            userId,
+            lwa.id,
+          );
+
+        // Si el área tiene respuestas, isArchived es true; si no tiene respuestas, isArchived es false
+        const isArchived = answerCount > 0;
+
+        return {
+          id: lwa.id.getValue(),
+          areaId: lwa.areaId.getValue(),
+          areaName: lwa.area?.description || lwa.area?.name || 'Unknown',
+          score: lwa.score,
+          isArchived,
+          createdAt: lwa.createdAt,
+          updatedAt: lwa.updatedAt,
+        };
+      }),
+    );
+
+    // 4. Preparar la respuesta
     return {
       id: lifeWheel.id.getValue(),
       userId: lifeWheel.userId.getValue(),
       globalScore: lifeWheel.globalScore,
-      lifeAreas: lifeWheelAreas.map((lwa) => ({
-        id: lwa.id.getValue(),
-        areaId: lwa.areaId.getValue(),
-        areaName: lwa.area?.description || lwa.area?.name || 'Unknown',
-        score: lwa.score,
-        createdAt: lwa.createdAt,
-        updatedAt: lwa.updatedAt,
-      })),
+      lifeAreas: lifeAreasWithArchiveStatus,
       lifeAreasSelected: lifeWheelAreasSelected.length
         ? lifeWheelAreasSelected.map((lwa) => ({
             id: lwa.id,
