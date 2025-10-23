@@ -56,9 +56,7 @@ export class SendDiagnosticUseCase {
 
         addedToSendGrid = sendGridResult.success;
 
-        if (sendGridResult.success) {
-          console.log('✅ Contact added to SendGrid marketing list');
-        } else {
+        if (!sendGridResult.success) {
           console.warn(
             '⚠️ Failed to add contact to SendGrid:',
             sendGridResult.error,
@@ -85,7 +83,6 @@ export class SendDiagnosticUseCase {
           score_amor: request.scores.love,
         });
         emailSent = true;
-        console.log('✅ Email sent to:', request.email);
       } catch (emailError) {
         console.error('❌ Email error (non-blocking):', emailError.message);
       }

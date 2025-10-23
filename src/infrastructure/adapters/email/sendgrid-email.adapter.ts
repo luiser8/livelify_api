@@ -41,7 +41,6 @@ export class SendGridEmailAdapter {
       };
 
       await sgMail.send(msg);
-      console.log('✅ Email sent via SendGrid to:', to);
     } catch (error) {
       console.error('❌ SendGrid email error:', error);
       throw new Error(
