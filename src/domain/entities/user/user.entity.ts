@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { UserId } from '../../value-objects/user/user-id.value-object';
 import { Email } from '../../value-objects/user/email.value-object';
 import { Password } from '../../value-objects/user/password.value-object';
@@ -16,6 +17,7 @@ export interface UserProps {
 }
 
 export class User {
+  [x: string]: any;
   private readonly _id: UserId;
   private _email: Email;
   private _password: Password;

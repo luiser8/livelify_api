@@ -7,6 +7,7 @@ import {
   USER_REPOSITORY_TOKEN,
   USER_PROFILE_REPOSITORY_TOKEN,
 } from '../../ports/tokens';
+import { Password } from 'src/domain/value-objects/user';
 
 export interface UpdateUserProfileRequest {
   userId: string;
@@ -15,6 +16,7 @@ export interface UpdateUserProfileRequest {
   address: string;
   phone: string;
   avatarUrl?: string;
+  password?: string;
 }
 
 export interface UpdateUserProfileResponse {
@@ -71,14 +73,19 @@ export class UpdateUserProfileUseCase {
       });
     }
 
-    // 3. Save profile
+    // 3. Update password if provided (optional)
+    if (request.password) {
+      await user.changePassword(new Password(request.password));
+    }
+
+    // 4. Save profile
     const savedProfile = await this.userProfileRepository.save(profile);
 
-    // 4. Update user entity with profile
+    // 5. Update user entity with profile
     user.updateProfile(savedProfile);
     await this.userRepository.update(user);
 
-    // 5. Return response
+    // 6. Return response
     return {
       id: savedProfile.id,
       userId: savedProfile.userId.getValue(),

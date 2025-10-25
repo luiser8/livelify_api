@@ -159,6 +159,7 @@ export class UserController {
         address: updateProfileDto.address,
         phone: updateProfileDto.phone,
         avatarUrl: updateProfileDto.avatarUrl,
+        password: updateProfileDto.password,
       });
 
       return result;

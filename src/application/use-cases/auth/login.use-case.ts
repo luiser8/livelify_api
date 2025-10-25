@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -83,6 +84,7 @@ export class LoginUseCase {
         firstName: userProfile.getFirstName(),
         lastName: userProfile.getLastName(),
         phone: userProfile.getPhone(),
+        address: userProfile.getAddress(),
         currencyId: user.currencyId,
         type: 'access',
         iat: Math.floor(Date.now() / 1000),
@@ -94,6 +96,7 @@ export class LoginUseCase {
         firstName: userProfile.getFirstName(),
         lastName: userProfile.getLastName(),
         phone: userProfile.getPhone(),
+        address: userProfile.getAddress(),
         currencyId: user.currencyId,
         type: 'refresh',
         iat: Math.floor(Date.now() / 1000),
