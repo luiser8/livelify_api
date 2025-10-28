@@ -85,6 +85,7 @@ export class ProjectController {
         lifeWheelAreaId: createProjectDto.lifeWheelAreaId,
         title: createProjectDto.title,
         description: createProjectDto.description,
+        expectedScore: createProjectDto.expectedScore,
         startDate: createProjectDto.startDate,
         endDate: createProjectDto.endDate,
       });

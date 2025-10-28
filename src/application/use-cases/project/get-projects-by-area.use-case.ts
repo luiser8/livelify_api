@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 import { Injectable, Inject } from '@nestjs/common';
 import { LifeWheelAreaId } from '../../../domain/value-objects/lifewheel/lifewheel-area-id.value-object';
 import type { GtdProjectRepositoryInterface } from '../../../domain/repositories/project/gtd-project.repository.interface';
@@ -17,6 +18,7 @@ export interface ProjectWithDetailResponse {
   title: string;
   description?: string;
   status: string;
+  expectedScore?: number;
   createdAt: Date;
   updatedAt: Date;
   detail?: {
@@ -70,6 +72,7 @@ export class GetProjectsByAreaUseCase {
         title: project.title,
         description: project.description,
         status: project.status,
+        expectedScore: project.expectedScore,
         createdAt: project.createdAt,
         updatedAt: project.updatedAt,
         detail: detail

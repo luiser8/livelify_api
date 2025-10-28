@@ -116,6 +116,12 @@ export class ProjectWithDetailDto {
   })
   status: string;
 
+  @ApiPropertyOptional({
+    description: 'Project expected score',
+    example: 8,
+  })
+  expectedScore?: number;
+
   @ApiProperty({
     description: 'Creation date',
     example: '2023-01-01T00:00:00.000Z',

@@ -14,12 +14,13 @@ export interface GtdProjectProps {
   title: string;
   description?: string;
   status?: ProjectStatus;
+  expectedScore?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 export class GtdProject {
-  detailId(detailId: any) {
+  detailId() {
     throw new Error('Method not implemented.');
   }
   private readonly _id: GtdProjectId;
@@ -27,6 +28,7 @@ export class GtdProject {
   private _title: string;
   private _description?: string;
   private _status: ProjectStatus;
+  private _expectedScore?: number;
   private readonly _createdAt: Date;
   private _updatedAt: Date;
 
@@ -36,6 +38,7 @@ export class GtdProject {
     this._title = props.title;
     this._description = props.description;
     this._status = props.status || ProjectStatus.ACTIVE;
+    this._expectedScore = props.expectedScore || 0;
     this._createdAt = props.createdAt || new Date();
     this._updatedAt = props.updatedAt || new Date();
   }
@@ -61,6 +64,10 @@ export class GtdProject {
 
   public get status(): ProjectStatus {
     return this._status;
+  }
+
+  public get expectedScore(): number | undefined {
+    return this._expectedScore;
   }
 
   public get createdAt(): Date {
@@ -92,6 +99,11 @@ export class GtdProject {
     this.touch();
   }
 
+  public updateExpectedScore(newExpectedScore?: number): void {
+    this._expectedScore = newExpectedScore;
+    this.touch();
+  }
+
   public markAsCompleted(): void {
     this._status = ProjectStatus.COMPLETED;
     this.touch();
@@ -113,12 +125,14 @@ export class GtdProject {
     lifeWheelAreaId: LifeWheelAreaId,
     title: string,
     description?: string,
+    expectedScore?: number,
   ): GtdProject {
     return new GtdProject({
       lifeWheelAreaId,
       title,
       description,
       status: ProjectStatus.ACTIVE,
+      expectedScore: expectedScore || 0,
     });
   }
 
@@ -135,6 +149,7 @@ export class GtdProject {
     title: string;
     description?: string;
     status: string;
+    expectedScore?: number;
     createdAt: Date;
     updatedAt: Date;
   } {
@@ -144,6 +159,7 @@ export class GtdProject {
       title: this._title,
       description: this._description,
       status: this._status,
+      expectedScore: this._expectedScore,
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,
     };

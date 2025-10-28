@@ -1,5 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsDateString, MinLength, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsDateString,
+  MinLength,
+  IsOptional,
+  IsNumber,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class CreateProjectFromLifeWheelAreaDto {
   @ApiProperty({
@@ -26,6 +34,16 @@ export class CreateProjectFromLifeWheelAreaDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({
+    description: 'Project expected score',
+    example: 8,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(10)
+  expectedScore?: number;
 
   @ApiProperty({
     description: 'Project start date (ISO string)',

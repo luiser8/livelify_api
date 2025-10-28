@@ -23,6 +23,7 @@ export interface CreateProjectFromLifeWheelAreaRequest {
   lifeWheelAreaId: string;
   title: string;
   description?: string;
+  expectedScore?: number;
   startDate: string; // ISO date string
   endDate: string; // ISO date string
 }
@@ -34,6 +35,7 @@ export interface CreateProjectFromLifeWheelAreaResponse {
     title: string;
     description?: string;
     status: string;
+    expectedScore?: number;
     createdAt: Date;
   };
   detail: {
@@ -101,6 +103,7 @@ export class CreateProjectFromLifeWheelAreaUseCase {
       lifeWheelAreaId,
       request.title,
       request.description,
+      request.expectedScore,
     );
 
     // 4. Guardar el proyecto
@@ -147,6 +150,7 @@ export class CreateProjectFromLifeWheelAreaUseCase {
         title: savedProject.title,
         description: savedProject.description,
         status: savedProject.status,
+        expectedScore: savedProject.expectedScore,
         createdAt: savedProject.createdAt,
       },
       detail: {

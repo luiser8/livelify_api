@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { GtdProjectRepositoryInterface } from '../../../domain/repositories/project/gtd-project.repository.interface';
-import {
-  GtdProject,
-  ProjectStatus,
-} from '../../../domain/entities/project/gtd-project.entity';
+import { GtdProject } from '../../../domain/entities/project/gtd-project.entity';
 import { GtdProjectId } from '../../../domain/value-objects/project/gtd-project-id.value-object';
 import { LifeWheelAreaId } from '../../../domain/value-objects/lifewheel/lifewheel-area-id.value-object';
 import { UserId } from '../../../domain/value-objects/user/user-id.value-object';
@@ -23,6 +24,7 @@ export class GtdProjectRepository implements GtdProjectRepositoryInterface {
         title: projectData.title,
         description: projectData.description,
         status: projectData.status as any,
+        expectedScore: projectData.expectedScore,
         createdAt: projectData.createdAt,
         updatedAt: projectData.updatedAt,
       },
@@ -108,6 +110,7 @@ export class GtdProjectRepository implements GtdProjectRepositoryInterface {
         title: projectData.title,
         description: projectData.description,
         status: projectData.status as any,
+        expectedScore: projectData.expectedScore,
         updatedAt: projectData.updatedAt,
       },
       include: {
@@ -135,7 +138,8 @@ export class GtdProjectRepository implements GtdProjectRepositoryInterface {
       lifeWheelAreaId: LifeWheelAreaId.fromString(value.lifeWheelAreaId),
       title: value.title,
       description: value.description,
-      status: value.status as ProjectStatus,
+      status: value.status,
+      expectedScore: value.expectedScore || 0,
       createdAt: value.createdAt,
       updatedAt: value.updatedAt,
     });
