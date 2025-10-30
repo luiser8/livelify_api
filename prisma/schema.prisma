@@ -148,6 +148,7 @@ model LifeWheel {
   lifeAreas   LifeWheelArea[]
   globalScore Float          // Promedio de los scores de las áreas
 
+  isAnswered  Boolean        @default(false)
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
@@ -164,6 +165,7 @@ model LifeWheelArea {
   area        Area         @relation(fields: [areaId], references: [id])
 
   score       Float          // Promedio de respuestas (Answers)
+  isBlocked   Boolean       @default(false)
 
   answers     Answer[]     // Se relaciona con Answer en lugar de Question
   projects    GtdProject[]

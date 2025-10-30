@@ -66,6 +66,7 @@ export class LifeWheelAreaRepository
       where: { id: lifeWheelAreaData.id },
       data: {
         score: lifeWheelAreaData.score,
+        isBlocked: lifeWheelAreaData.isBlocked,
         updatedAt: lifeWheelAreaData.updatedAt,
       },
       include: {
@@ -74,6 +75,24 @@ export class LifeWheelAreaRepository
     });
 
     return this.toDomainEntity(updatedLifeWheelArea);
+  }
+
+  async unlockAreas(lifeWheelAreaIds: LifeWheelAreaId[]): Promise<number> {
+    const ids = lifeWheelAreaIds.map((id) => id.getValue());
+
+    const result = await this.prisma.lifeWheelArea.updateMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+      data: {
+        isBlocked: true,
+        updatedAt: new Date(),
+      },
+    });
+
+    return result.count;
   }
 
   async delete(id: LifeWheelAreaId): Promise<void> {
@@ -101,6 +120,7 @@ export class LifeWheelAreaRepository
       areaId: AreaId.fromString(value.areaId),
       area: area,
       score: value.score,
+      isBlocked: value.isBlocked,
       createdAt: value.createdAt,
       updatedAt: value.updatedAt,
     });

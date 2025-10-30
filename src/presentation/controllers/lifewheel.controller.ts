@@ -7,6 +7,8 @@ import {
   NotFoundException,
   Post,
   Body,
+  BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -22,9 +24,14 @@ import { CurrentUser } from '../decorators/current-user.decorator';
 
 // DTOs
 import { GetUserLifeWheelResponseDto } from '../dtos/lifewheel/get-user-lifewheel.dto';
+import {
+  UnlockLifeWheelAreasDto,
+  UnlockLifeWheelAreasResponseDto,
+} from '../dtos/lifewheel/unlock-lifewheel-areas.dto';
 
 // Use Cases
 import { GetUserLifeWheelUseCase } from '../../application/use-cases/lifewheel/get-user-lifewheel.use-case';
+import { UnlockLifeWheelAreasUseCase } from '../../application/use-cases/lifewheel/unlock-lifewheel-areas.use-case';
 import { DefaultThrottle } from '../decorators/throttle.decorator';
 import {
   CreateUserSelectedAreasResponse,
@@ -39,6 +46,7 @@ import { CreateSelectUserAreasDto } from '../dtos/user/create-select-user-areas.
 export class LifeWheelController {
   constructor(
     private readonly getUserLifeWheelUseCase: GetUserLifeWheelUseCase,
+    private readonly unlockLifeWheelAreasUseCase: UnlockLifeWheelAreasUseCase,
     private readonly createUserSelectedAreasUseCase: CreateUserSelectedAreasUseCase,
   ) {}
 
@@ -111,6 +119,55 @@ export class LifeWheelController {
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {
         throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
+  }
+
+  @Post('unlock-areas')
+  @DefaultThrottle()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Unlock selected LifeWheel areas for project creation',
+    description:
+      'Unlock exactly 3 LifeWheelArea IDs to enable project creation for those areas. This is typically done after the user completes the questionnaire.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Areas unlocked successfully',
+    type: UnlockLifeWheelAreasResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Bad request - must select exactly 3 areas or areas already unlocked',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - areas do not belong to your LifeWheel',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'One or more LifeWheelAreas not found',
+  })
+  async unlockAreas(
+    @CurrentUser() user: { sub: string },
+    @Body() unlockDto: UnlockLifeWheelAreasDto,
+  ): Promise<UnlockLifeWheelAreasResponseDto> {
+    try {
+      return await this.unlockLifeWheelAreasUseCase.execute({
+        userId: user.sub,
+        lifeWheelAreaIds: unlockDto.lifeWheelAreaIds,
+      });
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      if (error instanceof NotFoundException) {
+        throw error;
       }
       throw error;
     }

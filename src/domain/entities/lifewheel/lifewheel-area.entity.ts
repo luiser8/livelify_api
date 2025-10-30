@@ -9,6 +9,7 @@ export interface LifeWheelAreaProps {
   areaId: AreaId;
   area?: Area; // Referencia completa al área
   score?: number;
+  isBlocked?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -19,6 +20,7 @@ export class LifeWheelArea {
   private readonly _areaId: AreaId;
   private readonly _area?: Area; // Referencia completa al área
   private _score: number;
+  private _isBlocked: boolean;
   private readonly _createdAt: Date;
   private _updatedAt: Date;
 
@@ -28,6 +30,7 @@ export class LifeWheelArea {
     this._areaId = props.areaId;
     this._area = props.area;
     this._score = props.score || 0;
+    this._isBlocked = props.isBlocked !== undefined ? props.isBlocked : true;
     this._createdAt = props.createdAt || new Date();
     this._updatedAt = props.updatedAt || new Date();
   }
@@ -53,6 +56,10 @@ export class LifeWheelArea {
 
   public get score(): number {
     return this._score;
+  }
+
+  public get isBlocked(): boolean {
+    return this._isBlocked;
   }
 
   public get createdAt(): Date {
@@ -90,12 +97,14 @@ export class LifeWheelArea {
     areaId: AreaId,
     area?: Area,
     initialScore = 0,
+    isBlocked = true,
   ): LifeWheelArea {
     return new LifeWheelArea({
       lifeWheelId,
       areaId,
       area,
       score: initialScore,
+      isBlocked,
     });
   }
 
@@ -111,6 +120,7 @@ export class LifeWheelArea {
     lifeWheelId: string;
     areaId: string;
     score: number;
+    isBlocked: boolean;
     createdAt: Date;
     updatedAt: Date;
   } {
@@ -119,6 +129,7 @@ export class LifeWheelArea {
       lifeWheelId: this._lifeWheelId.getValue(),
       areaId: this._areaId.getValue(),
       score: this._score,
+      isBlocked: this._isBlocked,
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,
     };

@@ -24,6 +24,7 @@ export interface CreateLifeWheelWithAreasResponse {
     areaId: string;
     areaName: string;
     score: number;
+    isBlocked: boolean;
   }[];
   createdAt: Date;
 }
@@ -89,6 +90,7 @@ export class CreateLifeWheelWithAreasUseCase {
         areaId: lwa.areaId.getValue(),
         areaName: lwa.area?.name || 'Unknown',
         score: lwa.score,
+        isBlocked: lwa.isBlocked,
       })),
       createdAt: updatedLifeWheel.createdAt,
     };

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { LifeWheelRepositoryInterface } from '../../../domain/repositories/lifewheel/lifewheel.repository.interface';
@@ -77,6 +79,7 @@ export class LifeWheelRepository implements LifeWheelRepositoryInterface {
       where: { id: lifeWheelData.id },
       data: {
         globalScore: lifeWheelData.globalScore,
+        isAnswered: lifeWheelData.isAnswered,
         updatedAt: lifeWheelData.updatedAt,
       },
       include: {
@@ -118,6 +121,7 @@ export class LifeWheelRepository implements LifeWheelRepositoryInterface {
           areaId: AreaId.fromString(la.areaId),
           area: area,
           score: la.score,
+          isBlocked: la.isBlocked,
           createdAt: la.createdAt,
           updatedAt: la.updatedAt,
         });
@@ -128,6 +132,7 @@ export class LifeWheelRepository implements LifeWheelRepositoryInterface {
       userId: UserId.fromString(value.userId),
       lifeAreas,
       globalScore: value.globalScore,
+      isAnswered: value.isAnswered,
       createdAt: value.createdAt,
       updatedAt: value.updatedAt,
     });

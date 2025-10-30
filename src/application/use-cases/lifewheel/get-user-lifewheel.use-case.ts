@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Inject } from '@nestjs/common';
 import { UserId } from '../../../domain/value-objects/user/user-id.value-object';
 import type { LifeWheelRepositoryInterface } from '../../../domain/repositories/lifewheel/lifewheel.repository.interface';
@@ -19,11 +20,13 @@ export interface GetUserLifeWheelResponse {
   id: string;
   userId: string;
   globalScore: number;
+  isAnswered: boolean;
   lifeAreas: {
     id: string;
     areaId: string;
     areaName: string;
     score: number;
+    isBlocked: boolean;
     isArchived: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -95,6 +98,7 @@ export class GetUserLifeWheelUseCase {
           areaId: lwa.areaId.getValue(),
           areaName: lwa.area?.description || lwa.area?.name || 'Unknown',
           score: lwa.score,
+          isBlocked: lwa.isBlocked,
           isArchived,
           createdAt: lwa.createdAt,
           updatedAt: lwa.updatedAt,
@@ -107,6 +111,7 @@ export class GetUserLifeWheelUseCase {
       id: lifeWheel.id.getValue(),
       userId: lifeWheel.userId.getValue(),
       globalScore: lifeWheel.globalScore,
+      isAnswered: lifeWheel.isAnswered,
       lifeAreas: lifeAreasWithArchiveStatus,
       lifeAreasSelected: lifeWheelAreasSelected.length
         ? lifeWheelAreasSelected.map((lwa) => ({

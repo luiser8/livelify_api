@@ -8,4 +8,5 @@ export interface LifeWheelAreaRepositoryInterface {
   findByLifeWheelId(lifeWheelId: LifeWheelId): Promise<LifeWheelArea[]>;
   update(lifeWheelArea: LifeWheelArea): Promise<LifeWheelArea>;
   delete(id: LifeWheelAreaId): Promise<void>;
+  unlockAreas(lifeWheelAreaIds: LifeWheelAreaId[]): Promise<number>;
 }

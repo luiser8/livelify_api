@@ -7,6 +7,7 @@ export interface LifeWheelProps {
   userId: UserId;
   lifeAreas?: LifeWheelArea[];
   globalScore?: number;
+  isAnswered?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -16,6 +17,7 @@ export class LifeWheel {
   private readonly _userId: UserId;
   private _lifeAreas: LifeWheelArea[];
   private _globalScore: number;
+  private _isAnswered: boolean;
   private readonly _createdAt: Date;
   private _updatedAt: Date;
 
@@ -24,6 +26,7 @@ export class LifeWheel {
     this._userId = props.userId;
     this._lifeAreas = props.lifeAreas || [];
     this._globalScore = props.globalScore || 0;
+    this._isAnswered = props.isAnswered || false;
     this._createdAt = props.createdAt || new Date();
     this._updatedAt = props.updatedAt || new Date();
   }
@@ -45,6 +48,10 @@ export class LifeWheel {
 
   public get globalScore(): number {
     return this._globalScore;
+  }
+
+  public get isAnswered(): boolean {
+    return this._isAnswered;
   }
 
   public get createdAt(): Date {
@@ -93,6 +100,11 @@ export class LifeWheel {
     this.touch();
   }
 
+  public markAsAnswered(): void {
+    this._isAnswered = true;
+    this.touch();
+  }
+
   private touch(): void {
     this._updatedAt = new Date();
   }
@@ -118,6 +130,7 @@ export class LifeWheel {
     id: string;
     userId: string;
     globalScore: number;
+    isAnswered: boolean;
     createdAt: Date;
     updatedAt: Date;
   } {
@@ -125,6 +138,7 @@ export class LifeWheel {
       id: this._id.getValue(),
       userId: this._userId.getValue(),
       globalScore: this._globalScore,
+      isAnswered: this._isAnswered,
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,
     };

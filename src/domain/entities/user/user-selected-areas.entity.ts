@@ -13,6 +13,7 @@ export interface UserAreasSelectedProps {
 }
 
 export class UserAreasSelected {
+  [x: string]: any;
   private readonly _id: string;
   private readonly _userId: UserId;
   private readonly _lifeWheelId: LifeWheelId;

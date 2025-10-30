@@ -31,7 +31,15 @@ export class LifeWheelAreaDto {
   score: number;
 
   @ApiProperty({
-    description: 'Indicates if the area has archived answers. True if area has answers, false if no answers yet.',
+    description:
+      'Indicates if the area is blocked. True if area is blocked, false if not.',
+    example: true,
+  })
+  isBlocked: boolean;
+
+  @ApiProperty({
+    description:
+      'Indicates if the area has archived answers. True if area has answers, false if no answers yet.',
     example: true,
   })
   isArchived: boolean;
@@ -67,6 +75,13 @@ export class GetUserLifeWheelResponseDto {
     example: 6.8,
   })
   globalScore: number;
+
+  @ApiProperty({
+    description:
+      'Indicates if the life wheel has been answered. True if answered, false if not.',
+    example: true,
+  })
+  isAnswered: boolean;
 
   @ApiProperty({
     description: 'Life areas with their scores',
