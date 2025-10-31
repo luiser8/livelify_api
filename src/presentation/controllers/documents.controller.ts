@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Param,
   BadRequestException,
+  Header,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import type { Response } from 'express';
@@ -34,6 +35,8 @@ export class DocumentsController {
   private readonly supportedFileTypes = Object.values(FileType);
 
   @Get(':type/:lang')
+  @Header('Content-Type', 'application/pdf; charset=utf-8')
+  @Header('Content-Disposition', 'inline; filename="${type}_&&_${lang}.pdf"')
   @Public()
   @PublicThrottle()
   @ApiOperation({
@@ -130,6 +133,8 @@ export class DocumentsController {
 
   // Endpoint específico para términos y condiciones (backward compatibility)
   @Get('terms/:lang')
+  @Header('Content-Type', 'application/pdf; charset=utf-8')
+  @Header('Content-Disposition', 'inline; filename="t_&&_c_${lang}.pdf"')
   @Public()
   @PublicThrottle()
   @ApiOperation({
@@ -152,6 +157,8 @@ export class DocumentsController {
 
   // Endpoint específico para políticas de privacidad
   @Get('privacy/:lang')
+  @Header('Content-Type', 'application/pdf; charset=utf-8')
+  @Header('Content-Disposition', 'inline; filename="p_&&_p_${lang}.pdf"')
   @Public()
   @PublicThrottle()
   @ApiOperation({
