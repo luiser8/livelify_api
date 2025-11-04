@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Injectable,
   Inject,
@@ -39,10 +38,8 @@ export class UnlockLifeWheelAreasUseCase {
     request: UnlockLifeWheelAreasRequest,
   ): Promise<UnlockLifeWheelAreasResponse> {
     // 1. Validar que se recibieron al menos 1 área
-    if (request.lifeWheelAreaIds.length !== 0) {
-      throw new BadRequestException(
-        'You must select at least 1 area to unlock',
-      );
+    if (request.lifeWheelAreaIds.length === 0) {
+      throw new BadRequestException('You must select areas to unlock');
     }
 
     const userId = UserId.fromString(request.userId);

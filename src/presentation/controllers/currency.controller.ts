@@ -10,7 +10,7 @@ import { GetAvailableCurrenciesResponseDto } from '../dtos/currency/get-currenci
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { DefaultThrottle } from '../decorators/throttle.decorator';
 
-@ApiTags('currencies')
+@ApiTags('Currencies')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 @Controller('currencies')

@@ -1,16 +1,16 @@
-import { GoalBudgetId } from '../../value-objects/goal-budget/goal-budget-id.value-object';
-import { ProjectGoalId } from '../../value-objects/goal/project-goal-id.value-object';
+import { ActionBudgetId } from '../../value-objects/action-budget/action-budget-id.value-object';
+import { GtdActionId } from '../../value-objects/action/gtd-action-id.value-object';
 import { CurrencyId } from '../../value-objects/currency/currency-id.value-object';
 import { Currency } from '../currency/currency.entity';
 
-export interface GoalBudgetProps {
-  id: GoalBudgetId;
-  goalId: ProjectGoalId;
+export interface ActionBudgetProps {
+  id: ActionBudgetId;
+  actionId: GtdActionId;
   baseCapital: number;
   multiplier: number;
   totalCapital: number;
-  monthlyBudget: number;
-  dailyBudget: number;
+  monthlyBudget: number | null;
+  dailyBudget: number | null;
   projectMonths: number;
   projectDays: number;
   currencyId: CurrencyId;
@@ -19,21 +19,21 @@ export interface GoalBudgetProps {
   updatedAt?: Date;
 }
 
-export interface GoalBudgetCalculationInput {
+export interface ActionBudgetCalculationInput {
   baseCapital: number;
   multiplier?: number;
   projectStartDate: Date;
   projectEndDate: Date;
 }
 
-export class GoalBudget {
-  private readonly _id: GoalBudgetId;
-  private readonly _goalId: ProjectGoalId;
+export class ActionBudget {
+  private readonly _id: ActionBudgetId;
+  private readonly _actionId: GtdActionId;
   private _baseCapital: number;
   private _multiplier: number;
   private _totalCapital: number;
-  private _monthlyBudget: number;
-  private _dailyBudget: number;
+  private _monthlyBudget: number | null;
+  private _dailyBudget: number | null;
   private _projectMonths: number;
   private _projectDays: number;
   private readonly _currencyId: CurrencyId;
@@ -41,9 +41,9 @@ export class GoalBudget {
   private readonly _createdAt: Date;
   private _updatedAt: Date;
 
-  private constructor(props: GoalBudgetProps) {
+  private constructor(props: ActionBudgetProps) {
     this._id = props.id;
-    this._goalId = props.goalId;
+    this._actionId = props.actionId;
     this._baseCapital = props.baseCapital;
     this._multiplier = props.multiplier;
     this._totalCapital = props.totalCapital;
@@ -60,18 +60,18 @@ export class GoalBudget {
   }
 
   /**
-   * Crea un nuevo presupuesto de goal con cálculos automáticos
+   * Crea un nuevo presupuesto de action con cálculos automáticos
    * Ejemplo: baseCapital = 3000, multiplier = 1.3
    * - totalCapital = 3000 * 1.3 = 3900
    * - monthlyBudget (IMO) = 3900 / meses del proyecto
    * - dailyBudget (IDO) = 3900 / días del proyecto
    */
   public static create(
-    goalId: ProjectGoalId,
+    actionId: GtdActionId,
     currencyId: CurrencyId,
-    input: GoalBudgetCalculationInput,
+    input: ActionBudgetCalculationInput,
     currency?: Currency,
-  ): GoalBudget {
+  ): ActionBudget {
     const multiplier = input.multiplier || 1.3;
     const totalCapital = Math.round(input.baseCapital * multiplier * 100) / 100;
 
@@ -89,9 +89,9 @@ export class GoalBudget {
     const monthlyBudget = Math.round((totalCapital / months) * 100) / 100;
     const dailyBudget = Math.round((totalCapital / days) * 100) / 100;
 
-    return new GoalBudget({
-      id: GoalBudgetId.create(),
-      goalId,
+    return new ActionBudget({
+      id: ActionBudgetId.create(),
+      actionId,
       baseCapital: input.baseCapital,
       multiplier,
       totalCapital,
@@ -104,8 +104,8 @@ export class GoalBudget {
     });
   }
 
-  public static reconstitute(props: GoalBudgetProps): GoalBudget {
-    return new GoalBudget(props);
+  public static reconstitute(props: ActionBudgetProps): ActionBudget {
+    return new ActionBudget(props);
   }
 
   /**
@@ -138,10 +138,10 @@ export class GoalBudget {
     if (this._totalCapital < 0) {
       throw new Error('Total capital cannot be negative');
     }
-    if (this._monthlyBudget < 0) {
+    if (this._monthlyBudget !== null && this._monthlyBudget < 0) {
       throw new Error('Monthly budget cannot be negative');
     }
-    if (this._dailyBudget < 0) {
+    if (this._dailyBudget !== null && this._dailyBudget < 0) {
       throw new Error('Daily budget cannot be negative');
     }
     if (this._projectMonths <= 0) {
@@ -157,7 +157,7 @@ export class GoalBudget {
    * Recalcula el presupuesto basado en una nueva duración del proyecto
    */
   public recalculateBudget(projectStartDate: Date, projectEndDate: Date): void {
-    const { months, days } = GoalBudget.calculateProjectDuration(
+    const { months, days } = ActionBudget.calculateProjectDuration(
       projectStartDate,
       projectEndDate,
     );
@@ -219,6 +219,10 @@ export class GoalBudget {
    * Calcula el presupuesto acumulado hasta una fecha específica
    */
   public calculateAccumulatedBudget(currentDate: Date): number {
+    if (this._dailyBudget === null) {
+      return 0;
+    }
+
     const startDate = this._createdAt;
     const diffTime = currentDate.getTime() - startDate.getTime();
     const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -244,12 +248,12 @@ export class GoalBudget {
   }
 
   // Getters
-  public get id(): GoalBudgetId {
+  public get id(): ActionBudgetId {
     return this._id;
   }
 
-  public get goalId(): ProjectGoalId {
-    return this._goalId;
+  public get actionId(): GtdActionId {
+    return this._actionId;
   }
 
   public get baseCapital(): number {
@@ -264,11 +268,11 @@ export class GoalBudget {
     return this._totalCapital;
   }
 
-  public get monthlyBudget(): number {
+  public get monthlyBudget(): number | null {
     return this._monthlyBudget;
   }
 
-  public get dailyBudget(): number {
+  public get dailyBudget(): number | null {
     return this._dailyBudget;
   }
 

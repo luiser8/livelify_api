@@ -19,7 +19,7 @@ import { CurrencyRepository } from '../repositories/currency/currency.repository
 import { ContextRepository } from '../repositories/context/context.repository';
 import { ProjectGoalRepository } from '../repositories/goal/project-goal.repository';
 import { GtdActionRepository } from '../repositories/action/gtd-action.repository';
-import { GoalBudgetRepository } from '../repositories/goal-budget/goal-budget.repository';
+import { ActionBudgetRepository } from '../repositories/action-budget/action-budget.repository';
 import { UserAreasSelectedRepository } from '../repositories/user/user-areas-selected-repository';
 
 // Tokens
@@ -69,8 +69,8 @@ import {
   GTD_ACTION_REPOSITORY_TOKEN,
 } from '../../application/ports/goals-actions';
 
-//Goal Budgets
-import { GOAL_BUDGET_REPOSITORY_TOKEN } from '../../application/ports/goal-budgets';
+//Action Budgets
+import { ACTION_BUDGET_REPOSITORY_TOKEN } from '../../application/ports/action-budgets';
 
 // Question
 import { QuestionRepository } from '../repositories/question/question.repository';
@@ -151,8 +151,8 @@ import { QuestionRepository } from '../repositories/question/question.repository
       useClass: GtdActionRepository,
     },
     {
-      provide: GOAL_BUDGET_REPOSITORY_TOKEN,
-      useClass: GoalBudgetRepository,
+      provide: ACTION_BUDGET_REPOSITORY_TOKEN,
+      useClass: ActionBudgetRepository,
     },
     {
       provide: USER_AREAS_SELECTED_REPOSITORY,
@@ -178,7 +178,7 @@ import { QuestionRepository } from '../repositories/question/question.repository
     CONTEXT_REPOSITORY_TOKEN,
     PROJECT_GOAL_REPOSITORY_TOKEN,
     GTD_ACTION_REPOSITORY_TOKEN,
-    GOAL_BUDGET_REPOSITORY_TOKEN,
+    ACTION_BUDGET_REPOSITORY_TOKEN,
     USER_AREAS_SELECTED_REPOSITORY,
   ],
 })

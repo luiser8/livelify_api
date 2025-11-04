@@ -76,6 +76,97 @@ export class CreateGtdActionDto {
   @IsOptional()
   @IsString()
   contextId?: string;
+
+  // Campos para crear presupuesto de la acción
+  @ApiProperty({
+    description:
+      'Base capital for action budget (optional). If provided, budget will be created automatically with multiplier 1.3',
+    example: 3000,
+    required: false,
+    minimum: 0,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  baseCapital?: number;
+
+  @ApiProperty({
+    description:
+      'Currency code for budget (required if baseCapital is provided)',
+    example: 'USD',
+    required: false,
+    minLength: 3,
+    maxLength: 3,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(3)
+  currencyCode?: string;
+}
+
+// ActionBudgetResponseDto debe estar antes de GtdActionResponseDto
+export class ActionBudgetResponseDto {
+  @ApiProperty({
+    description: 'Action Budget ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  id: string;
+
+  @ApiProperty({
+    description: 'Base capital',
+    example: 3000,
+  })
+  baseCapital: number;
+
+  @ApiProperty({
+    description: 'Multiplier factor (constant: 1.3)',
+    example: 1.3,
+  })
+  multiplier: number;
+
+  @ApiProperty({
+    description: 'Total capital (baseCapital * multiplier)',
+    example: 3900,
+  })
+  totalCapital: number;
+
+  @ApiProperty({
+    description: 'Monthly budget (IMO) = totalCapital / project months',
+    example: 650,
+    nullable: true,
+  })
+  monthlyBudget: number | null;
+
+  @ApiProperty({
+    description: 'Daily budget (IDO) = totalCapital / project days',
+    example: 21.66,
+    nullable: true,
+  })
+  dailyBudget: number | null;
+
+  @ApiProperty({
+    description: 'Project duration in months',
+    example: 6,
+  })
+  projectMonths: number;
+
+  @ApiProperty({
+    description: 'Project duration in days',
+    example: 180,
+  })
+  projectDays: number;
+
+  @ApiProperty({
+    description: 'Currency code',
+    example: 'USD',
+  })
+  currencyCode: string;
+
+  @ApiProperty({
+    description: 'Currency symbol',
+    example: '$',
+  })
+  currencySymbol: string;
 }
 
 export class GtdActionResponseDto {
@@ -175,6 +266,13 @@ export class GtdActionResponseDto {
     example: '2024-01-01T00:00:00.000Z',
   })
   updatedAt: Date;
+
+  @ApiProperty({
+    description: 'Action budget information (if budget exists)',
+    type: ActionBudgetResponseDto,
+    required: false,
+  })
+  budget?: ActionBudgetResponseDto;
 }
 
 export class CreateGtdActionResponseDto {
@@ -183,4 +281,11 @@ export class CreateGtdActionResponseDto {
     type: GtdActionResponseDto,
   })
   action: GtdActionResponseDto;
+
+  @ApiProperty({
+    description: 'Action budget information (if budget was created)',
+    type: ActionBudgetResponseDto,
+    required: false,
+  })
+  budget?: ActionBudgetResponseDto;
 }

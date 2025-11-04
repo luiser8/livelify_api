@@ -31,4 +31,3 @@ export interface SendGridMarketingServiceInterface {
     request: AddContactToListRequest,
   ): Promise<AddContactToListResponse>;
 }
-

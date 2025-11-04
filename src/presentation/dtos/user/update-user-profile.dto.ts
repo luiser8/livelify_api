@@ -49,8 +49,7 @@ export class UpdateUserProfileDto {
   avatarUrl?: string;
 
   @ApiPropertyOptional({
-    description:
-      'User password - must be at least 6 characters (optional)',
+    description: 'User password - must be at least 6 characters (optional)',
     example: 'SecurePass123!',
     minLength: 6,
   })

@@ -9,6 +9,7 @@ import {
   Body,
   BadRequestException,
   ForbiddenException,
+  Put,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -28,10 +29,12 @@ import {
   UnlockLifeWheelAreasDto,
   UnlockLifeWheelAreasResponseDto,
 } from '../dtos/lifewheel/unlock-lifewheel-areas.dto';
+import { MarkLifeWheelAsAnsweredResponseDto } from '../dtos/lifewheel/mark-lifewheel-as-answered.dto';
 
 // Use Cases
 import { GetUserLifeWheelUseCase } from '../../application/use-cases/lifewheel/get-user-lifewheel.use-case';
 import { UnlockLifeWheelAreasUseCase } from '../../application/use-cases/lifewheel/unlock-lifewheel-areas.use-case';
+import { MarkLifeWheelAsAnsweredUseCase } from '../../application/use-cases/lifewheel/mark-lifewheel-as-answered.use-case';
 import { DefaultThrottle } from '../decorators/throttle.decorator';
 import {
   CreateUserSelectedAreasResponse,
@@ -47,6 +50,7 @@ export class LifeWheelController {
   constructor(
     private readonly getUserLifeWheelUseCase: GetUserLifeWheelUseCase,
     private readonly unlockLifeWheelAreasUseCase: UnlockLifeWheelAreasUseCase,
+    private readonly markLifeWheelAsAnsweredUseCase: MarkLifeWheelAsAnsweredUseCase,
     private readonly createUserSelectedAreasUseCase: CreateUserSelectedAreasUseCase,
   ) {}
 
@@ -139,8 +143,7 @@ export class LifeWheelController {
   })
   @ApiResponse({
     status: 400,
-    description:
-      'Bad request - must select exactly 3 areas or areas already unlocked',
+    description: 'Bad request - must select areas to unlock',
   })
   @ApiResponse({
     status: 403,
@@ -166,6 +169,38 @@ export class LifeWheelController {
       if (error instanceof ForbiddenException) {
         throw error;
       }
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw error;
+    }
+  }
+
+  @Put('mark-as-answered')
+  @DefaultThrottle()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Mark LifeWheel as answered',
+    description:
+      'Updates the isAnswered field to true for the authenticated user LifeWheel. This indicates that the user has completed the questionnaire.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'LifeWheel marked as answered successfully',
+    type: MarkLifeWheelAsAnsweredResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'LifeWheel not found for user',
+  })
+  async markAsAnswered(
+    @CurrentUser() user: { sub: string },
+  ): Promise<MarkLifeWheelAsAnsweredResponseDto> {
+    try {
+      return await this.markLifeWheelAsAnsweredUseCase.execute({
+        userId: user.sub,
+      });
+    } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }

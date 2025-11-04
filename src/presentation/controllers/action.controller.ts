@@ -30,7 +30,7 @@ import {
   GetUserActionsResponseDto,
 } from '../dtos/action/get-user-actions.dto';
 
-@ApiTags('actions')
+@ApiTags('Actions')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 @Controller('actions')
@@ -41,7 +41,7 @@ export class ActionController {
     private readonly completeActionUseCase: CompleteActionUseCase,
   ) {}
 
-  @Post()
+  @Post('add')
   @ApiOperation({
     summary: 'Create GTD action',
     description:

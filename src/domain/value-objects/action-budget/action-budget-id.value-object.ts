@@ -1,28 +1,28 @@
 import { v4 as uuidv4 } from 'uuid';
 
-export class GoalBudgetId {
+export class ActionBudgetId {
   private readonly _value: string;
 
   private constructor(value: string) {
     if (!value || value.trim().length === 0) {
-      throw new Error('GoalBudgetId cannot be empty');
+      throw new Error('ActionBudgetId cannot be empty');
     }
     this._value = value;
   }
 
-  public static create(): GoalBudgetId {
-    return new GoalBudgetId(uuidv4());
+  public static create(): ActionBudgetId {
+    return new ActionBudgetId(uuidv4());
   }
 
-  public static fromString(value: string): GoalBudgetId {
-    return new GoalBudgetId(value);
+  public static fromString(value: string): ActionBudgetId {
+    return new ActionBudgetId(value);
   }
 
   public getValue(): string {
     return this._value;
   }
 
-  public equals(other: GoalBudgetId): boolean {
+  public equals(other: ActionBudgetId): boolean {
     return this._value === other._value;
   }
 

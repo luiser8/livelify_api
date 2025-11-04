@@ -33,6 +33,7 @@ import { ActionController } from './controllers/action.controller';
 import { DocumentsController } from './controllers/documents.controller';
 import { SubmitAreaAnswersUseCase } from 'src/application/use-cases/answer/submit-area-answers.use-case';
 import { GetUserLifeWheelUseCase } from 'src/application/use-cases/lifewheel/get-user-lifewheel.use-case';
+import { MarkLifeWheelAsAnsweredUseCase } from 'src/application/use-cases/lifewheel/mark-lifewheel-as-answered.use-case';
 import { CreateProjectFromLifeWheelAreaUseCase } from 'src/application/use-cases/project/create-project-from-lifewheel-area.use-case';
 import { GetUserProjectsUseCase } from 'src/application/use-cases/project/get-user-projects.use-case';
 import { GetProjectsByAreaUseCase } from 'src/application/use-cases/project/get-projects-by-area.use-case';
@@ -80,6 +81,7 @@ import { SendDiagnosticUseCase } from 'src/application/use-cases/diagnostic/send
     GetQuestionByAreaIdUseCase,
     SubmitAreaAnswersUseCase,
     GetUserLifeWheelUseCase,
+    MarkLifeWheelAsAnsweredUseCase,
     CreateProjectFromLifeWheelAreaUseCase,
     GetUserProjectsUseCase,
     GetProjectsByAreaUseCase,

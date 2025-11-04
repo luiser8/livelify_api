@@ -179,7 +179,7 @@ export class GtdProjectDetail {
       lifeAreaId,
       startDate,
       endDate,
-      status: ProjectDetailStatus.PLANNING,
+      status: ProjectDetailStatus.ACTIVE,
     });
   }
 

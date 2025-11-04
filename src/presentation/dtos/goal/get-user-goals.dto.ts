@@ -38,6 +38,22 @@ export class GoalWithProjectResponseDto {
     example: '2024-01-01T00:00:00.000Z',
   })
   updatedAt: Date;
+
+  @ApiProperty({
+    description:
+      'Total monthly budget (IMO) - sum of all action budgets for this goal',
+    example: 1500.5,
+    nullable: true,
+  })
+  totalMonthlyBudget: number | null;
+
+  @ApiProperty({
+    description:
+      'Total daily budget (IDO) - sum of all action budgets for this goal',
+    example: 50.25,
+    nullable: true,
+  })
+  totalDailyBudget: number | null;
 }
 
 export class GoalsByTypeDto {

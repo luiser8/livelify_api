@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Inject } from '@nestjs/common';
 import { UserId } from '../../../domain/value-objects/user/user-id.value-object';
 import type { LifeWheelRepositoryInterface } from '../../../domain/repositories/lifewheel/lifewheel.repository.interface';

@@ -21,6 +21,7 @@ import { GetQuestionByAreaIdUseCase } from './use-cases/question/get-by-area-que
 import { CreateLifeWheelWithAreasUseCase } from './use-cases/lifewheel/create-lifewheel-with-areas.use-case';
 import { GetUserLifeWheelUseCase } from './use-cases/lifewheel/get-user-lifewheel.use-case';
 import { UnlockLifeWheelAreasUseCase } from './use-cases/lifewheel/unlock-lifewheel-areas.use-case';
+import { MarkLifeWheelAsAnsweredUseCase } from './use-cases/lifewheel/mark-lifewheel-as-answered.use-case';
 import { SubmitAreaAnswersUseCase } from './use-cases/answer/submit-area-answers.use-case';
 import { CreateProjectFromLifeWheelAreaUseCase } from './use-cases/project/create-project-from-lifewheel-area.use-case';
 import { GetUserProjectsUseCase } from './use-cases/project/get-user-projects.use-case';
@@ -71,6 +72,7 @@ import { SendDiagnosticUseCase } from './use-cases/diagnostic/send-diagnostic.us
     CreateLifeWheelWithAreasUseCase,
     GetUserLifeWheelUseCase,
     UnlockLifeWheelAreasUseCase,
+    MarkLifeWheelAsAnsweredUseCase,
     CreateUserSelectedAreasUseCase,
     // Answer
     SubmitAreaAnswersUseCase,
@@ -127,6 +129,7 @@ import { SendDiagnosticUseCase } from './use-cases/diagnostic/send-diagnostic.us
     CreateLifeWheelWithAreasUseCase,
     GetUserLifeWheelUseCase,
     UnlockLifeWheelAreasUseCase,
+    MarkLifeWheelAsAnsweredUseCase,
     CreateUserSelectedAreasUseCase,
     // Answer
     SubmitAreaAnswersUseCase,

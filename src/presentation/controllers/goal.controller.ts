@@ -15,7 +15,7 @@ import {
 } from '../dtos/goal/create-project-goal.dto';
 import { GetUserGoalsResponseDto } from '../dtos/goal/get-user-goals.dto';
 
-@ApiTags('goals')
+@ApiTags('Goals')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 @Controller('goals')

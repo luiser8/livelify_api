@@ -29,7 +29,7 @@ import {
 } from '../dtos/budget/update-budget.dto';
 import { GetUserBudgetsResponseDto } from '../dtos/budget/get-user-budgets.dto';
 
-@ApiTags('budgets')
+@ApiTags('Budgets')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 @Controller('budgets')
