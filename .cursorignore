@@ -1,0 +1,16 @@
+# Environment files with sensitive information
+.env
+.env.local
+.env.*.local
+.env.development
+.env.development.local
+.env.production
+.env.qa
+
+# Dependencies
+node_modules/
+dist/
+
+# Logs
+*.log
+

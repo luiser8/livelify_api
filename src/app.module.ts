@@ -12,21 +12,30 @@ import { DatabaseModule } from './infrastructure/config/database.module';
 import { LoggerModule } from './infrastructure/config/logger.module';
 import { LoggingInterceptor } from './infrastructure/config/logging.interceptor';
 
-function getEnvFilePath(): string {
+function getEnvFilePaths(): string[] {
   const environment =
     process.env.APP_ENV || process.env.NODE_ENV || 'development';
 
-  console.log(`🌍 Loading environment: ${environment}`);
-  console.log(`📁 Environment file: .env.${environment}`);
+  // Load in order: .env.{environment}.local (highest priority), then .env.{environment}
+  // ConfigModule loads files in reverse priority order, so we list them in reverse
+  const envFiles = [
+    `.env.${environment}.local`, // Overrides for local development
+    `.env.${environment}`, // Environment-specific config
+  ];
 
-  return `.env.${environment}`;
+  console.log(`🌍 Loading environment: ${environment}`);
+  console.log(`📁 Environment files (in priority order):`);
+  console.log(`   1. .env.${environment}.local (if exists)`);
+  console.log(`   2. .env.${environment}`);
+
+  return envFiles;
 }
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: getEnvFilePath(),
+      envFilePath: getEnvFilePaths(),
       expandVariables: true,
     }),
     LoggerModule,
