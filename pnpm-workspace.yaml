@@ -6,3 +6,6 @@ ignoredBuiltDependencies:
   - bcrypt
   - prisma
   - unrs-resolver
+
+onlyBuiltDependencies:
+  - protobufjs

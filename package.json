@@ -55,12 +55,12 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@nestjs/common": "11.1.8",
+    "@nestjs/common": "11.1.9",
     "@nestjs/config": "4.0.2",
-    "@nestjs/core": "11.1.8",
+    "@nestjs/core": "11.1.9",
     "@nestjs/jwt": "11.0.1",
-    "@nestjs/platform-express": "11.1.8",
-    "@nestjs/swagger": "11.2.1",
+    "@nestjs/platform-express": "11.1.9",
+    "@nestjs/swagger": "11.2.3",
     "@nestjs/terminus": "11.0.0",
     "@nestjs/throttler": "6.4.0",
     "@prisma/client": "6.18.0",
@@ -79,16 +79,16 @@
   "devDependencies": {
     "@eslint/eslintrc": "3.3.1",
     "@eslint/js": "9.39.1",
-    "@nestjs/cli": "11.0.10",
+    "@nestjs/cli": "11.0.12",
     "@nestjs/schematics": "11.0.9",
-    "@nestjs/testing": "11.1.8",
+    "@nestjs/testing": "11.1.9",
     "@types/bcrypt": "6.0.0",
     "@types/express": "5.0.5",
     "@types/helmet": "4.0.0",
     "@types/jest": "30.0.0",
     "@types/ms": "2.1.0",
-    "@types/node": "24.10.0",
-    "@types/nodemailer": "7.0.3",
+    "@types/node": "24.10.1",
+    "@types/nodemailer": "7.0.4",
     "@types/supertest": "6.0.3",
     "eslint": "9.39.1",
     "eslint-config-prettier": "10.1.8",
@@ -104,7 +104,7 @@
     "ts-node": "10.9.2",
     "tsconfig-paths": "4.2.0",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.46.3"
+    "typescript-eslint": "8.47.0"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
