@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-misused-promises */
-
 import { PrismaClient, PlanType } from '@prisma/client';
 
 const prisma = new PrismaClient();

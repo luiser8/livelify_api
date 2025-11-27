@@ -9,10 +9,12 @@ import type * as ms from 'ms';
 import type { UserRepositoryInterface } from '../../../domain/repositories/user/user.repository.interface';
 import type { UserTokenRepositoryInterface } from '../../../domain/repositories/user/user-token.repository.interface';
 import type { UserProfileRepositoryInterface } from '../../../domain/repositories/user/user-profile.repository.interface';
+import type { UserRecoveryRepositoryInterface } from '../../../domain/repositories/user/user-recovery.repository.interface';
 import {
   USER_REPOSITORY_TOKEN,
   USER_TOKEN_REPOSITORY_TOKEN,
   USER_PROFILE_REPOSITORY_TOKEN,
+  USER_RECOVERY_REPOSITORY_TOKEN,
 } from '../../ports/tokens';
 
 export interface LoginRequest {
@@ -34,6 +36,8 @@ export class LoginUseCase {
     private readonly userTokenRepository: UserTokenRepositoryInterface,
     @Inject(USER_PROFILE_REPOSITORY_TOKEN)
     private readonly userProfileRepository: UserProfileRepositoryInterface,
+    @Inject(USER_RECOVERY_REPOSITORY_TOKEN)
+    private readonly userRecoveryRepository: UserRecoveryRepositoryInterface,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly logger: CustomLoggerService,
@@ -69,7 +73,28 @@ export class LoginUseCase {
         throw new Error('Invalid credentials');
       }
 
-      // 4. Get user profile for personal data
+      // 4. Verify account activation
+      this.logger.debug(
+        `Checking account activation for user: ${user.id.getValue()}`,
+      );
+      const recoveryRecords = await this.userRecoveryRepository.findByUserId(
+        user.id,
+      );
+      const activationRecord = recoveryRecords.find(
+        (record) => record.type === 'REGISTER',
+      );
+
+      // If there's an active REGISTER record (active: true), the account hasn't been activated yet
+      if (activationRecord && activationRecord.active) {
+        this.logger.warn(
+          `Login failed: Account not activated for email ${request.email}`,
+        );
+        throw new Error(
+          'Account not activated. Please check your email and activate your account.',
+        );
+      }
+
+      // 5. Get user profile for personal data
       const userProfile = await this.userProfileRepository.findByUserId(
         user.id,
       );
@@ -77,7 +102,7 @@ export class LoginUseCase {
         throw new Error('User profile not found');
       }
 
-      // 5. Generate JWT tokens with user claims including personal data
+      // 6. Generate JWT tokens with user claims including personal data
       const accessTokenPayload = {
         sub: user.id.getValue(),
         email: user.email.getValue(),
@@ -126,7 +151,7 @@ export class LoginUseCase {
         },
       );
 
-      // 6. Calculate expiration date for access token
+      // 7. Calculate expiration date for access token
       const expiresAt = new Date();
       // Parse the expiration time (1h = 1 hour)
 
@@ -151,7 +176,7 @@ export class LoginUseCase {
         expiresAt.setHours(expiresAt.getHours() + 1);
       }
 
-      // 7. Save tokens to database
+      // 8. Save tokens to database
       this.logger.debug(
         `Saving tokens to database for user: ${user.id.getValue()}`,
       );
@@ -170,7 +195,7 @@ export class LoginUseCase {
       );
       this.logger.logAuthAttempt(request.email, true);
 
-      // 8. Return response with tokens
+      // 9. Return response with tokens
       return {
         access_token: accessToken,
         refresh_token: refreshToken,

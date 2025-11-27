@@ -5,6 +5,7 @@ import { DatabaseModule } from './database.module';
 import { UserRepository } from '../repositories/user/user.repository';
 import { UserProfileRepository } from '../repositories/user/user-profile.repository';
 import { UserTokenRepository } from '../repositories/user/user-token.repository';
+import { UserRecoveryRepository } from '../repositories/user/user-recovery.repository';
 import { UserSubscriptionPlanRepository } from '../repositories/user/user-subscription-plan.repository';
 import { UserContextRepository } from '../repositories/user/user-context.repository';
 import { SubscriptionPlanRepository } from '../repositories/subscription/subscription-plan.repository';
@@ -27,6 +28,7 @@ import {
   USER_REPOSITORY_TOKEN,
   USER_PROFILE_REPOSITORY_TOKEN,
   USER_TOKEN_REPOSITORY_TOKEN,
+  USER_RECOVERY_REPOSITORY_TOKEN,
   USER_AREAS_SELECTED_REPOSITORY,
 } from '../../application/ports/tokens';
 
@@ -89,6 +91,10 @@ import { QuestionRepository } from '../repositories/question/question.repository
     {
       provide: USER_TOKEN_REPOSITORY_TOKEN,
       useClass: UserTokenRepository,
+    },
+    {
+      provide: USER_RECOVERY_REPOSITORY_TOKEN,
+      useClass: UserRecoveryRepository,
     },
     {
       provide: USER_SUBSCRIPTION_REPOSITORY,
@@ -163,6 +169,7 @@ import { QuestionRepository } from '../repositories/question/question.repository
     USER_REPOSITORY_TOKEN,
     USER_PROFILE_REPOSITORY_TOKEN,
     USER_TOKEN_REPOSITORY_TOKEN,
+    USER_RECOVERY_REPOSITORY_TOKEN,
     USER_SUBSCRIPTION_REPOSITORY,
     USER_CONTEXT_REPOSITORY,
     SUBSCRIPTION_REPOSITORY,

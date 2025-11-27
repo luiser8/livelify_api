@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import { User } from '../../../domain/entities/user/user.entity';
 import { UserProfile } from '../../../domain/entities/user/user-profile.entity';
@@ -187,6 +189,16 @@ export class UserRepository implements UserRepositoryInterface {
 
   async count(): Promise<number> {
     return this.prisma.user.count();
+  }
+
+  async updatePassword(id: UserId, hashedPassword: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: id.getValue() },
+      data: {
+        password: hashedPassword,
+        updatedAt: new Date(),
+      },
+    });
   }
 
   private toDomainEntity(prismaUser: {

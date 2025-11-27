@@ -34,9 +34,14 @@ import {
   CreateUserWithProfileResponseDto,
   UserProfileResponseDto,
 } from '../dtos/user';
+import {
+  ActivateAccountDto,
+  ActivateAccountResponseDto,
+} from '../dtos/user/activate-account.dto';
 
 // Use Cases
 import { CreateUserWithProfileUseCase } from '../../application/use-cases/user/create-user-with-profile.use-case';
+import { ActivateAccountUseCase } from '../../application/use-cases/user/activate-account.use-case';
 import { GetUserByIdUseCase } from '../../application/use-cases/user/get-user-by-id.use-case';
 import { GetSubscriptionByUserIdUseCase } from '../../application/use-cases/subscription/get-subscription-by-user.use-case';
 import { UpdateUserProfileUseCase } from '../../application/use-cases/user/update-user-profile.use-case';
@@ -71,6 +76,7 @@ import { UpdateUserSubscriptionDto } from '../dtos/subscription/update-user-subs
 export class UserController {
   constructor(
     private readonly createUserWithProfileUseCase: CreateUserWithProfileUseCase,
+    private readonly activateAccountUseCase: ActivateAccountUseCase,
     private readonly getUserByIdUseCase: GetUserByIdUseCase,
     private readonly updateUserProfileUseCase: UpdateUserProfileUseCase,
     private readonly createUserSubscriptionUseCase: CreateUserSubscriptionUseCase,
@@ -115,15 +121,58 @@ export class UserController {
         avatarUrl: createUserDto.avatarUrl,
         acceptTermsAndPolicies: createUserDto.acceptTermsAndPolicies,
         currencyId: createUserDto.currencyId,
+        language: createUserDto.language as 'es' | 'en' | undefined,
       });
 
       return result;
-    } catch (error) {
+    } catch (error: unknown) {
       if (
         error instanceof Error &&
         error.message === 'User with this email already exists'
       ) {
         throw new ConflictException('User with this email already exists');
+      }
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Unknown error occurred during registration');
+    }
+  }
+
+  @Post('activate')
+  @Public()
+  @DefaultThrottle() // 🌐 Rate limited
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Activate user account',
+    description:
+      'Activates a user account using the hash sent via email. Rate limited: 5 attempts per 15 minutes per IP',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Account activated successfully',
+    type: ActivateAccountResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - invalid or expired hash',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too Many Requests - rate limit exceeded',
+  })
+  async activateAccount(
+    @Body() activateAccountDto: ActivateAccountDto,
+  ): Promise<ActivateAccountResponseDto> {
+    try {
+      const result = await this.activateAccountUseCase.execute({
+        hash: activateAccountDto.hash,
+      });
+
+      return result;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new BadRequestException(error.message);
       }
       throw error;
     }

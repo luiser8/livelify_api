@@ -130,7 +130,7 @@ model UserRecovery {
   user   User   @relation(fields: [userId], references: [id])
 
   type         RecoveryType? @default(REGISTER)
-  securityCode String?
+  urlHash      String?
   active       Boolean       @default(true)
 
   createdAt DateTime @default(now())

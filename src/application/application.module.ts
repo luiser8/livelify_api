@@ -8,12 +8,15 @@ import { GetUserByIdUseCase } from './use-cases/user/get-user-by-id.use-case';
 import { GetUserCompleteProfileUseCase } from './use-cases/user/get-user-complete-profile.use-case';
 import { UpdateUserProfileUseCase } from './use-cases/user/update-user-profile.use-case';
 import { CreateUserWithContextUseCase } from './use-cases/context/create-user-with-context.use-case';
+import { ActivateAccountUseCase } from './use-cases/user/activate-account.use-case';
 
 // Auth Use Cases
 import { LoginUseCase } from './use-cases/auth/login.use-case';
 import { RefreshTokenUseCase } from './use-cases/auth/refresh-token.use-case';
 import { LogoutUseCase } from './use-cases/auth/logout.use-case';
 import { VerifyTokenUseCase } from './use-cases/auth/verify-token.use-case';
+import { RequestPasswordRecoveryUseCase } from './use-cases/auth/request-password-recovery.use-case';
+import { ResetPasswordUseCase } from './use-cases/auth/reset-password.use-case';
 import { CreateUserSubscriptionUseCase } from './use-cases/subscription/create-user-with-subscription.use-case';
 import { GetAllSubscriptionsUseCase } from './use-cases/subscription/get-all-subscriptions.use-case';
 import { GetAllAreasUseCase } from './use-cases/area/get-all-areas.use-case';
@@ -51,6 +54,7 @@ import { SendDiagnosticUseCase } from './use-cases/diagnostic/send-diagnostic.us
   providers: [
     // User Use Cases
     CreateUserWithProfileUseCase,
+    ActivateAccountUseCase,
     GetUserByIdUseCase,
     GetUserCompleteProfileUseCase,
     UpdateUserProfileUseCase,
@@ -64,6 +68,8 @@ import { SendDiagnosticUseCase } from './use-cases/diagnostic/send-diagnostic.us
     RefreshTokenUseCase,
     LogoutUseCase,
     VerifyTokenUseCase,
+    RequestPasswordRecoveryUseCase,
+    ResetPasswordUseCase,
     // Area
     GetAllAreasUseCase,
     // Question
@@ -108,6 +114,7 @@ import { SendDiagnosticUseCase } from './use-cases/diagnostic/send-diagnostic.us
     ServicesModule,
     // User Use Cases
     CreateUserWithProfileUseCase,
+    ActivateAccountUseCase,
     GetUserByIdUseCase,
     GetUserCompleteProfileUseCase,
     UpdateUserProfileUseCase,
@@ -121,6 +128,8 @@ import { SendDiagnosticUseCase } from './use-cases/diagnostic/send-diagnostic.us
     RefreshTokenUseCase,
     LogoutUseCase,
     VerifyTokenUseCase,
+    RequestPasswordRecoveryUseCase,
+    ResetPasswordUseCase,
     // Area
     GetAllAreasUseCase,
     // Question

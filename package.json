@@ -34,6 +34,7 @@
     "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:seed:dev": "APP_ENV=development ts-node prisma/seed.ts",
     "prisma:seed:qa": "APP_ENV=qa ts-node prisma/seed.ts",
+    "prisma:clean:users": "ts-node prisma/delete-all-users.ts",
     "db:reset-and-seed:dev": "npm run prisma:reset:dev:skip-seed && npm run prisma:seed:dev",
     "db:reset-and-seed:qa": "APP_ENV=qa prisma migrate reset --force --skip-seed && npm run prisma:seed:qa",
     "db:fresh:dev": "npm run prisma:reset:dev",
@@ -69,9 +70,9 @@
     "@types/uuid": "11.0.0",
     "bcrypt": "6.0.0",
     "class-transformer": "0.5.1",
-    "class-validator": "0.14.2",
+    "class-validator": "0.14.3",
     "helmet": "8.1.0",
-    "nodemailer": "7.0.10",
+    "nodemailer": "7.0.11",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2",
     "uuid": "13.0.0"
@@ -104,7 +105,7 @@
     "ts-node": "10.9.2",
     "tsconfig-paths": "4.2.0",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.47.0"
+    "typescript-eslint": "8.48.0"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

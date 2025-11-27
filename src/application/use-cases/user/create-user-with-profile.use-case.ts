@@ -1,16 +1,22 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Injectable, Inject } from '@nestjs/common';
 import { User } from '../../../domain/entities/user/user.entity';
 import { UserProfile } from '../../../domain/entities/user/user-profile.entity';
+import { UserRecovery } from '../../../domain/entities/user/user-recovery.entity';
 import { Email } from '../../../domain/value-objects/user/email.value-object';
 import type { UserRepositoryInterface } from '../../../domain/repositories/user/user.repository.interface';
 import type { UserProfileRepositoryInterface } from '../../../domain/repositories/user/user-profile.repository.interface';
+import type { UserRecoveryRepositoryInterface } from '../../../domain/repositories/user/user-recovery.repository.interface';
 import type { CurrencyRepositoryInterface } from '../../../domain/repositories/currency/currency.repository.interface';
 import { CreateLifeWheelWithAreasUseCase } from '../lifewheel/create-lifewheel-with-areas.use-case';
 import {
   USER_REPOSITORY_TOKEN,
   USER_PROFILE_REPOSITORY_TOKEN,
+  USER_RECOVERY_REPOSITORY_TOKEN,
 } from '../../ports/tokens';
 import { CURRENCY_REPOSITORY_TOKEN } from '../../ports/budget';
+import { SendGridEmailAdapter } from '../../../infrastructure/adapters/email/sendgrid-email.adapter';
+import type { Language } from '../../../infrastructure/adapters/email/email-templates';
 
 export interface CreateUserWithProfileRequest {
   email: string;
@@ -22,6 +28,7 @@ export interface CreateUserWithProfileRequest {
   avatarUrl?: string;
   acceptTermsAndPolicies: boolean;
   currencyId?: string;
+  language?: Language;
 }
 
 export interface CreateUserWithProfileResponse {
@@ -57,9 +64,12 @@ export class CreateUserWithProfileUseCase {
     private readonly userRepository: UserRepositoryInterface,
     @Inject(USER_PROFILE_REPOSITORY_TOKEN)
     private readonly userProfileRepository: UserProfileRepositoryInterface,
+    @Inject(USER_RECOVERY_REPOSITORY_TOKEN)
+    private readonly userRecoveryRepository: UserRecoveryRepositoryInterface,
     @Inject(CURRENCY_REPOSITORY_TOKEN)
     private readonly currencyRepository: CurrencyRepositoryInterface,
     private readonly createLifeWheelWithAreasUseCase: CreateLifeWheelWithAreasUseCase,
+    private readonly sendGridEmailAdapter: SendGridEmailAdapter,
   ) {}
 
   async execute(
@@ -116,7 +126,32 @@ export class CreateUserWithProfileUseCase {
         userId: savedUser.id.getValue(),
       });
 
-    // 9. Return response
+    // 9. Generate activation hash and save to UserRecovery
+    const activationHash = UserRecovery.generateActivationHash();
+    const userRecovery = UserRecovery.createForActivation(
+      savedUser.id,
+      activationHash,
+    );
+    await this.userRecoveryRepository.save(userRecovery);
+
+    // 10. Send activation email
+    try {
+      const language = request.language || 'es'; // Default to Spanish
+      await this.sendGridEmailAdapter.sendActivationEmail(
+        savedUser.email.getValue(),
+        activationHash,
+        savedProfile.firstName,
+        language,
+      );
+      console.log(
+        `✅ Activation email sent to ${savedUser.email.getValue()} in ${language}`,
+      );
+    } catch (error) {
+      console.error('❌ Failed to send activation email:', error);
+      // No throw error to not block user registration
+    }
+
+    // 11. Return response
     return {
       id: savedUser.id.getValue(),
       email: savedUser.email.getValue(),

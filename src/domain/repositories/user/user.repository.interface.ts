@@ -21,4 +21,7 @@ export interface UserRepositoryInterface {
   findUsersWithProfiles(): Promise<User[]>;
   findUsersByCreationDate(from: Date, to: Date): Promise<User[]>;
   count(): Promise<number>;
+
+  // Password management
+  updatePassword(id: UserId, hashedPassword: string): Promise<void>;
 }

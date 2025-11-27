@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsUrl,
   IsBoolean,
+  IsIn,
 } from 'class-validator';
 
 export class CreateUserWithProfileDto {
@@ -87,4 +88,15 @@ export class CreateUserWithProfileDto {
   @IsOptional()
   @IsString()
   currencyId?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Language for activation email (es for Spanish, en for English, defaults to es)',
+    example: 'es',
+    enum: ['es', 'en'],
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['es', 'en'], { message: 'Language must be either "es" or "en"' })
+  language?: 'es' | 'en';
 }

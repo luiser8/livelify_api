@@ -1,6 +1,9 @@
 import * as bcrypt from 'bcrypt';
 
 export class Password {
+  static create() {
+    throw new Error('Method not implemented.');
+  }
   private readonly value: string;
 
   constructor(password: string, isHashed: boolean = false) {
