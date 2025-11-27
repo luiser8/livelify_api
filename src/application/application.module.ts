@@ -17,6 +17,7 @@ import { LogoutUseCase } from './use-cases/auth/logout.use-case';
 import { VerifyTokenUseCase } from './use-cases/auth/verify-token.use-case';
 import { RequestPasswordRecoveryUseCase } from './use-cases/auth/request-password-recovery.use-case';
 import { ResetPasswordUseCase } from './use-cases/auth/reset-password.use-case';
+import { VerifyPasswordRecoveryUseCase } from './use-cases/auth/verify-password-recovery.use-case';
 import { CreateUserSubscriptionUseCase } from './use-cases/subscription/create-user-with-subscription.use-case';
 import { GetAllSubscriptionsUseCase } from './use-cases/subscription/get-all-subscriptions.use-case';
 import { GetAllAreasUseCase } from './use-cases/area/get-all-areas.use-case';
@@ -70,6 +71,7 @@ import { SendDiagnosticUseCase } from './use-cases/diagnostic/send-diagnostic.us
     VerifyTokenUseCase,
     RequestPasswordRecoveryUseCase,
     ResetPasswordUseCase,
+    VerifyPasswordRecoveryUseCase,
     // Area
     GetAllAreasUseCase,
     // Question
@@ -130,6 +132,7 @@ import { SendDiagnosticUseCase } from './use-cases/diagnostic/send-diagnostic.us
     VerifyTokenUseCase,
     RequestPasswordRecoveryUseCase,
     ResetPasswordUseCase,
+    VerifyPasswordRecoveryUseCase,
     // Area
     GetAllAreasUseCase,
     // Question

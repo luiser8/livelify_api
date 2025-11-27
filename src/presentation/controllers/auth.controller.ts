@@ -37,6 +37,10 @@ import {
 import { VerifyTokenResponseDto } from '../dtos/auth/verify-token.dto';
 import { RequestPasswordRecoveryDto } from '../dtos/auth/request-password-recovery.dto';
 import { ResetPasswordDto } from '../dtos/auth/reset-password.dto';
+import {
+  VerifyPasswordRecoveryDto,
+  VerifyPasswordRecoveryResponseDto,
+} from '../dtos/auth/verify-password-recovery.dto';
 
 // Use Cases
 import { LoginUseCase } from '../../application/use-cases/auth/login.use-case';
@@ -45,6 +49,7 @@ import { LogoutUseCase } from '../../application/use-cases/auth/logout.use-case'
 import { VerifyTokenUseCase } from '../../application/use-cases/auth/verify-token.use-case';
 import { RequestPasswordRecoveryUseCase } from '../../application/use-cases/auth/request-password-recovery.use-case';
 import { ResetPasswordUseCase } from '../../application/use-cases/auth/reset-password.use-case';
+import { VerifyPasswordRecoveryUseCase } from '../../application/use-cases/auth/verify-password-recovery.use-case';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -58,6 +63,7 @@ export class AuthController {
     private readonly verifyTokenUseCase: VerifyTokenUseCase,
     private readonly requestPasswordRecoveryUseCase: RequestPasswordRecoveryUseCase,
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
+    private readonly verifyPasswordRecoveryUseCase: VerifyPasswordRecoveryUseCase,
   ) {}
 
   @Post('login')
@@ -280,6 +286,42 @@ export class AuthController {
       return {
         message: 'If the email exists, a recovery link has been sent',
       };
+    }
+  }
+
+  @Post('verify-password-recovery')
+  @Public()
+  @DefaultThrottle() // 🌐 Rate limited
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Verify if password recovery hash is valid',
+    description:
+      'Checks if the recovery hash is valid, not expired, and not already processed. This should be called before showing the password reset form. Rate limited: 10 requests per minute per IP',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recovery hash verification result',
+    type: VerifyPasswordRecoveryResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found - recovery link not found',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too Many Requests - rate limit exceeded',
+  })
+  async verifyPasswordRecovery(
+    @Body() verifyPasswordRecoveryDto: VerifyPasswordRecoveryDto,
+  ): Promise<VerifyPasswordRecoveryResponseDto> {
+    try {
+      const result = await this.verifyPasswordRecoveryUseCase.execute(
+        verifyPasswordRecoveryDto.hash,
+      );
+
+      return result;
+    } catch (error) {
+      throw error;
     }
   }
 
