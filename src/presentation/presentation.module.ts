@@ -49,6 +49,8 @@ import { CompleteActionUseCase } from 'src/application/use-cases/action/complete
 import { VerifyTokenUseCase } from 'src/application/use-cases/auth/verify-token.use-case';
 import { CreateUserSelectedAreasUseCase } from 'src/application/use-cases/user/create-select-user-areas.use-case';
 import { SendDiagnosticUseCase } from 'src/application/use-cases/diagnostic/send-diagnostic.use-case';
+import { ContactController } from './controllers/contact.controller';
+import { AddContactUseCase } from 'src/application/use-cases/contact/add-contact.use-case';
 
 @Module({
   imports: [ApplicationModule, TerminusModule, DatabaseModule],
@@ -68,6 +70,7 @@ import { SendDiagnosticUseCase } from 'src/application/use-cases/diagnostic/send
     ActionController,
     DocumentsController,
     DiagnosticController,
+    ContactController,
   ],
   providers: [
     JwtAuthGuard,
@@ -98,6 +101,7 @@ import { SendDiagnosticUseCase } from 'src/application/use-cases/diagnostic/send
     VerifyTokenUseCase,
     CreateUserSelectedAreasUseCase,
     SendDiagnosticUseCase,
+    AddContactUseCase,
   ],
   exports: [JwtAuthGuard],
 })

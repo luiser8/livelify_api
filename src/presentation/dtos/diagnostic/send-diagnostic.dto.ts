@@ -96,13 +96,13 @@ export class SendDiagnosticDto {
   @Type(() => DiagnosticScoresDto)
   scores: DiagnosticScoresDto;
 
-  @ApiProperty({ example: 'Luis Rondon', description: 'User full name' })
+  @ApiProperty({ example: 'Nombre del usuario', description: 'User full name' })
   @IsString()
   @IsNotEmpty()
   name: string;
 
   @ApiProperty({
-    example: 'leduardo.rondon@gmail.com',
+    example: 'correo@ejemplo.com',
     description: 'User email address',
   })
   @IsEmail()

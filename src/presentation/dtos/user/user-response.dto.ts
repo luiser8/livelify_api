@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { TypeCreation } from 'src/domain/entities/user/user.entity';
 
 export class UserProfileResponseDto {
   @ApiProperty({
@@ -65,6 +66,13 @@ export class UserResponseDto {
     example: '2023-01-01T00:00:00.000Z',
   })
   updatedAt: Date;
+
+  @ApiProperty({
+    description: 'Type of creation',
+    enum: TypeCreation,
+    example: 'APPLICATION',
+  })
+  typeCreation: TypeCreation;
 }
 
 export class CreateUserResponseDto {

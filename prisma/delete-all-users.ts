@@ -154,12 +154,12 @@ export const deleteAllUsers = async () => {
 };
 
 // Ejecutar desde CLI
-// deleteAllUsers()
-//   .then(() => {
-//     console.log('Proceso completado sin errores.');
-//     process.exit(0);
-//   })
-//   .catch((err) => {
-//     console.error('ERROR EN LA ELIMINACIÓN:', err);
-//     process.exit(1);
-//   });
+deleteAllUsers()
+  .then(() => {
+    console.log('Proceso completado sin errores.');
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error('ERROR EN LA ELIMINACIÓN:', err);
+    process.exit(1);
+  });

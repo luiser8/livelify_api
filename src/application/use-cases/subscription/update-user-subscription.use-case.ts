@@ -7,6 +7,7 @@ import type { UserRepositoryInterface } from 'src/domain/repositories/user/user.
 import { USER_REPOSITORY_TOKEN } from 'src/application/ports/tokens';
 import { SubscriptionPlanId } from 'src/domain/value-objects/subscription/subscription-plan-id.value-object';
 import { PaymentMethod, PaymentProvider } from '@prisma/client';
+import { SubscriptionType } from 'src/domain/entities/user/user-subscription-plan.entity';
 
 export interface UpdateUserWithSubscriptionRequest {
   id: string;
@@ -17,6 +18,7 @@ export interface UpdateUserWithSubscriptionRequest {
   amountPaid?: number;
   paymentMethod?: PaymentMethod;
   paymentProvider?: PaymentProvider;
+  type?: SubscriptionType;
 }
 
 export interface UpdateUserWithSubscriptionResponse {
@@ -34,6 +36,7 @@ export interface UpdateUserWithSubscriptionResponse {
     amountPaid?: number;
     paymentMethod?: PaymentMethod;
     paymentProvider?: PaymentProvider;
+    type?: SubscriptionType;
   };
   createdAt: Date;
 }
@@ -91,6 +94,7 @@ export class UpdateUserSubscriptionUseCase {
       currencyId: request.currencyId || existingSubscription.currencyId,
       endDate,
       renewalDate,
+      type: request.type || existingSubscription.type,
       amountPaid:
         request.amountPaid !== undefined
           ? request.amountPaid
@@ -130,6 +134,7 @@ export class UpdateUserSubscriptionUseCase {
         amountPaid: savedUserSubscription.amountPaid,
         paymentMethod: savedUserSubscription.paymentMethod,
         paymentProvider: savedUserSubscription.paymentProvider,
+        type: savedUserSubscription.type,
         plan: undefined,
       },
       createdAt: savedUserSubscription.createdAt,

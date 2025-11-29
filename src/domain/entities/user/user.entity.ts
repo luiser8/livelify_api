@@ -1,9 +1,17 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { UserId } from '../../value-objects/user/user-id.value-object';
 import { Email } from '../../value-objects/user/email.value-object';
 import { Password } from '../../value-objects/user/password.value-object';
 import { UserProfile } from '../user/user-profile.entity';
 import { SubscriptionPlan } from '../subscription/subscription-plan.entity';
+
+export enum TypeCreation {
+  APPLICATION = 'APPLICATION',
+  EXTERNAL = 'EXTERNAL',
+}
 
 export interface UserProps {
   id?: UserId;
@@ -12,6 +20,7 @@ export interface UserProps {
   currencyId?: string;
   profile?: UserProfile;
   plan?: SubscriptionPlan;
+  typeCreation?: TypeCreation;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -24,6 +33,7 @@ export class User {
   private _currencyId?: string;
   private _profile?: UserProfile;
   private _plan?: SubscriptionPlan;
+  private _typeCreation?: TypeCreation;
   private readonly _createdAt: Date;
   private _updatedAt: Date;
 
@@ -34,6 +44,7 @@ export class User {
     this._currencyId = props.currencyId;
     this._profile = props.profile;
     this._plan = props.plan;
+    this._typeCreation = props.typeCreation;
     this._createdAt = props.createdAt || new Date();
     this._updatedAt = props.updatedAt || new Date();
   }
@@ -61,6 +72,10 @@ export class User {
 
   public get plan(): SubscriptionPlan | undefined {
     return this._plan;
+  }
+
+  public get typeCreation(): TypeCreation | undefined {
+    return this._typeCreation;
   }
 
   public get createdAt(): Date {
@@ -132,6 +147,7 @@ export class User {
       currencyId: this._currencyId,
       profile: this._profile?.toPlainObject(),
       plan: this._plan ? this._plan.toPlainObject() : null,
+      typeCreation: this._typeCreation,
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,
     };

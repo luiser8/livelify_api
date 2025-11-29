@@ -7,7 +7,9 @@ import {
   IsUrl,
   IsBoolean,
   IsIn,
+  IsEnum,
 } from 'class-validator';
+import { TypeCreation } from 'src/domain/entities/user/user.entity';
 
 export class CreateUserWithProfileDto {
   @ApiProperty({
@@ -99,4 +101,12 @@ export class CreateUserWithProfileDto {
   @IsString()
   @IsIn(['es', 'en'], { message: 'Language must be either "es" or "en"' })
   language?: 'es' | 'en';
+
+  @ApiProperty({
+    description: 'Type of creation',
+    enum: TypeCreation,
+    example: 'APPLICATION',
+  })
+  @IsEnum(TypeCreation)
+  typeCreation: TypeCreation;
 }

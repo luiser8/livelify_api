@@ -4,6 +4,10 @@ import { SubscriptionPlanId } from '../../value-objects/subscription/subscriptio
 import { SubscriptionPlan } from '../subscription/subscription-plan.entity';
 import { PaymentMethod, PaymentProvider } from '@prisma/client';
 
+export enum SubscriptionType {
+  FREE = 'FREE',
+  PREMIUM = 'PREMIUM',
+}
 export interface UserSubscriptionProps {
   id?: UserSubscriptionId;
   userId: UserId;
@@ -18,6 +22,7 @@ export interface UserSubscriptionProps {
   renewalDate?: Date; // Próxima fecha de renovación
   active?: boolean;
   autoRenew?: boolean;
+  type?: SubscriptionType; // Tipo de suscripción (FREE, PREMIUM)
 
   // Información de transacción
   amountPaid?: number; // Monto realmente pagado
@@ -44,6 +49,7 @@ export class UserSubscription {
   // Estado
   private _active: boolean;
   private _autoRenew: boolean;
+  private _type?: SubscriptionType;
 
   // Pago
   private _amountPaid?: number;
@@ -67,6 +73,7 @@ export class UserSubscription {
 
     this._active = props.active ?? true;
     this._autoRenew = props.autoRenew ?? true;
+    this._type = props.type;
 
     this._amountPaid = props.amountPaid;
     this._paymentMethod = props.paymentMethod;
@@ -115,6 +122,10 @@ export class UserSubscription {
 
   public get autoRenew(): boolean {
     return this._autoRenew;
+  }
+
+  public get type(): SubscriptionType | undefined {
+    return this._type;
   }
 
   public get amountPaid(): number | undefined {
@@ -203,6 +214,7 @@ export class UserSubscription {
       renewalDate: this._renewalDate,
       active: this._active,
       autoRenew: this._autoRenew,
+      type: this._type,
       amountPaid: this._amountPaid,
       paymentMethod: this._paymentMethod,
       paymentProvider: this._paymentProvider,

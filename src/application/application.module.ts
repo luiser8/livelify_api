@@ -50,6 +50,9 @@ import { CreateUserSelectedAreasUseCase } from './use-cases/user/create-select-u
 // Diagnostic Use Cases
 import { SendDiagnosticUseCase } from './use-cases/diagnostic/send-diagnostic.use-case';
 
+// Contact Use Cases
+import { AddContactUseCase } from './use-cases/contact/add-contact.use-case';
+
 @Module({
   imports: [RepositoryModule, ServicesModule],
   providers: [
@@ -109,6 +112,8 @@ import { SendDiagnosticUseCase } from './use-cases/diagnostic/send-diagnostic.us
     DeleteUserContextUseCase,
     // Diagnostic
     SendDiagnosticUseCase,
+    // Contact
+    AddContactUseCase,
   ],
   exports: [
     // Repository Module - needed for guards and other components
@@ -170,6 +175,8 @@ import { SendDiagnosticUseCase } from './use-cases/diagnostic/send-diagnostic.us
     DeleteUserContextUseCase,
     // Diagnostic
     SendDiagnosticUseCase,
+    // Contact
+    AddContactUseCase,
   ],
 })
 export class ApplicationModule {}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Controller,
   Get,
@@ -121,7 +122,8 @@ export class UserController {
         avatarUrl: createUserDto.avatarUrl,
         acceptTermsAndPolicies: createUserDto.acceptTermsAndPolicies,
         currencyId: createUserDto.currencyId,
-        language: createUserDto.language as 'es' | 'en' | undefined,
+        language: createUserDto.language,
+        typeCreation: createUserDto.typeCreation,
       });
 
       return result;
@@ -252,10 +254,10 @@ export class UserController {
         amountPaid: createSubscriptionDto.amountPaid,
         paymentMethod: createSubscriptionDto.paymentMethod,
         paymentProvider: createSubscriptionDto.paymentProvider,
+        type: createSubscriptionDto.type,
       });
 
       if (result) {
-        // Map the use case response to the expected DTO
         return result;
       }
 
@@ -307,6 +309,7 @@ export class UserController {
         amountPaid: updateSubscriptionDto.amountPaid,
         paymentMethod: updateSubscriptionDto.paymentMethod,
         paymentProvider: updateSubscriptionDto.paymentProvider,
+        type: updateSubscriptionDto.type,
       });
 
       if (result) {

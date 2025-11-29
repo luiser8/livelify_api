@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsOptional, IsNumber, IsEnum } from 'class-validator';
 import { PaymentMethod, PaymentProvider } from '@prisma/client';
-
+import { SubscriptionType } from 'src/domain/entities/user/user-subscription-plan.entity';
 export class CreateUserSubscriptionDto {
   @ApiProperty({
     description: 'Plan ID',
@@ -47,4 +47,14 @@ export class CreateUserSubscriptionDto {
   @IsEnum(PaymentProvider)
   @IsOptional()
   paymentProvider?: PaymentProvider;
+
+  @ApiProperty({
+    description: 'Type of subscription',
+    enum: SubscriptionType,
+    example: 'FREE',
+    required: false,
+  })
+  @IsEnum(SubscriptionType)
+  @IsOptional()
+  type?: SubscriptionType;
 }

@@ -7,7 +7,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { PaymentMethod, PaymentProvider } from '@prisma/client';
-
+import { SubscriptionType } from 'src/domain/entities/user/user-subscription-plan.entity';
 export class UpdateUserSubscriptionDto {
   @ApiProperty({
     description: 'Subscription ID',
@@ -71,4 +71,14 @@ export class UpdateUserSubscriptionDto {
   @IsEnum(PaymentProvider)
   @IsOptional()
   paymentProvider?: PaymentProvider;
+
+  @ApiProperty({
+    description: 'Type of subscription',
+    enum: SubscriptionType,
+    example: 'FREE',
+    required: false,
+  })
+  @IsEnum(SubscriptionType)
+  @IsOptional()
+  type?: SubscriptionType;
 }

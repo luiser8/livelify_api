@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Injectable, Inject } from '@nestjs/common';
 import { User } from '../../../domain/entities/user/user.entity';
 import { UserProfile } from '../../../domain/entities/user/user-profile.entity';
@@ -17,6 +16,7 @@ import {
 import { CURRENCY_REPOSITORY_TOKEN } from '../../ports/budget';
 import { SendGridEmailAdapter } from '../../../infrastructure/adapters/email/sendgrid-email.adapter';
 import type { Language } from '../../../infrastructure/adapters/email/email-templates';
+import { TypeCreation } from 'src/domain/entities/user/user.entity';
 
 export interface CreateUserWithProfileRequest {
   email: string;
@@ -29,6 +29,7 @@ export interface CreateUserWithProfileRequest {
   acceptTermsAndPolicies: boolean;
   currencyId?: string;
   language?: Language;
+  typeCreation?: TypeCreation;
 }
 
 export interface CreateUserWithProfileResponse {
@@ -55,6 +56,7 @@ export interface CreateUserWithProfileResponse {
     }[];
   };
   createdAt: Date;
+  typeCreation: TypeCreation;
 }
 
 @Injectable()
@@ -171,6 +173,7 @@ export class CreateUserWithProfileUseCase {
         lifeAreas: lifeWheelResponse.lifeAreas,
       },
       createdAt: savedUser.createdAt,
+      typeCreation: request.typeCreation || TypeCreation.APPLICATION,
     };
   }
 }

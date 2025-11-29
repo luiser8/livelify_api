@@ -7,6 +7,7 @@ import type { UserRepositoryInterface } from 'src/domain/repositories/user/user.
 import { USER_REPOSITORY_TOKEN } from 'src/application/ports/tokens';
 import { SubscriptionPlanId } from 'src/domain/value-objects/subscription/subscription-plan-id.value-object';
 import { PaymentMethod, PaymentProvider } from '@prisma/client';
+import { SubscriptionType } from 'src/domain/entities/user/user-subscription-plan.entity';
 
 export interface CreateUserWithSubscriptionRequest {
   userId: string;
@@ -15,6 +16,7 @@ export interface CreateUserWithSubscriptionRequest {
   amountPaid?: number;
   paymentMethod?: PaymentMethod;
   paymentProvider?: PaymentProvider;
+  type?: SubscriptionType;
 }
 
 export interface CreateUserWithSubscriptionResponse {
@@ -31,6 +33,7 @@ export interface CreateUserWithSubscriptionResponse {
     amountPaid?: number;
     paymentMethod?: PaymentMethod;
     paymentProvider?: PaymentProvider;
+    type?: SubscriptionType;
   };
   createdAt: Date;
 }
@@ -57,7 +60,6 @@ export class CreateUserSubscriptionUseCase {
     }
 
     // 2. Calculate end date based on billing cycle (default to 1 month)
-    const startDate = new Date();
     const endDate = new Date();
     endDate.setMonth(endDate.getMonth() + 1); // Default 1 month, should be based on plan
 
@@ -68,12 +70,13 @@ export class CreateUserSubscriptionUseCase {
     const subscription = UserSubscription.create({
       userId: existingUser.id,
       planId: new SubscriptionPlanId(request.planId),
-      currencyId: request.currencyId || 'default-currency-id', // Should get default currency from config
+      currencyId: request.currencyId || 'default-currency-id',
       endDate,
       renewalDate,
       amountPaid: request.amountPaid,
       paymentMethod: request.paymentMethod,
       paymentProvider: request.paymentProvider,
+      type: request.type,
     });
 
     // 4. Persist subscription
@@ -95,6 +98,8 @@ export class CreateUserSubscriptionUseCase {
         amountPaid: savedUserSubscription.amountPaid,
         paymentMethod: savedUserSubscription.paymentMethod,
         paymentProvider: savedUserSubscription.paymentProvider,
+
+        type: savedUserSubscription.type,
       },
       createdAt: savedUserSubscription.createdAt,
     };

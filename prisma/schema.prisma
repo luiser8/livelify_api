@@ -56,6 +56,7 @@ model UserSubscription {
   renewalDate DateTime? // Próxima fecha de renovación
   active      Boolean   @default(true)
   autoRenew   Boolean   @default(true)
+  type        SubscriptionType? @default(FREE)
 
   // Información de transacción
   amountPaid      Float? // Monto realmente pagado
@@ -82,6 +83,7 @@ model User {
   profile  UserProfile?
   tokens   UserToken[]
   recovery UserRecovery[]
+  typeCreation TypeCreation? @default(APPLICATION)
 
   lifeWheel LifeWheel[]
   contexts  Context[] // ✅ Contextos globales de cada usuario
@@ -472,4 +474,14 @@ enum RecoveryType {
   REGISTER
   RECOVER_PASSWORD
   RECOVER_EMAIL
+}
+
+enum SubscriptionType {
+  FREE
+  PREMIUM
+}
+
+enum TypeCreation {
+  APPLICATION
+  EXTERNAL
 }

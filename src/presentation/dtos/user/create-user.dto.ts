@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, MinLength, Matches } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  Matches,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
+import { TypeCreation } from 'src/domain/entities/user/user.entity';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -22,4 +30,14 @@ export class CreateUserDto {
       'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character',
   })
   password: string;
+
+  @ApiProperty({
+    description: 'Type of creation',
+    enum: TypeCreation,
+    example: 'APPLICATION',
+    required: false,
+  })
+  @IsEnum(TypeCreation)
+  @IsOptional()
+  typeCreation?: TypeCreation;
 }
