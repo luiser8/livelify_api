@@ -72,7 +72,7 @@ export class SendDiagnosticUseCase {
       // 2. Send email via SendGrid with Dynamic Template
       let emailSent = false;
       try {
-        await this.sendGridEmail.sendEmail(request.email, {
+        await this.sendGridEmail.sendEmail(request.email, 'diagnostic', {
           nombre_cliente: request.name,
           puntuacion_promedio: request.average.toFixed(1),
           score_desarrollo: request.scores.personal,

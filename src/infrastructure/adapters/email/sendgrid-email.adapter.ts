@@ -15,6 +15,7 @@ export class SendGridEmailAdapter {
   private readonly apiKey: string;
   private readonly fromEmail: string;
   private readonly templateId: string;
+  private readonly templateContactsId: string;
   private readonly activationTemplateId: string;
   private readonly passwordRecoveryTemplateId: string;
   private readonly frontendUrl: string;
@@ -24,6 +25,10 @@ export class SendGridEmailAdapter {
     this.fromEmail = this.configService.get<string>('SENDGRID_FROM_EMAIL', '');
     this.templateId = this.configService.get<string>(
       'SENDGRID_TEMPLATE_ID',
+      '',
+    );
+    this.templateContactsId = this.configService.get<string>(
+      'SENDGRID_TEMPLATE_CONTACTS_ID',
       '',
     );
     this.activationTemplateId = this.configService.get<string>(
@@ -46,6 +51,7 @@ export class SendGridEmailAdapter {
 
   async sendEmail(
     to: string,
+    type: 'diagnostic' | 'contacts',
     dynamicTemplateData: Record<string, any>,
   ): Promise<void> {
     if (!this.apiKey || !this.templateId) {
@@ -57,7 +63,8 @@ export class SendGridEmailAdapter {
       const msg = {
         to,
         from: this.fromEmail,
-        templateId: this.templateId,
+        templateId:
+          type === 'diagnostic' ? this.templateId : this.templateContactsId,
         dynamicTemplateData,
       };
 

@@ -2,6 +2,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { SENDGRID_MARKETING_SERVICE_TOKEN } from '../../ports/sendgrid-marketing';
 import type { SendGridMarketingServiceInterface } from '../../ports/sendgrid-marketing';
+import { SendGridEmailAdapter } from 'src/infrastructure/adapters/email/sendgrid-email.adapter';
 
 export interface AddContactRequest {
   name: string;
@@ -19,6 +20,7 @@ export class AddContactUseCase {
   constructor(
     @Inject(SENDGRID_MARKETING_SERVICE_TOKEN)
     private readonly sendGridMarketing: SendGridMarketingServiceInterface,
+    private readonly sendGridEmail: SendGridEmailAdapter,
   ) {}
 
   async execute(request: AddContactRequest): Promise<AddContactResponse> {
@@ -46,6 +48,16 @@ export class AddContactUseCase {
             addedToSendGrid: false,
           };
         }
+
+        // 2. Send email via SendGrid with Dynamic Template
+        try {
+          await this.sendGridEmail.sendEmail(request.email, 'contacts', {
+            nombre_cliente: request.name,
+            email: request.email,
+          });
+        } catch (emailError) {
+          console.error('❌ Email error (non-blocking):', emailError.message);
+        }
       } catch (sendGridError) {
         console.error('❌ SendGrid error:', sendGridError.message);
         throw new Error(
@@ -55,7 +67,7 @@ export class AddContactUseCase {
 
       return {
         success: true,
-        message: 'Contact added to SendGrid successfully',
+        message: 'Contact added to SendGrid and email sent successfully',
         addedToSendGrid,
       };
     } catch (error) {
