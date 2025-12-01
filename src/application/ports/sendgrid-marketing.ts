@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * SendGrid Marketing Service Port
  * Interface for adding contacts to SendGrid marketing lists
@@ -9,6 +10,7 @@ export const SENDGRID_MARKETING_SERVICE_TOKEN = Symbol(
 
 export interface AddContactToListRequest {
   email: string;
+  listIdType: 'diagnostic' | 'contacts';
   customFields: {
     nombre_cliente?: string;
     puntuacion_promedio?: string;

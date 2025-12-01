@@ -42,6 +42,7 @@ export class SendDiagnosticUseCase {
       try {
         const sendGridResult = await this.sendGridMarketing.addContactToList({
           email: request.email,
+          listIdType: 'diagnostic',
           customFields: {
             nombre_cliente: request.name,
             puntuacion_promedio: request.average.toFixed(1),

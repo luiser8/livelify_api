@@ -30,6 +30,7 @@ export class AddContactUseCase {
       try {
         const sendGridResult = await this.sendGridMarketing.addContactToList({
           email: request.email,
+          listIdType: 'contacts',
           customFields: {
             nombre_cliente: request.name,
           },

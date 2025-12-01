@@ -10,11 +10,10 @@ import {
 } from '../../../application/ports/sendgrid-marketing';
 
 @Injectable()
-export class SendGridMarketingAdapter
-  implements SendGridMarketingServiceInterface
-{
+export class SendGridMarketingAdapter implements SendGridMarketingServiceInterface {
   private readonly apiKey: string;
   private readonly listId: string;
+  private readonly listContactsId: string;
 
   constructor(private readonly configService: ConfigService) {
     // Get API Key from environment
@@ -22,6 +21,12 @@ export class SendGridMarketingAdapter
 
     // Get List ID from environment
     this.listId = this.configService.get<string>('SENDGRID_LIST_ID', '');
+
+    // Get List Contacts ID from environment
+    this.listContactsId = this.configService.get<string>(
+      'SENDGRID_LIST_CONTACTS_ID',
+      '',
+    );
 
     // Configure SendGrid client with API key
     if (this.apiKey) {
@@ -44,7 +49,11 @@ export class SendGridMarketingAdapter
     try {
       // Prepare data structure for SendGrid API
       const data = {
-        list_ids: [this.listId],
+        list_ids: [
+          request.listIdType === 'diagnostic'
+            ? this.listId
+            : this.listContactsId,
+        ],
         contacts: [
           {
             email: request.email,
